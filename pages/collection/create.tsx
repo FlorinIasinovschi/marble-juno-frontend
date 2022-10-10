@@ -28,7 +28,7 @@ export default function Home() {
   return (
     <AppLayout fullWidth={fullWidth}>
       <SdkProvider config={config}>
-        <PageHeader
+        {/* <PageHeader
           title="Collection Create"
           subtitle=""
           align="left"
@@ -48,7 +48,8 @@ export default function Home() {
             onDisconnect={resetWalletConnection}
           />
           </WalletContainer>
-        }
+        } */}
+        <CollectionCreate/>
       </SdkProvider>
     </AppLayout>
   
