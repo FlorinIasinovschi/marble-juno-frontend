@@ -1,10 +1,31 @@
 import * as React from 'react'
 import styled from 'styled-components'
+import SelectedNFT from '../components/home/SelectedNFT'
+
+import {
+  ChakraProvider,
+  Flex,
+  Stack,
+  HStack,
+  Text,
+  Grid,
+  Button,
+} from '@chakra-ui/react'
 
 const home = () => {
     return (
         <Container>
-            
+            <ChakraProvider>
+              {/* selected nft */}
+              <SelectedNFT />
+              <Collections>
+                <TextTitle>Curated Collections</TextTitle>
+
+                <Stack spacing="50px">
+                  
+                </Stack>
+              </Collections>
+            </ChakraProvider>
         </Container>
     )
 }

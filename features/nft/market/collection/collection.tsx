@@ -484,8 +484,6 @@ export const CollectionPage = ({id}: CollectionProps) => {
         setIsOfferShowing(true)
     }, [dispatch, offer_status])
 
-    console.log('nfts:', nfts);
-
     return (
         <CollectionWrapper>
             <Banner>

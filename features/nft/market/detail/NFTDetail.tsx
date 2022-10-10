@@ -9,6 +9,7 @@ import { LoadingProgress } from 'components/LoadingProgress'
 import { User, CopyNft, Heart, Clock, Package, Credit } from 'icons'
 import { useHistory, useParams } from "react-router-dom";
 import { RoundedIcon, RoundedIconComponent } from 'components/RoundedIcon'
+import { OfferModal } from "./components/OfferModal";
 import Card from './components/card'
 import Link from 'next/link'
 import {
@@ -20,7 +21,8 @@ import {
   getRealTokenAmount,
   PaymentToken,
   SALE_TYPE,
-  getFileTypeFromURL
+  getFileTypeFromURL,
+  toMinDenom
 } from "services/nft"
 import { walletState } from 'state/atoms/walletAtoms'
 import { useRecoilValue } from 'recoil'
@@ -41,6 +43,9 @@ import { NFTName, MoreTitle } from './styled'
 import { isMobile } from 'util/device'
 import SimpleTable from "./table";
 import OnSaleModal from "./components/OnSaleModal";
+import UpdateMarketModal from "./components/UpdateMarketModal";
+import { fromBase64, toBase64 } from '@cosmjs/encoding';
+import { RELOAD_STATUS } from "store/types";
 
 interface DetailParams {
     readonly collectionId: string
@@ -70,6 +75,8 @@ export const NFTDetail = ({ collectionId, id}) => {
     })
 
     const [time, setTime] = useState(Math.round(new Date().getTime()/1000))
+    const [highestBid, setHighestBid] = useState(0);
+    const [isBidder, setIsBidder] = useState(false);
 
     const [nft, setNft] = useState<NftInfo & { created_at: string, description: string }>(
         {'tokenId': id, 'address': '', 'image': '', 'name': '', 'user': '', 'price': '0', 'total': 2, 'collectionName': "", 'symbol': 'Marble', 'sale':{}, 'paymentToken': {}, 'type': 'image', "created": "", "collectionId": 0, "created_at": "", "description": ""}
@@ -128,6 +135,21 @@ export const NFTDetail = ({ collectionId, id}) => {
             res_nft["owner"] = sales[saleIds.indexOf(parseInt(id))].provider
             res_nft["sale"] = sales[saleIds.indexOf(parseInt(id))]
             res_nft["owner"] = sale.provider
+
+            // get highest bid
+            if(sale.requests.length > 0) {
+                let maxBid = 0
+                sale.requests.forEach(request => {
+                    if(request.price > maxBid) {
+                        maxBid = getRealTokenAmount({amount: request.price, denom: paymentToken.denom})
+                    }
+
+                    if(request.address == address) {
+                        setIsBidder(true)
+                    }
+                })
+                setHighestBid(maxBid);
+            }
         }else{
             res_nft["price"] = 0
             res_nft["sale"] = {}
@@ -223,6 +245,43 @@ export const NFTDetail = ({ collectionId, id}) => {
         setReloadCount(rCount)
         return false
     }
+
+    const handleBy = async(e) => {
+        const marketContract = Market(PUBLIC_MARKETPLACE).use(client)
+        let collection = await marketContract.collection(Number(collectionId))
+        const collectionContract = Collection(collection.collection_address).useTx(signingClient)
+        let msg:any
+        if (nft.paymentToken.type == "cw20"){
+            msg = {"propose":{"token_id": Number(id)}}
+            let encodedMsg: string = toBase64(new TextEncoder().encode(JSON.stringify(msg)))
+            let buy = await collectionContract.buy(address, nft.paymentToken.address, parseInt(toMinDenom(parseFloat(nft.price), nft.paymentToken.denom)).toString(), encodedMsg)
+        }else{
+            msg = {"propose":{"token_id": Number(id), "denom": nft.paymentToken.denom}}
+            console.log("msg", msg)
+            let buy = await collectionContract.propose(address, Number(id), parseInt(toMinDenom(parseFloat(nft.price), nft.paymentToken.denom)).toString(), nft.paymentToken.denom)
+        }
+        
+        
+        dispatch(
+            {
+                type: RELOAD_STATUS,
+                payload: nft.tokenId
+            }
+        )
+        toast.success(
+            `You have buyed this NFT successfully.`,
+            {
+                position: 'top-right',
+                autoClose: 5000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            }
+        )
+    }
+
     useEffect(() => {
     }, [reloadCount])
 
@@ -345,11 +404,11 @@ export const NFTDetail = ({ collectionId, id}) => {
                                                                             <Text>
                                                                                 <DateCountdown
                                                                                     dateTo={
-                                                                                        nft.sale.duration_type.Time[1] ||
+                                                                                        nft.sale.duration_type.Time[1] * 1000 ||
                                                                                         Date.now()
                                                                                     }
                                                                                     dateFrom={
-                                                                                        nft.sale.duration_type.Time[0] ||
+                                                                                        nft.sale.duration_type.Time[0] * 1000 ||
                                                                                         Date.now()
                                                                                     }
                                                                                     interval={0}
@@ -363,17 +422,197 @@ export const NFTDetail = ({ collectionId, id}) => {
                                                                 </NftSale>
                                                             ) : (
                                                                 <>
-                                                                    Time {time}
+                                                                    <NftSale>
+                                                                        <IconWrapper icon={<Clock />} />
+                                                                        Auction isn't started. It will start in
+                                                                        <Text>
+                                                                        <DateCountdown
+                                                                            dateTo={
+                                                                                nft.sale.duration_type.Time[1] * 1000 ||
+                                                                                Date.now()
+                                                                            }
+                                                                            dateFrom={
+                                                                                nft.sale.duration_type.Time[1] * 1000 ||
+                                                                                Date.now()
+                                                                            }
+                                                                            interval={0}
+                                                                            mostSignificantFigure="none"
+                                                                            numberOfFigures={3}
+                                                                            callback={() => undefined}
+                                                                        />
+                                                                        </Text>
+                                                                    </NftSale>
                                                                 </>
                                                             )
                                                         }
                                                     </>
                                                 ) : (
-                                                    <>
-                                                        Not
-                                                    </>
+                                                    <NftSale>
+                                                        For Sale
+                                                        {/* {marketStatus.data.ended_at} */}
+                                                    </NftSale>
                                                 )
                                             }
+                                            <PriceTag>
+                                                <Grid templateColumns="repeat(3, 1fr)" gap={6} margin="0">
+                                                    <Stack>
+                                                        <Text color="rgb(112, 122, 131)" fontSize="14px">
+                                                            {
+                                                                nft.sale.sale_type === 'Auction'
+                                                                    ? 'Start price'
+                                                                    : 'Current price'
+                                                            }
+                                                        </Text>
+                                                        <Span className="owner-address">
+                                                            {nft.price}&nbsp;
+                                                            {nft.symbol}
+                                                        </Span>
+                                                    </Stack>
+                                                    {
+                                                        nft.sale.sale_type === 'Auction' && nft.user === address && (
+                                                            <Stack>
+                                                                <Text color="rgb(112, 122, 131)" fontSize="14px">
+                                                                    Reserve Price
+                                                                </Text>
+                                                                <Span className="owner-address">
+                                                                    {getRealTokenAmount({amount: nft.sale.reserve_price, denom: nft.paymentToken.denom})}&nbsp;
+                                                                    {nft.symbol}
+                                                                </Span>
+                                                            </Stack>
+                                                        )
+                                                    }
+                                                    {
+                                                        nft.sale.sale_type === 'Auction' && (
+                                                            <Stack>
+                                                                <Text color="rgb(112, 122, 131)">Highest Bid</Text>
+                                                                {highestBid !== 0 && (
+                                                                    <Span className="owner-address">
+                                                                        {highestBid}&nbsp;
+                                                                        {nft.symbol}
+                                                                    </Span>
+                                                                )}
+                                                            </Stack>
+                                                        )
+                                                    }
+                                                </Grid>
+                                                {
+                                                    nft.sale.sale_type === 'Auction' && nft.sale.duration_type.Time[1] < time && 
+                                                        isBidder && 
+                                                        highestBid && 
+                                                        Number(highestBid) < getRealTokenAmount({amount: nft.sale.reserve_price, denom: nft.paymentToken.denom}) && (
+                                                            <Text
+                                                                margin="10px 0"
+                                                                fontFamily="Mulish"
+                                                                fontSize="20px"
+                                                            >
+                                                                This auction ended but has not meet the reserve
+                                                                price. The seller can evaluate and accept the
+                                                                highest offer.
+                                                            </Text>
+                                                    )
+                                                }
+                                                {
+                                                    nft.user === address ? (
+                                                        <>
+                                                            <ButtonGroup>
+                                                                {
+                                                                    !nft.sale.can_accept && !highestBid && (
+                                                                        <UpdateMarketModal collectionId={collectionId} id={id} />
+                                                                    )
+                                                                }
+                                                                {
+                                                                    parseFloat(nft.price) > 0 && !nft.sale.can_accept && (
+                                                                        <Button
+                                                                            className="btn-buy btn-default"
+                                                                            css={{
+                                                                            background: '$white',
+                                                                            color: '$black',
+                                                                            stroke: '$black',
+                                                                            width: '100%',
+                                                                            padding: '15px auto',
+                                                                            }}
+                                                                            size="large"
+                                                                            onClick={(e) => {
+                                                                                e.preventDefault()
+                                                                                cancelSale(e)
+                                                                                return false
+                                                                            }}
+                                                                        >
+                                                                            Cancel Marketing
+                                                                        </Button>
+                                                                    )
+                                                                }
+                                                                {
+                                                                    parseFloat(nft.price) > 0 && nft.sale.can_accept && highestBid && (
+                                                                        <Button
+                                                                            className="btn-buy btn-default"
+                                                                            css={{
+                                                                                background: '$black',
+                                                                                color: '$white',
+                                                                                stroke: '$white',
+                                                                                width: 'fit-content',
+                                                                            }}
+                                                                            variant="primary"
+                                                                            size="large"
+                                                                            onClick={(e) => {
+                                                                                e.preventDefault()
+                                                                                acceptSale(e)
+                                                                                return false
+                                                                            }}
+                                                                        >
+                                                                            Accept Bid
+                                                                        </Button>
+                                                                    )
+                                                                }
+                                                            </ButtonGroup>
+                                                        </>
+                                                    ) : nft.sale.sale_type === 'Auction' ? (
+                                                        <Stack
+                                                            direction={isMobile() ? 'column' : 'row'}
+                                                            alignItems="flex-end"
+                                                        >
+                                                            {
+                                                                nft.sale.duration_type.Time[0] < time && nft.sale.duration_type.Time[1] > time && (
+                                                                    <Stack paddingTop={10} width="100%">
+                                                                        <OfferModal collectionId={collectionId} id={id} highestBid={highestBid} />
+                                                                    </Stack>
+                                                                )
+                                                            }
+                                                            {
+                                                                isBidder && (
+                                                                    <Button
+                                                                        className="btn-buy btn-default"
+                                                                        css={{
+                                                                            background: '$white',
+                                                                            color: '$black',
+                                                                            stroke: '$black',
+                                                                            width: '100%',
+                                                                        }}
+                                                                        size="large"
+                                                                        onClick={() => undefined}
+                                                                        >
+                                                                        Cancel Bid
+                                                                    </Button>
+                                                                )
+                                                            }
+                                                        </Stack>
+                                                    ) : (
+                                                        <Button
+                                                            className="btn-buy btn-default"
+                                                            css={{
+                                                                background: '$white',
+                                                                color: '$black',
+                                                                stroke: '$white',
+                                                                width: '100%',
+                                                            }}
+                                                            size="large"
+                                                            onClick={handleBy}
+                                                        >
+                                                            Buy Now
+                                                        </Button>
+                                                    )
+                                                }
+                                            </PriceTag>
                                         </NftBuyOfferTag>
                                     ) : (
                                         <NftBuyOfferTag className="nft-buy-offer">
@@ -411,7 +650,7 @@ export const NFTDetail = ({ collectionId, id}) => {
                                             <SimpleTable
                                                 data={nft.sale.requests}
                                                 unit={''}
-                                                paymentToken={''}
+                                                paymentToken={nft.paymentToken.denom}
                                             />
                                         </Card>
                                     )

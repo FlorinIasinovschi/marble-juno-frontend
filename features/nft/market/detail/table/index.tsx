@@ -1,8 +1,8 @@
 import * as React from 'react'
 import styled from 'styled-components'
-import { Stack, HStack, Text } from '@chakra-ui/react'
-import { convertMicroDenomToDenom } from 'util/conversion'
-import { RoundedIcon, RoundedBidIconComponent } from 'components/RoundedIcon'
+import { HStack, Text } from '@chakra-ui/react'
+import { RoundedBidIconComponent } from 'components/RoundedIcon'
+import { getRealTokenAmount } from "services/nft"
 
 const SimpleTable = ({ data, unit, paymentToken }) => {
     return (
@@ -18,8 +18,8 @@ const SimpleTable = ({ data, unit, paymentToken }) => {
                     />
                     </HStack>
                     <Text fontFamily="Mulish" fontSize="20px">
-                    {convertMicroDenomToDenom(element.price, unit).toFixed(2)}{' '}
-                    {paymentToken}
+                      {getRealTokenAmount({amount: element.price, denom: paymentToken})}{' '}
+                      {paymentToken}
                     </Text>
                 </BidContainer>
             ))
