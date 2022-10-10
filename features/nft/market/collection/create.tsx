@@ -37,38 +37,34 @@ import { isMobile } from 'util/device'
 const categories = [
   {
     value: '0',
-    label: 'All'
-  },
-  {
-    value: '1',
     label: 'Digital',
   },
   {
-    value: '2',
+    value: '1',
     label: 'Physical',
   },
   {
-    value: '3',
+    value: '2',
     label: 'Music',
   },
   {
-    value: '4',
+    value: '3',
     label: 'Painting',
   },
   {
-    value: '5',
+    value: '4',
     label: 'Videos',
   },
   {
-    value: '6',
+    value: '5',
     label: 'Photography',
   },
   {
-    value: '7',
+    value: '6',
     label: 'Sports',
   },
   {
-    value: '8',
+    value: '7',
     label: 'Utility',
   },
 ]
@@ -183,10 +179,15 @@ export const CollectionCreate = () => {
 
   const handleChange = (index, evnt)=>{
     const { name, value } = evnt.target
-    const list = [...inputFields]
-    list[index][name] = value
 
     console.log(name, value);
+    // check rate
+    if(name === 'rate' && (/^\d*[.]?\d*$/.test(value) === false || parseFloat(value) > 100)) {
+      return;
+    }
+
+    const list = [...inputFields]
+    list[index][name] = value
 
     setInputFields(list)
   }
@@ -426,268 +427,6 @@ export const CollectionCreate = () => {
   }
 
   return (
-    // <Container>
-    //   <p><span className="required">*</span> Required Fields</p>
-    //   <LogoFeaturedContinaer className="logo-featured-container collection-item">
-    //     <LogoContainer>
-    //       <h3>Logo image <span className="required">*</span></h3>
-    //       <p>This image will also be used for navigation. 350*350 recommended.</p>
-    //       <AspectRatio maxW='350px' ratio={1}>
-    //         <DropZone data={data} dispatch={dispatch} item="logo"/>
-    //       </AspectRatio>
-    //     </LogoContainer>
-    //     <FeaturedContainer className="hide">
-    //       <h3>Featured image</h3>
-    //       <p>This image will also be used for Featured your collection on home page, category pages, or other promotional areas of OpenSea. 600*400 recommended.</p>
-    //       <AspectRatio maxW='600px' ratio={1.5}>
-    //         <FeaturedImageUpload data={data} dispatch={dispatch} item="featured"/>
-    //       </AspectRatio>
-    //     </FeaturedContainer>
-    //   </LogoFeaturedContinaer>
-    //   <BannerContainer className="collection-item hide">
-    //     <h3>Banner image</h3>
-    //     <p>This image will appear at the top of your collection page. Avoid including too much text in this banner image, as the dimemsions change on different devices. 1400*400 recommended.</p>
-    //     <AspectRatio maxW='1400px' ratio={3.5}>
-    //       <BannerImageUpload data={data} dispatch={dispatch} item="collection-banner"/>
-    //     </AspectRatio>
-    //   </BannerContainer>
-    //   <ChakraProvider>
-    //     <CollectionItem className="collection-item">
-    //       <h3>Name <span className="required">*</span></h3>
-    //       <Input
-    //               pr='48px'
-    //               type='text'
-    //               placeholder='Example: Treasures of the Sea'
-    //               value={name} onChange={handleNameChange}
-    //             />
-    //     </CollectionItem>
-    //     <CollectionItem className="collection-item hide">
-    //       <h3>URL <span className="required">*</span></h3>
-    //       <p>Customize your URL on Marble NFT Marketplace. Must only contain lowercase letters, numbers, and hyphens.</p>
-    //       <InputGroup size='sm'>
-    //         <InputLeftAddon children={`${window.location.origin}/`} />
-    //         <Input placeholder='collection-name' value={slug} onChange={handleSlugChange}/>
-    //       </InputGroup>
-    //     </CollectionItem>
-    //     <CollectionItem className="collection-item">
-    //       <h3>Description</h3>
-    //       <p>Markdown syntax is supported. 0 of 1000 characters used.</p>
-    //       <Textarea value={description} onChange={handleDescriptionChange}/>
-    //     </CollectionItem>
-    //     <CollectionItem className="collection-item">
-    //       <h3>Category</h3>
-    //       <p>Adding a category will help make your item discoverable on Marble NFT Marketplace.</p>
-    //       <Select id='category_id' value={category} onChange={handleCategoryChange}>
-    //         {nftcategories.length > 0 && nftcategories.map((category, idx) => (
-    //             <option value={category.id} key={`cat${idx}`}>{category.name=='All'?'':category.name}</option>
-    //         ))}
-    //       </Select>
-    //     </CollectionItem>
-    //     <CollectionItem className="collection-item">
-    //       <h3>Link</h3>
-    //       <Stack spacing={0} className="link-group">
-    //         <InputGroup className="link-item first-item">
-    //           <InputLeftAddon pointerEvents='none'>
-    //             <YourSite/>
-    //           </InputLeftAddon>
-    //           <Input type='text' placeholder='yoursite.io' value={website} onChange={handleWebsiteChange}/>
-    //         </InputGroup>
-    //         <InputGroup className="link-item">
-    //           <InputLeftAddon pointerEvents='none'>
-    //             <Discord/>https://discord.gg/
-    //           </InputLeftAddon>
-    //           <Input placeholder='abcdef' value={discord} onChange={handleDiscordChange}/>
-    //         </InputGroup>
-    //         <InputGroup className="link-item">
-    //           <InputLeftAddon pointerEvents='none'>
-    //             <Instagram/>https://www.instagram.com/
-    //           </InputLeftAddon>
-    //           <Input type='text' placeholder='YourInstagramHandle' value={instagram} onChange={handleInstagramChange}/>
-    //         </InputGroup>
-    //         <InputGroup className="link-item">
-    //           <InputLeftAddon pointerEvents='none'>
-    //             <MediumM/>https://medium.com/@
-    //           </InputLeftAddon>
-    //           <Input type='text' placeholder='YourMediumHandle' value={medium} onChange={handleMediumChange}/>
-    //         </InputGroup>
-    //         <InputGroup className="link-item last-item">
-    //           <InputLeftAddon pointerEvents='none'>
-    //             <Telegram/>https://t.me/
-    //           </InputLeftAddon>
-    //           <Input type='text' placeholder='abcdef' value={telegram} onChange={handleTelegramChange}/>
-    //         </InputGroup>
-    //       </Stack>
-    //     </CollectionItem>
-    //     <CollectionItem className="collection-item">
-    //       <h3>Creator earnings</h3>
-    //       <p>Collec a free when a user re-sells an item you originally created. This is deducted from the final sale price and paid monthly to a payout of your choosing.</p>
-    //       <Link href="#" passHref>Learn more about creator earnings.</Link>
-          
-    //       <RatesContainer>
-    //         <h4>Royalty</h4>
-    //         <h4>Maximum Royalty Fee <span className="required">*</span></h4>
-    //         <Input
-    //                 type='number'
-    //                 value={maximumRoyaltyFee} onChange={handleMaximumRoyaltyFeeChange}
-    //               />
-    //         {inputFields.map((data, index)=>{
-    //             const {address, rate}= data;
-    //             return(
-    //               <div className="rate-item" key={index}>
-    //                 <Input type="text" readOnly={index!==0?false:true} onChange={(evnt)=>handleChange(index, evnt)} value={address} name="address" className="form-control"  placeholder="Address" />
-    //                 <Input type="number" onChange={(evnt)=>handleChange(index, evnt)} value={rate} name="rate" className="form-control"  placeholder="Rate" />
-    //                 <Button disabled={index!==0?false:true} onClick={removeInputFields}>x</Button>
-    //               </div>
-    //             )
-    //           })
-    //         }
-
-    //         <div className="add-rate-item">
-    //           <Button onClick={addInputField}>Add New</Button>
-    //         </div>
-    //       </RatesContainer>
-    //     </CollectionItem>
-    //     <CollectionItem className="collection-item">
-    //       <h3>Blockchain</h3>
-    //       <HStack spacing={0} className="chain-group">
-    //         <Image alt="Token Icon" className="token-icon" src="/juno.png"/><span>JUNO</span>
-    //       </HStack>
-    //     </CollectionItem>
-    //     <CollectionItem className="collection-item hide">
-    //       <h3>Payment tokens</h3>
-    //       <HStack spacing={0} className="chain-group">
-          
-    //         {collectionTokens.length > 0 && collectionTokens.map((token, idx) => (
-    //           <Button
-    //             key={`token${idx}`}
-    //             variant="secondary"
-    //             className={`${tokens.indexOf(idx) != -1?'active':'default'}`}
-    //             onClick={() => {
-
-    //               if (tokens.indexOf(idx) == -1){
-    //                 let tokenIds = tokens
-    //                 tokenIds.push(idx)
-    //                 setTokens(tokenIds)
-    //                 collectionTokenCount++
-    //                 setTokenReomveCount(collectionTokenCount)
-    //               }else{
-    //                 let tokenIds = tokens
-    //                 tokenIds.splice(tokenIds.indexOf(idx), 1)
-    //                 console.log("Tokens", tokenIds)
-    //                 setTokens(tokenIds)
-    //                 collectionTokenCount--
-    //                 setTokenReomveCount(collectionTokenCount)
-    //               }
-    //               if (tokens.indexOf(idx) == -1){
-    //                 let tokenIds = []
-    //                 tokenIds.push(idx)
-    //                 setTokens(tokenIds)
-    //                 collectionTokenCount++
-    //                 setTokenReomveCount(collectionTokenCount)
-    //               }else{
-    //                 let tokenIds = tokens
-    //                 tokenIds.splice(tokenIds.indexOf(idx), 1)
-    //                 console.log("Tokens", tokenIds)
-    //                 setTokens([])
-    //                 collectionTokenCount--
-    //                 setTokenReomveCount(collectionTokenCount)
-    //               }
-    //               return false
-    //             }}
-    //           >
-                
-    //             <Image alt="Token Icon" className="token-icon" src={collectionTokens[idx].logoUri}/>{token.name}
-    //             <span className={`${tokens.indexOf(idx) != -1?'visible-yes':'visible-no'}`}>
-    //             <CheckIcon />
-    //             </span>
-    //           </Button>
-    //         ))}
-          
-    //       </HStack>
-    //     </CollectionItem>
-    //     <CollectionItem className="collection-item hide">
-    //       <h3>Display theme</h3>
-    //       <p>Change how your items are shown.</p>
-    //       <Stack spacing={0} className="theme-group">
-    //         <HStack {...group}>
-    //           {options.map((value) => {
-    //             const radio = getRadioProps({ value })
-    //             if (radio.isChecked){
-    //               themeValue = radio.value.toString()
-    //             }
-                
-    //             return (
-    //               <RadioCard key={value} value={value} {...radio}>
-    //                 {value == '1' &&
-    //                   <Template>
-    //                     <CheckboxItem className="check-icon"><CheckIcon/></CheckboxItem>
-    //                     <Design>
-    //                       <Template1/><Template1/><Template1/>
-    //                     </Design>
-    //                     <h3>Padded</h3>
-    //                     <p>Recommended for assets with transparent background</p>
-    //                   </Template>
-    //                 }
-    //                 {value == '2' &&
-    //                   <Template>
-    //                     <CheckboxItem className="check-icon"><CheckIcon/></CheckboxItem>
-    //                     <Design>
-    //                       <Template1/><Template1/><Template1/>
-    //                     </Design>
-    //                     <h3>Contained</h3>
-    //                     <p>Recommended for assets that are not a 1:1 ratio</p>
-    //                   </Template>
-    //                 }
-    //                 {value == '3' &&
-    //                   <Template>
-    //                     <CheckboxItem className="check-icon"><CheckIcon/></CheckboxItem>
-    //                     <Design>
-    //                       <Template1/><Template1/><Template1/>
-    //                     </Design>
-    //                     <h3>Covered</h3>
-    //                     <p>Recommended for assets that can extend to the edge</p>
-    //                   </Template>
-    //                 }
-    //               </RadioCard>
-    //             )
-    //           })}
-    //         </HStack>
-    //       </Stack>
-    //     </CollectionItem>
-    //     <CollectionItem className="collection-item hide">
-    //       <h3>Explicit & sensitive content</h3>
-    //       <ExplicitItem>
-    //         <p>Set this collection as explicit and senstive content</p>
-    //         <Switch value="yes" id='explicit-senstive' onChange={(e) => e.target.checked?setExplicit(e.target.value):setExplicit("")}/>
-    //       </ExplicitItem>
-    //     </CollectionItem>
-    //     <CollectionItem className="collection-item">
-    //       <Button className="btn-default"
-    //         css={{
-    //           'background': '$black',
-    //           'color': '$white',
-    //           'stroke': '$white',
-    //         }}
-    //         variant="primary"
-    //         size="large"
-    //         onClick={(e) => {
-              
-    //           createCollection(e)
-            
-    //         }}
-
-    //         disabled={isJsonUploading}
-    //       >
-    //         Create
-    //       </Button>
-    //       {collectionIpfsHash != "" &&
-    //         <span className="hide">
-    //         Pinata IpfsHash: <Link href={`https://gateway.pinata.cloud/ipfs/${collectionIpfsHash}`} passHref>{collectionIpfsHash}</Link>
-    //         </span>
-    //       }
-    //     </CollectionItem>
-    //   </ChakraProvider>
-    // </Container>
     (
       address && (
         <Container>
@@ -769,7 +508,6 @@ export const CollectionCreate = () => {
                               )}
                               <StyledInput
                                 name="rate"
-                                type="number"
                                 value={rate}
                                 onChange={(evnt)=>handleChange(index, evnt)}
                                 style={{ marginRight: '20px' }}
