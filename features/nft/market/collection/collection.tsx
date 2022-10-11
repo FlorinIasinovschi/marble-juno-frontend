@@ -27,6 +27,7 @@ import { OfferDialog } from 'features/nft/market/detail/OfferDialog'
 import { LoadingProgress } from 'components/LoadingProgress'
 import { RoundedIconComponent } from 'components/RoundedIcon'
 import { isMobile } from 'util/device'
+import { EditCollectionModal } from './components/EditCollectionModal';
 
 const PUBLIC_MARKETPLACE = process.env.NEXT_PUBLIC_MARKETPLACE || ''
 let airdroppedCollectionId1 = 3
@@ -116,7 +117,7 @@ export const CollectionPage = ({id}: CollectionProps) => {
     const [isBuyShowing, setIsBuyShowing] = useState(false)
     const [offerId, setOfferId] = useState("")
     const [isOfferShowing, setIsOfferShowing] = useState(false)
-
+    const [isLoading, setIsLoading] = useState(true);
 
     const closeFilterStatusButton = (fstatus) => {
         console.log(filter_status)
@@ -221,6 +222,7 @@ export const CollectionPage = ({id}: CollectionProps) => {
         console.log("tokenIds:", tokenIds)
         let rCount = 0
         while (tokenIds.length > 0){
+            setIsLoading(true);
             for (let i = 0; i < tokenIds.length; i++){
             console.log("token ID", tokenIds[i])
             let nftInfo = await cw721Contract.nftInfo(tokenIds[i])
@@ -289,6 +291,7 @@ export const CollectionPage = ({id}: CollectionProps) => {
         }
         
         console.log("NFTs:",collectionNFTs);
+        setIsLoading(false);
         
         })()
     }, [id, client])
@@ -579,7 +582,7 @@ export const CollectionPage = ({id}: CollectionProps) => {
                 className={`${isCollapse ? 'collapse-close' : 'collapse-open'}`}
             >
                 {
-                    reloadCount < 2 && nfts.length === 0 && 
+                    isLoading && 
                         <div
                             style={{
                             width: '100%',
@@ -606,7 +609,7 @@ export const CollectionPage = ({id}: CollectionProps) => {
                         </InfiniteScroll>
                 }
                 {
-                    reloadCount > 2 && nfts.length === 0 && address === collectionInfo.creator && (
+                    nfts.length === 0 && address === collectionInfo.creator && !isLoading && (
                         <Stack
                         spacing="50px"
                         width="50%"
@@ -621,6 +624,7 @@ export const CollectionPage = ({id}: CollectionProps) => {
                                 uploading <br /> a logo, cover image and description
                             </Text>
                             {/* Edit Collection Modal */}
+                            <EditCollectionModal collectionInfo={collectionInfo} />
                         </Stack>
                     )
                 }

@@ -1,12 +1,14 @@
 import React, { useState } from "react"
 import css from "../styles/DropZone.module.css"
 import axios from 'axios'
-import { styled } from './theme'
-import { NoImage } from 'icons'
+import styled from 'styled-components'
 import { 
   ChakraProvider, 
   Image,
 } from '@chakra-ui/react'
+import { RoundedIcon } from './RoundedIcon'
+import { isMobile } from 'util/device'
+import { NoImage, Trash } from 'icons'
 
 const PUBLIC_PINATA_API_KEY = process.env.NEXT_PUBLIC_PINATA_API_KEY || ''
 const PUBLIC_PINATA_SECRET_API_KEY = process.env.NEXT_PUBLIC_PINATA_SECRET_API_KEY || ''
@@ -108,26 +110,31 @@ const DropZone = ({ data, dispatch, item }) => {
 
   return (
     <ChakraProvider>
-      <Container className={`${item}-section`}>
-        <DropzoneContainer className={ipfsHash!=""?"opacity02":""}>
-          <div
-            onDrop={(e) => handleDrop(e)}
-            onDragOver={(e) => handleDragOver(e)}
-            onDragEnter={(e) => handleDragEnter(e)}
-            onDragLeave={(e) => handleDragLeave(e)}
-          >
-            <StyledImage>
-              <NoImage/>
-            </StyledImage>
-            <p className={css.uploadMessage}>
-              drag your Image here 
-              <br/> to upload
-            </p>
-            <p>
-              <span className="line-through">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-              <span>&nbsp;or&nbsp;</span>
-              <span className="line-through">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
-            </p>
+      <div
+        onDrop={(e) => handleDrop(e)}
+        onDragOver={(e) => handleDragOver(e)}
+        onDragEnter={(e) => handleDragEnter(e)}
+        onDragLeave={(e) => handleDragLeave(e)}
+      >
+        {ipfsHash ? (
+          <DropzoneContainer>
+            <Flex>
+              <RoundedIcon
+                src={process.env.NEXT_PUBLIC_PINATA_URL + ipfsHash}
+                size={isMobile() ? '60px' : '80px'}
+              />
+              <IconButton
+                onClick={() => {
+                  setIpfsHash('')
+                }}
+              >
+                <Trash width={isMobile() ? '30px' : '50px'} />
+              </IconButton>
+            </Flex>
+          </DropzoneContainer>
+        ) : (
+          <DropzoneContainer className={ipfsHash != '' ? 'opacity02' : ''}>
+            <NoImage />
             <input
               id="fileSelect"
               type="file"
@@ -135,87 +142,40 @@ const DropZone = ({ data, dispatch, item }) => {
               className={css.files}
               onChange={(e) => handleFileSelect(e)}
             />
-            <label htmlFor="fileSelect"><NoImage/>Choose Image</label>
-          </div>
-          {/* Pass the selectect or dropped files as props */}
-          {/* Only show upload button after selecting atleast 1 file */}
-          {/* {data.fileList.length > 0 && (
-            <button className={css.uploadBtn} onClick={uploadFiles}>
-              Upload
-            </button>
-          )} */}
-        </DropzoneContainer>
-        <ImageContainer>
-          {ipfsHash!="" &&
-            <Image alt="Collection Logo Image" className="collection-logo-img" src={`${PUBLIC_PINATA_URL}${ipfsHash}`}/>
-          }
-        </ImageContainer>
-      </Container>
+            <label htmlFor="fileSelect" className={css.uploadMessage}>
+              {'Drag and drop or click to upload'}
+            </label>
+          </DropzoneContainer>
+        )}
+      </div>
     </ChakraProvider>
   )
 }
-const Container = styled('div', {
-  position: 'relative',
-  boxShadow: '0px 4px 44px rgba(0, 0, 0, 0.12)',
-  marginTop: '$8',
-  borderRadius: '$2',
-})
-const DropzoneContainer = styled('div', {
-  zIndex: 3,
-  background: 'transparent',
-  textAlign: 'center',
-  position: 'absolute',
-  left: '0',
-  top: '0',
-  width: '100%',
-  height: '100%',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  border: '$borderWidths$2 dashed $uploadborder',
-  borderRadius: '$2',
-  '&.opacity02':{
-    opacity: '0.2',
-  },
-  '&.opacity02:hover':{
-    opacity: '0.8',
-    background: '$light',
-  },
-  ' p':{
-    color: '$uploaddesc',
-    padding: '$4',
-  },
-  ' label':{
-    backgroundColor: '$dark',
-    borderRadius: '$2',
-    display: 'flex',
-    gap: '$4',
-    padding: '$4',
-    justifyContent: 'center',
-    alignItems: 'center',
+
+const DropzoneContainer = styled.div`
+  background: #272734;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0px 4px 40px rgba(42, 47, 50, 0.09);
+  backdrop-filter: blur(40px);
+  /* Note: backdrop-filter has minimal browser support */
+  padding: 30px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  @media (max-width: 480px) {
+    padding: 20px;
   }
-})
-const StyledImage = styled('div', {
-  display: 'flex',
-  justifyContent: 'center',
-  ' svg':{
-    width: '40px',
-    height: '36px',
-    stroke: '$uploadicon',
-    ' path':{
-      fill: '$grayicon',
-    }
-  }
-})
-const ImageContainer = styled('div', {
-  width: '100%',
-  height: '100%',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  'img':{
-    maxWidth: '100%',
-    maxHeight: '100%',
-  }
-})
+`
+const Flex = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+`
+const IconButton = styled.div`
+  cursor: pointer;
+`
+
 export default DropZone

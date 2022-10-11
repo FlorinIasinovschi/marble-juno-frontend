@@ -15,52 +15,6 @@ interface NftCollectionProps {
 export function NftCollectionTable({ collections, activeCategoryId }: NftCollectionProps): JSX.Element {
   return (
     <>
-      {/* <CollectionsDiv className="collections">
-      {collections.map((collection, idx) => (
-        (activeCategoryId == 0 || collection.cat_ids.split(",").indexOf(activeCategoryId.toString()) != -1) && (
-          <Link href={`/collection/${collection.id}`} passHref key={idx}>
-          <CollectionDiv className="collection" key={idx}>
-            <ImgDiv className="nft-img-div">
-            {collection.type == 'image' &&
-              <Image src={collection.image} alt="NFT Image"/>
-            }
-            {collection.type == 'video' &&
-            <video controls>
-              <source src={collection.image}/>
-            </video>
-            }
-            {collection.type == 'audio' &&
-            <audio controls>
-              <source src={collection.image}/>
-            </audio>
-            }
-              
-            </ImgDiv>
-            <BannerDiv className="nft-banner-div">
-              {collection.type == 'image' &&
-                <Image src={collection.image} alt="NFT Image"/>
-              }
-              {collection.type == 'video' &&
-              <video>
-                <source src={collection.image}/>
-              </video>
-              }
-              {collection.type == 'audio' &&
-              <audio>
-                <source src={collection.image}/>
-              </audio>
-              }
-            </BannerDiv>
-            <TextDiv>
-            <h2>{collection.name}</h2>
-            <h5><span>by</span> <a href="#">{collection.creator}</a></h5>
-            <p>{collection.description}</p>
-            </TextDiv>
-          </CollectionDiv>
-          </Link>
-        )
-      ))}
-      </CollectionsDiv> */}
       <Container>
         {collections.map((collection, idx) => (activeCategoryId == 0 || collection.cat_ids.split(",").indexOf(activeCategoryId.toString()) != -1) && (
             <Link href={`/collection/${collection.id}`} passHref key={idx}>

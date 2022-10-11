@@ -31,7 +31,6 @@ export default function Explores() {
                         <Explore />
                     </TabPanel>
                     <TabPanel>
-                        {/* <Profiles profileCounts={profiles} /> */}
                         <Profiles />
                     </TabPanel>
                 </TabPanels>
