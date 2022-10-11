@@ -11,6 +11,7 @@ import styled from 'styled-components'
 import { AppLayout } from 'components/Layout/AppLayout'
 import { Explore } from 'features/nft/market/explore'
 import NFTExplorer from 'features/nft/market/nftexplore'
+import Profiles from 'features/nft/market/profile/allProfiles'
 
 export default function Explores() {
     return (
@@ -31,6 +32,7 @@ export default function Explores() {
                     </TabPanel>
                     <TabPanel>
                         {/* <Profiles profileCounts={profiles} /> */}
+                        <Profiles />
                     </TabPanel>
                 </TabPanels>
             </Tabs>
