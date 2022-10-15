@@ -1,18 +1,17 @@
-import { RELOAD_STATUS } from "../types"
-import { Dispatch, AnyAction } from "redux"
+import { RELOAD_STATUS } from "../types";
+import { Dispatch, AnyAction } from "redux";
 
 export const setReloadData = (action: string, data) => async (dispatch) => {
-  console.log("dispatch", action, data)
   try {
-    switch (action){
+    switch (action) {
       case RELOAD_STATUS:
         dispatch({
           type: action,
           payload: data,
         });
-      break;
-    }  
+        break;
+    }
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
 };

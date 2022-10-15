@@ -14,13 +14,8 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { Bech32, toHex } from "@cosmjs/encoding";
-import { FileUpload, TransactionLink } from "components/NFT"
-import {
-  CW721,
-  unSanitizeIpfsUrl,
-  uploadFile,
-  useSdk,
-} from "services/nft";
+import { FileUpload, TransactionLink } from "components/NFT";
+import { CW721, unSanitizeIpfsUrl, uploadFile, useSdk } from "services/nft";
 import { config } from "services/config";
 
 function generateId(address: string) {
@@ -29,7 +24,7 @@ function generateId(address: string) {
   return (
     pubkey?.substr(2, 10) +
     pubkey?.substring(pubkey.length - 8) +
-    '-' +
+    "-" +
     Math.random().toString(36).substr(2, 9)
   ).toUpperCase();
 }
@@ -69,13 +64,12 @@ export const Create = () => {
 
     try {
       const fileHash = await uploadFile(files[0]);
-      console.log(fileHash, nftId);
       const nftMsg = {
         token_id: nftId,
         owner: address,
         name: nftName!,
         description: description,
-        image: unSanitizeIpfsUrl(fileHash)
+        image: unSanitizeIpfsUrl(fileHash),
       };
 
       const contract = CW721(config.contract).useTx(getSignClient()!);
@@ -104,25 +98,28 @@ export const Create = () => {
   }
 
   return (
-    <Flex
-      p={4}
-      mb={8}
-      justifyContent="center"
-      direction="row">
+    <Flex p={4} mb={8} justifyContent="center" direction="row">
       <Box maxW="500px" w="100%">
         <Box>
           <Box mt={6} mb={10}>
-            <Heading as="h3" fontSize="3xl">Create a single NFT</Heading>
+            <Heading as="h3" fontSize="3xl">
+              Create a single NFT
+            </Heading>
           </Box>
-          <Box as={'form'} id="nft-form" onSubmit={createNft}>
+          <Box as={"form"} id="nft-form" onSubmit={createNft}>
             <Box>
               <FormControl id="name" isRequired>
                 <FormLabel
                   fontSize="sm"
                   fontFamily="mono"
                   fontWeight="semibold"
-                >Image</FormLabel>
-                <FileUpload accept="image/*" onDrop={acceptedFiles => setFiles(acceptedFiles)} />
+                >
+                  Image
+                </FormLabel>
+                <FileUpload
+                  accept="image/*"
+                  onDrop={(acceptedFiles) => setFiles(acceptedFiles)}
+                />
               </FormControl>
             </Box>
             <Box mt={4}>
@@ -131,11 +128,14 @@ export const Create = () => {
                   fontSize="sm"
                   fontFamily="mono"
                   fontWeight="semibold"
-                >Name</FormLabel>
+                >
+                  Name
+                </FormLabel>
                 <Input
                   name="name"
                   spellCheck={false}
-                  onChange={e => setNftName(e.target.value)} />
+                  onChange={(e) => setNftName(e.target.value)}
+                />
               </FormControl>
             </Box>
             <Box mt={4}>
@@ -144,11 +144,15 @@ export const Create = () => {
                   fontSize="sm"
                   fontFamily="mono"
                   fontWeight="semibold"
-                >Description</FormLabel>
-                <Textarea name="description"
+                >
+                  Description
+                </FormLabel>
+                <Textarea
+                  name="description"
                   placeholder="NFT description"
                   spellCheck={false}
-                  onChange={e => setDescription(e.target.value)} />
+                  onChange={(e) => setDescription(e.target.value)}
+                />
               </FormControl>
             </Box>
             <Box mt={6}>
@@ -157,21 +161,21 @@ export const Create = () => {
                 loadingText="Minting"
                 type="submit"
                 height="var(--chakra-sizes-10)"
-                fontSize={'md'}
+                fontSize={"md"}
                 fontWeight="semibold"
-                borderRadius={'50px'}
-                color={'white'}
+                borderRadius={"50px"}
+                color={"white"}
                 bg="pink.500"
                 _hover={{
                   bg: "gray.500",
-                }}>
+                }}
+              >
                 Create
               </Button>
             </Box>
           </Box>
         </Box>
-
       </Box>
     </Flex>
   );
-}
+};

@@ -1,26 +1,26 @@
-import { toast } from 'react-toastify'
+import { toast } from "react-toastify";
 import {
   swapToken1ForToken2,
   swapToken2ForToken1,
   swapTokenForToken,
-} from 'services/swap'
-import { unsafelyGetTokenInfo, useBaseTokenInfo } from 'hooks/useTokenInfo'
-import { useRecoilValue, useSetRecoilState } from 'recoil'
+} from "services/swap";
+import { unsafelyGetTokenInfo, useBaseTokenInfo } from "hooks/useTokenInfo";
+import { useRecoilValue, useSetRecoilState } from "recoil";
 import {
   TransactionStatus,
   transactionStatusState,
-} from 'state/atoms/transactionAtoms'
-import { walletState, WalletStatusType } from 'state/atoms/walletAtoms'
-import { convertDenomToMicroDenom } from 'util/conversion'
-import { slippageAtom, tokenSwapAtom } from '../swapAtoms'
-import { useMutation, useQueryClient } from 'react-query'
+} from "state/atoms/transactionAtoms";
+import { walletState, WalletStatusType } from "state/atoms/walletAtoms";
+import { convertDenomToMicroDenom } from "util/conversion";
+import { slippageAtom, tokenSwapAtom } from "../swapAtoms";
+import { useMutation, useQueryClient } from "react-query";
 
 type UseTokenSwapArgs = {
-  tokenASymbol: string
-  tokenBSymbol: string
-  tokenAmount: number
-  tokenToTokenPrice: number
-}
+  tokenASymbol: string;
+  tokenBSymbol: string;
+  tokenAmount: number;
+  tokenToTokenPrice: number;
+};
 
 export const useTokenSwap = ({
   tokenASymbol,
@@ -28,35 +28,35 @@ export const useTokenSwap = ({
   tokenAmount,
   tokenToTokenPrice,
 }: UseTokenSwapArgs) => {
-  const { client, address, status } = useRecoilValue(walletState)
-  const setTransactionState = useSetRecoilState(transactionStatusState)
-  const slippage = useRecoilValue(slippageAtom)
-  const setTokenSwap = useSetRecoilState(tokenSwapAtom)
+  const { client, address, status } = useRecoilValue(walletState);
+  const setTransactionState = useSetRecoilState(transactionStatusState);
+  const slippage = useRecoilValue(slippageAtom);
+  const setTokenSwap = useSetRecoilState(tokenSwapAtom);
 
-  const baseToken = useBaseTokenInfo()
+  const baseToken = useBaseTokenInfo();
 
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation(
-    'swapTokens',
+    "swapTokens",
     async () => {
-      const tokenA = unsafelyGetTokenInfo(tokenASymbol)
-      const tokenB = unsafelyGetTokenInfo(tokenBSymbol)
+      const tokenA = unsafelyGetTokenInfo(tokenASymbol);
+      const tokenB = unsafelyGetTokenInfo(tokenBSymbol);
 
       if (status !== WalletStatusType.connected) {
-        throw new Error('Please connect your wallet.')
+        throw new Error("Please connect your wallet.");
       }
 
-      setTransactionState(TransactionStatus.EXECUTING)
+      setTransactionState(TransactionStatus.EXECUTING);
 
       const convertedTokenAmount = convertDenomToMicroDenom(
         tokenAmount,
         tokenA.decimals
-      )
+      );
       const convertedPrice = convertDenomToMicroDenom(
         tokenToTokenPrice,
         tokenB.decimals
-      )
+      );
 
       if (tokenASymbol === baseToken.symbol) {
         return await swapToken1ForToken2({
@@ -70,7 +70,7 @@ export const useTokenSwap = ({
           token2_native: tokenA.native,
           swapAddress: tokenB.swap_address,
           client,
-        })
+        });
       }
 
       if (tokenBSymbol === baseToken.symbol) {
@@ -84,7 +84,7 @@ export const useTokenSwap = ({
           swapAddress: tokenA.swap_address,
           token2_native: tokenA.native,
           client,
-        })
+        });
       }
 
       return await swapTokenForToken({
@@ -98,19 +98,19 @@ export const useTokenSwap = ({
         tokenDenom: tokenA.denom,
         outputSwapAddress: tokenB.swap_address,
         client,
-      })
+      });
     },
     {
       onSuccess() {
-        toast.success('🎉 Swap Successful', {
-          position: 'top-right',
+        toast.success("🎉 Swap Successful", {
+          position: "top-right",
           autoClose: 5000,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-        })
+        });
 
         setTokenSwap(([tokenA, tokenB]) => [
           {
@@ -118,12 +118,11 @@ export const useTokenSwap = ({
             amount: 0,
           },
           tokenB,
-        ])
+        ]);
 
-        queryClient.refetchQueries({ active: true })
+        queryClient.refetchQueries({ active: true });
       },
       onError(e) {
-        console.log(e)
         // let msg =
         //   String(e).length > 300
         //     ? `${String(e).substring(0, 150)} ... ${String(e).substring(
@@ -141,8 +140,8 @@ export const useTokenSwap = ({
         // })
       },
       onSettled() {
-        setTransactionState(TransactionStatus.IDLE)
+        setTransactionState(TransactionStatus.IDLE);
       },
     }
-  )
-}
+  );
+};

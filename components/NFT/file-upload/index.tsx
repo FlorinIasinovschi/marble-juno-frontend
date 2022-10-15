@@ -13,14 +13,10 @@ import {
 import { DropzoneProps, useDropzone } from "react-dropzone";
 
 export function FileUpload(props: DropzoneProps): JSX.Element {
-  const {
-    acceptedFiles,
-    isDragAccept,
-    getRootProps,
-    getInputProps,
-  } = useDropzone(props)
+  const { acceptedFiles, isDragAccept, getRootProps, getInputProps } =
+    useDropzone(props);
 
-  const acceptedFileItems = acceptedFiles.map(file => file.name).join(',');
+  const acceptedFileItems = acceptedFiles.map((file) => file.name).join(",");
 
   const uploadContainer = (
     <Stack spacing={1} textAlign="center">
@@ -63,10 +59,7 @@ export function FileUpload(props: DropzoneProps): JSX.Element {
         </chakra.label>
         <Text pl={1}>or drag and drop</Text>
       </Flex>
-      <Text
-        fontSize="xs"
-        color={useColorModeValue("gray.500", "gray.500")}
-      >
+      <Text fontSize="xs" color={useColorModeValue("gray.500", "gray.500")}>
         PNG, JPG, JPEG, SVG or GIF up to 10MB
       </Text>
     </Stack>
@@ -74,10 +67,9 @@ export function FileUpload(props: DropzoneProps): JSX.Element {
 
   function previewImage(acceptedFiles: File[]): JSX.Element {
     if (acceptedFiles.length > 0) {
-      console.log("previewing image!");
-      return (< Image alt="" src={URL.createObjectURL(acceptedFiles[0])} />);
+      return <Image alt="" src={URL.createObjectURL(acceptedFiles[0])} />;
     }
-    return (<Image alt="" />);
+    return <Image alt="" />;
   }
 
   const filenameContainer = (
@@ -95,9 +87,7 @@ export function FileUpload(props: DropzoneProps): JSX.Element {
 
   return (
     <Box>
-      <Flex>
-        {previewImage(acceptedFiles)}
-      </Flex>
+      <Flex>{previewImage(acceptedFiles)}</Flex>
       <Flex
         mt={1}
         justify="center"

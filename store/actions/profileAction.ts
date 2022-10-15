@@ -1,18 +1,50 @@
-import { PROFILE_STATUS } from "../types"
-import { Dispatch, AnyAction } from "redux"
+import { PROFILE_STATUS } from "../types";
+import axios from "axios";
+import { backend_url } from "util/constants";
 
 export const setProfileData = (action: string, data) => async (dispatch) => {
-  console.log("dispatch", action, data)
   try {
-    switch (action){
+    switch (action) {
       case PROFILE_STATUS:
         dispatch({
           type: action,
           payload: data,
         });
-      break;
-    }  
+        break;
+    }
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
+};
+export const getProfileData = (address, dispatch) => {
+  axios
+    .get(`${backend_url}/get_user`, { params: { id: address } })
+    .then(({ data }) => {
+      dispatch({
+        type: PROFILE_STATUS,
+        payload: data,
+      });
+    })
+    .catch((err) => {
+      console.log("get_user_error: ", err);
+    });
+};
+
+export const createProfileData = (
+  profileInfo,
+  dispatch,
+  successCallback = () => {},
+  failCallback = () => {}
+) => {
+  axios
+    .post(`${backend_url}/register_user`, profileInfo)
+    .then(({ data }) => {
+      dispatch({
+        type: PROFILE_STATUS,
+        payload: data,
+      });
+    })
+    .catch((err) => {
+      console.log("create_user_error: ", err);
+    });
 };

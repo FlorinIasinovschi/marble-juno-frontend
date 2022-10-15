@@ -1,43 +1,41 @@
-import * as React from 'react'
-import styled from 'styled-components'
-import { shortenAddress } from 'util/shortenAddress'
-
-const default_banner = 'banner1.png'
-const default_avatar = 'avatar1.png'
+import * as React from "react";
+import styled from "styled-components";
+import { default_image } from "util/constants";
+import { getReducedAddress } from "util/conversion";
 
 const ProfileCard = ({ profileInfo }) => {
-    return (
-      <Container>
-        <ImgDiv className="nft-img-url">
-          <Image
-            src={
-              profileInfo.banner
-                ? profileInfo.banner
-                : default_banner
-            }
-            alt="NFT Image"
-          />
-          <LogoImage
-            src={
-              profileInfo.avatar
-                ? profileInfo.avatar
-                : default_avatar
-            }
-            alt="avatar"
-          />
-        </ImgDiv>
-        <InfoDiv>
-          <h1>{profileInfo.name}</h1>
-          <h3>{shortenAddress(profileInfo.address)}</h3>
-          <p>{profileInfo.bio}</p>
-        </InfoDiv>
-      </Container>
-    )
-  }
-  
-  export default ProfileCard
+  return (
+    <Container>
+      <ImgDiv className="nft-img-url">
+        <Image
+          src={
+            profileInfo.banner
+              ? process.env.NEXT_PUBLIC_PINATA_URL + profileInfo.banner
+              : default_image
+          }
+          alt="NFT Image"
+        />
+        <LogoImage
+          src={
+            profileInfo.avatar
+              ? process.env.NEXT_PUBLIC_PINATA_URL + profileInfo.avatar
+              : default_image
+          }
+          alt="avatar"
+        />
+      </ImgDiv>
+      <InfoDiv>
+        <h1>{profileInfo.name}</h1>
+        <h3>{getReducedAddress(profileInfo.id)}</h3>
+        <p>{profileInfo.bio}</p>
+      </InfoDiv>
+    </Container>
+  );
+};
 
-  const Container = styled.div`
+export default ProfileCard;
+
+const Container = styled.div`
   padding: 30px;
   border-radius: 60px;
   background: rgba(05, 06, 22, 0.2);
@@ -53,13 +51,13 @@ const ProfileCard = ({ profileInfo }) => {
   @media (max-width: 480px) {
     width: 320px;
   }
-`
+`;
 const ImgDiv = styled.div`
   width: 100%;
   padding-bottom: 75%;
   display: block;
   position: relative;
-`
+`;
 const Image = styled.img`
   position: absolute;
   top: 0;
@@ -71,7 +69,7 @@ const Image = styled.img`
   object-fit: cover;
   object-position: center;
   border-radius: 20px;
-`
+`;
 const LogoImage = styled.img`
   position: absolute;
   border: 4px solid rgba(255, 255, 255, 0.8);
@@ -86,7 +84,7 @@ const LogoImage = styled.img`
     bottom: -42px;
     left: calc(50% - 42px);
   }
-`
+`;
 const InfoDiv = styled.div`
   margin-top: 70px;
   text-align: center;
@@ -110,4 +108,4 @@ const InfoDiv = styled.div`
       font-size: 12px;
     }
   }
-`
+`;

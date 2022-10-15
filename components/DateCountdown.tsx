@@ -4,29 +4,26 @@
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable react/jsx-filename-extension */
 /* eslint-disable class-methods-use-this */
-import React, { Component, ReactInstance } from 'react';
-import { styled } from './theme'
-const calculateStateFromProps = (props: DateCountdownProps = defaultDateCountdownProps): DateCountdownStates => {
-  let {
-    dateTo,
-    dateFrom,
-    numberOfFigures,
-    mostSignificantFigure
-  } = props;
-  const currentDate: Date = new Date(dateFrom)
+import React, { Component, ReactInstance } from "react";
+import { styled } from "./theme";
+const calculateStateFromProps = (
+  props: DateCountdownProps = defaultDateCountdownProps
+): DateCountdownStates => {
+  let { dateTo, dateFrom, numberOfFigures, mostSignificantFigure } = props;
+  const currentDate: Date = new Date(dateFrom);
   const targetDate: Date = new Date(dateTo);
 
   const diff = targetDate.getTime() - currentDate.getTime();
-  let significance = ['year', 'month', 'day', 'hour', 'min', 'sec'];
+  let significance = ["year", "month", "day", "hour", "min", "sec"];
 
-  let year = Math.floor(diff / 31104000000);// time diff in years
+  let year = Math.floor(diff / 31104000000); // time diff in years
   let month = Math.floor((diff / 2592000000) % 12); // time diff in months (modulated to 12)
   let day = Math.floor((diff / 86400000) % 30); // time diff in days (modulated to 30)
   let hour = Math.floor((diff / 3600000) % 24); // time diff's hours (modulated to 24)
   let min = Math.floor((diff / 60000) % 60); // time diff's minutes (modulated to 60)
   let sec = Math.floor((diff / 1000) % 60); // time diff's seconds (modulated to 60)
 
-  if (mostSignificantFigure === 'none') {
+  if (mostSignificantFigure === "none") {
     if (year === 0) {
       significance = significance.slice(1);
       if (month === 0) {
@@ -43,27 +40,29 @@ const calculateStateFromProps = (props: DateCountdownProps = defaultDateCountdow
       }
     }
   } else {
-    significance = significance.slice(significance.indexOf(mostSignificantFigure));
+    significance = significance.slice(
+      significance.indexOf(mostSignificantFigure)
+    );
   }
   significance = significance.slice(0, numberOfFigures);
 
-  if (significance.indexOf('year') === -1) {
+  if (significance.indexOf("year") === -1) {
     month += year * 12;
     year = 0;
   }
-  if (significance.indexOf('month') === -1) {
+  if (significance.indexOf("month") === -1) {
     day += month * 30;
     month = 0;
   }
-  if (significance.indexOf('day') === -1) {
+  if (significance.indexOf("day") === -1) {
     hour += day * 24;
     day = 0;
   }
-  if (significance.indexOf('hour') === -1) {
+  if (significance.indexOf("hour") === -1) {
     min += hour * 60;
     hour = 0;
   }
-  if (significance.indexOf('min') === -1) {
+  if (significance.indexOf("min") === -1) {
     sec += min * 60;
     min = 0;
   }
@@ -76,7 +75,7 @@ const calculateStateFromProps = (props: DateCountdownProps = defaultDateCountdow
     day,
     hour,
     min,
-    sec
+    sec,
   };
 };
 
@@ -90,18 +89,18 @@ const figuresMax = {
 };
 
 const defaultDateCountdownProps = {
-  locales: ['year', 'month', 'day', 'hour', 'minute', 'second'],
-  locales_plural: ['years', 'months', 'days', 'hours', 'minutes', 'seconds'],
-  dateTo: (new Date()).toString(),
-  dateFrom: (new Date()).toString(),
+  locales: ["year", "month", "day", "hour", "minute", "second"],
+  locales_plural: ["years", "months", "days", "hours", "minutes", "seconds"],
+  dateTo: new Date().toString(),
+  dateFrom: new Date().toString(),
   callback: () => null,
-  mostSignificantFigure: 'none',
+  mostSignificantFigure: "none",
   numberOfFigures: 6,
   noAnimate: false,
-}
+};
 
 class DateCountdown extends Component<DateCountdownProps, DateCountdownStates> {
-  public static defaultProps = defaultDateCountdownProps
+  public static defaultProps = defaultDateCountdownProps;
   constructor(props) {
     super(props);
 
@@ -113,7 +112,6 @@ class DateCountdown extends Component<DateCountdownProps, DateCountdownStates> {
     this.animateAndChangeIfNeeded = this.animateAndChangeIfNeeded.bind(this);
     this.tick = this.tick.bind(this);
     this.dissect = this.dissect.bind(this);
-
   }
 
   componentDidMount() {
@@ -144,40 +142,48 @@ class DateCountdown extends Component<DateCountdownProps, DateCountdownStates> {
       for (let i = 0; i < digits.length; i += 1) {
         if (i === digits.length - 1) {
           setTimeout(() => {
-            if (!noAnimate) digits[i].classList.toggle('odometerEnd');
+            if (!noAnimate) digits[i].classList.toggle("odometerEnd");
             setTimeout(() => {
-              if (!noAnimate) digits[i].classList.toggle('odometerEnd');
-              if (!noAnimate) digits[i].classList.toggle('odometerStart');
-              if (prevUnit !== 'none') {
+              if (!noAnimate) digits[i].classList.toggle("odometerEnd");
+              if (!noAnimate) digits[i].classList.toggle("odometerStart");
+              if (prevUnit !== "none") {
                 let newState = {};
                 newState[prevUnit] = figuresMax[prevUnit] - 1;
                 newState[unit] = state[unit] - 1;
                 this.setState(newState);
               }
-              if (!noAnimate) setTimeout(() => digits[i].classList.toggle('odometerStart'), speed);
+              if (!noAnimate)
+                setTimeout(
+                  () => digits[i].classList.toggle("odometerStart"),
+                  speed
+                );
             }, speed);
           }, 1000 - speed);
         } else {
           let allZeros = true;
           for (let j = i + 1; j < digits.length; j += 1) {
-            if (digits[j].innerHTML !== '0') {
+            if (digits[j].innerHTML !== "0") {
               allZeros = false;
               break;
             }
           }
           if (allZeros) {
             setTimeout(() => {
-              if (!noAnimate) digits[i].classList.toggle('odometerEnd');
+              if (!noAnimate) digits[i].classList.toggle("odometerEnd");
               setTimeout(() => {
-                if (!noAnimate) digits[i].classList.toggle('odometerEnd');
-                if (!noAnimate) digits[i].classList.toggle('odometerStart');
-                if (prevUnit !== 'none') {
+                if (!noAnimate) digits[i].classList.toggle("odometerEnd");
+                if (!noAnimate) digits[i].classList.toggle("odometerStart");
+                if (prevUnit !== "none") {
                   let newState = {};
                   newState[prevUnit] = figuresMax[prevUnit] - 1;
                   newState[unit] = state[unit] - 1;
                   this.setState(newState);
                 }
-                if (!noAnimate) setTimeout(() => digits[i].classList.toggle('odometerStart'), speed);
+                if (!noAnimate)
+                  setTimeout(
+                    () => digits[i].classList.toggle("odometerStart"),
+                    speed
+                  );
               }, speed);
             }, 1000 - speed);
           }
@@ -187,41 +193,40 @@ class DateCountdown extends Component<DateCountdownProps, DateCountdownStates> {
   }
 
   tick() {
-    const {
-      sec,
-      min,
-      hour,
-      day,
-      month,
-      year,
-      tickId
-    } = this.state;
+    const { sec, min, hour, day, month, year, tickId } = this.state;
     const { callback } = this.props;
     const newSec = sec - 1;
     this.setState({ sec: newSec });
-    this.animateAndChangeIfNeeded('sec', 'none');
+    this.animateAndChangeIfNeeded("sec", "none");
 
     if (newSec === 0) {
-      this.animateAndChangeIfNeeded('min', 'sec');
+      this.animateAndChangeIfNeeded("min", "sec");
 
       if (min === 0) {
-        this.animateAndChangeIfNeeded('hour', 'min');
+        this.animateAndChangeIfNeeded("hour", "min");
 
         if (hour === 0) {
-          this.animateAndChangeIfNeeded('day', 'hour');
+          this.animateAndChangeIfNeeded("day", "hour");
 
           if (day === 0) {
-            this.animateAndChangeIfNeeded('month', 'day');
+            this.animateAndChangeIfNeeded("month", "day");
 
             if (month === 0) {
-              this.animateAndChangeIfNeeded('year', 'month');
+              this.animateAndChangeIfNeeded("year", "month");
             }
           }
         }
       }
     }
 
-    if (sec === 0 && min === 0 && hour === 0 && day === 0 && month === 0 && year === 0) {
+    if (
+      sec === 0 &&
+      min === 0 &&
+      hour === 0 &&
+      day === 0 &&
+      month === 0 &&
+      year === 0
+    ) {
       this.setState({ diff: -1 });
       clearInterval(tickId);
       callback();
@@ -233,7 +238,11 @@ class DateCountdown extends Component<DateCountdownProps, DateCountdownStates> {
     if (valStr.length === 1) {
       valStr = `0${valStr}`;
     }
-    return valStr.split('').map((digit, key) => <span key={key} className={key.toString()}>{digit}</span>);
+    return valStr.split("").map((digit, key) => (
+      <span key={key} className={key.toString()}>
+        {digit}
+      </span>
+    ));
   }
 
   render() {
@@ -241,29 +250,28 @@ class DateCountdown extends Component<DateCountdownProps, DateCountdownStates> {
     let { significance, diff } = state;
     // eslint-disable-next-line camelcase
     let { locales, locales_plural } = this.props;
-    let units = ['year', 'month', 'day', 'hour', 'min', 'sec'];
+    let units = ["year", "month", "day", "hour", "min", "sec"];
 
-    if (diff < 0) { // past date
+    if (diff < 0) {
+      // past date
       return (
         <span className="odometer-block">
-          {
-            units.map((unit, key) => {
-              if (significance.indexOf(unit) !== -1) {
-                return (
-                  <span style={{display:'flex'}}>
-                  <span key={key} className="dcd-info">
-                    <span ref={unit} className={`${unit} dcd-val`}>00</span>
-                    <span className="dcd-comment">
-                    {locales[key]}
+          {units.map((unit, key) => {
+            if (significance.indexOf(unit) !== -1) {
+              return (
+                <span key={key} style={{ display: "flex" }}>
+                  <span className="dcd-info">
+                    <span ref={unit} className={`${unit} dcd-val`}>
+                      00
                     </span>
+                    <span className="dcd-comment">{locales[key]}</span>
                   </span>
-                  <span>{unit != "sec" && ':'}</span>
-                  </span>
-                );
-              }
-              return null;
-            })
-          }
+                  <span>{unit != "sec" && ":"}</span>
+                </span>
+              );
+            }
+            return null;
+          })}
         </span>
       );
     }
@@ -273,15 +281,17 @@ class DateCountdown extends Component<DateCountdownProps, DateCountdownStates> {
         {units.map((unit, key) => {
           if (significance.indexOf(unit) !== -1) {
             return (
-              <span style={{display:'flex'}}>
-                <span key={key} className="dcd-info">
-                  <span ref={unit} className={`${unit} dcd-val`}>{this.dissect(state[unit])}</span>
+              <span key={key} style={{ display: "flex" }}>
+                <span className="dcd-info">
+                  <span ref={unit} className={`${unit} dcd-val`}>
+                    {this.dissect(state[unit])}
+                  </span>
                   <span className="dcd-comment">
-                  {state[unit] <= 1 && locales[key]}
-                  {state[unit] > 1 && locales_plural[key]}
+                    {state[unit] <= 1 && locales[key]}
+                    {state[unit] > 1 && locales_plural[key]}
                   </span>
                 </span>
-                <span>{unit != "sec" && ':'}</span>
+                <span>{unit != "sec" && ":"}</span>
               </span>
             );
           }
@@ -293,28 +303,28 @@ class DateCountdown extends Component<DateCountdownProps, DateCountdownStates> {
 }
 
 type DateCountdownProps = {
-  locales?: Array<string>,
-  locales_plural?: Array<string>,
-  dateTo?: string,
-  dateFrom?: string,
-  callback?: () => void,
-  mostSignificantFigure?: string,
-  numberOfFigures?: number,
-  noAnimate?: boolean
+  locales?: Array<string>;
+  locales_plural?: Array<string>;
+  dateTo?: string;
+  dateFrom?: string;
+  callback?: () => void;
+  mostSignificantFigure?: string;
+  numberOfFigures?: number;
+  noAnimate?: boolean;
 };
 
 type DateCountdownStates = {
-  speed: number,
-  diff: number,
-  significance: string[],
-  year: number,
-  month: number,
-  day: number,
-  hour: number,
-  min: number,
-  sec: number,
-  tickId?: NodeJS.Timer | null
+  speed: number;
+  diff: number;
+  significance: string[];
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  min: number;
+  sec: number;
+  tickId?: NodeJS.Timer | null;
 };
 
-DateCountdown.defaultProps = defaultDateCountdownProps
+DateCountdown.defaultProps = defaultDateCountdownProps;
 export default DateCountdown;

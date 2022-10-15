@@ -7,14 +7,14 @@ import { useBaseTokenInfo } from "../hooks/useTokenInfo";
 import { useTokenBalance } from "../hooks/useTokenBalance";
 import { formatTokenBalance } from "../util/conversion";
 import { Logout } from "../icons/Logout";
-import { Copy } from "../icons/Copy";
-import { CSS } from "@stitches/react";
+// import { Copy } from "../icons/Copy";
+// import { CSS } from "@stitches/react";
 import { useRecoilValue } from "recoil";
 import { walletState } from "../state/atoms/walletAtoms";
 import { useState } from "react";
 import styledComponent from "styled-components";
 
-type ConnectedWalletButtonProps = { css?: CSS } & {
+type ConnectedWalletButtonProps = {
   walletName?: string;
   onConnect: () => void;
   onDisconnect: () => void;

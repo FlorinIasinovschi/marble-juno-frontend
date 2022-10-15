@@ -30,19 +30,19 @@
 
 .files + label {
   margin-top: 1rem;
-  background-color: #0d6efd;
   border-radius: 4rem;
   color: #fff;
   cursor: pointer;
   display: inline-block;
+  font-family: 'Mulish';
   padding: 0.25rem 0.75rem;
   text-align: center;
   user-select: none;
+  font-size: 18px;
 }
 
 .files + label:focus,
 .files + label:hover {
-  background-color: #0a58ca;
   color: #fff;
 }
 
