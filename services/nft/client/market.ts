@@ -179,7 +179,7 @@ export const Market = (contractAddress: string): MarketContract => {
       maximumRoyaltyFee: number,
       royalties: any,
       uri: string
-    ): Promise<string> => {
+    ): Promise<any> => {
       const result = await client.execute(
         owner,
         contractAddress,

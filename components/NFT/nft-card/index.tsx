@@ -20,7 +20,7 @@ import {
   SALE_TYPE,
 } from "services/nft";
 import { NftInfoResponse } from "services/nft";
-
+import { RoundedIcon, RoundedIconComponent } from "components/RoundedIcon";
 import { Dispatch, AnyAction } from "redux";
 import { BuyDialog } from "features/nft/market/detail/BuyDialog";
 import { OfferDialog } from "features/nft/market/detail/OfferDialog";
@@ -76,7 +76,6 @@ export function NftCard({ nft, type }: NftCardProps): JSX.Element {
   const [buyId, setBuyId] = useState("");
   const [isOfferShowing, setIsOfferShowing] = useState(false);
   const [offerId, setOfferId] = useState("");
-
   const showBuyDialog = async (e) => {
     e.preventDefault();
     // dispatch(
@@ -291,8 +290,9 @@ export function NftCard({ nft, type }: NftCardProps): JSX.Element {
           <Flex justifyContent="space-between">
             <NFTName>{nft.name}</NFTName>
             <HStack>
-              <Logo src={"/default.png"} alt="logo" size="34px" />
-              <p>{shortenAddress(nft.user)}</p>
+              <RoundedIconComponent size="26px" address={nft.user} />
+              {/* <Logo src={"/default.png"} alt="logo" size="34px" />
+              <p>{shortenAddress(nft.user)}</p> */}
             </HStack>
           </Flex>
 
@@ -328,7 +328,7 @@ export function NftCard({ nft, type }: NftCardProps): JSX.Element {
               {Object.keys(nft.sale).length > 0 &&
                 nft.sale.sale_type === "Auction" && (
                   <Flex alignItems="center">
-                    {nft.sale.requests > 0 ? (
+                    {nft.sale.requests.length > 0 ? (
                       <>
                         <Value>
                           {getRealTokenAmount({

@@ -59,7 +59,6 @@ export const MyCollectedNFTs = ({ id }) => {
         paymentTokensAddress.push(paymentTokenList.tokens[i].address);
       }
       let rCount = 0;
-      console.log("collections: ", collections);
       for (let k = 0; k < collections.length; k++) {
         let collection = await marketContract.collection(collections[k].id);
         const response = await fetch(
@@ -75,20 +74,17 @@ export const MyCollectedNFTs = ({ id }) => {
         for (let i = 0; i < sales.length; i++) {
           saleIds.push(sales[i].token_id);
         }
-        console.log("collection: ", collection);
         const cw721Contract = CW721(collection.cw721_address).use(client);
         let tokenIdsInfo: any;
         let tokenIds: any;
         // if (collection.owner != id) {
         tokenIdsInfo = await cw721Contract.tokens(id);
-        console.log("tokenIdsInfo: ", tokenIdsInfo);
         // console.log("tokensInfo: ", tokenIdsInfo);
         // } else {
         //   tokenIdsInfo = await cw721Contract.allTokens();
         // }
         // console.log("tokenIdsInfo: ", tokenIdsInfo);
         tokenIds = tokenIdsInfo.tokens;
-        console.log("tokenIds: ", tokenIds);
         while (tokenIds.length > 0) {
           for (let i = 0; i < tokenIds.length; i++) {
             let nftInfo = await cw721Contract.nftInfo(tokenIds[i]);

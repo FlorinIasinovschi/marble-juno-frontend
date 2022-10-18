@@ -28,7 +28,6 @@ export const Explore = () => {
 
       const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
       let collectionList = await marketContract.listCollections();
-      console.log("collectionList: ", collectionList);
       let res_categories = await fetch(process.env.NEXT_PUBLIC_CATEGORY_URL);
       let categories = await res_categories.json();
       setNftCategories(categories.categories);
@@ -40,7 +39,6 @@ export const Explore = () => {
             process.env.NEXT_PUBLIC_PINATA_URL + collectionList[i].uri
           );
           res_collection = await ipfs_collection.json();
-          console.log("ipfs_collection: ", res_collection);
 
           let collection_info: any = {};
           collection_info.id = collectionList[i].id;
@@ -69,7 +67,6 @@ export const Explore = () => {
       setLoading(false);
     })();
   }, [client]);
-  console.log("nftcollection: ", nftcollections);
   return (
     <ExploreWrapper>
       <CategoryTab

@@ -632,54 +632,73 @@ export const NFTDetail = ({ collectionId, id }) => {
                       )}
                     {nft.user === address ? (
                       <>
-                        <ButtonGroup>
-                          {/* {!nft.sale.requests.length && !highestBid && (
-                            <UpdateMarketModal
-                              collectionId={collectionId}
-                              id={id}
-                            />
-                          )} */}
-                          {parseFloat(nft.price) > 0 &&
-                          !nft.sale.requests.length ? (
-                            <Button
-                              className="btn-buy btn-default"
-                              css={{
-                                background: "$white",
-                                color: "$black",
-                                stroke: "$black",
-                                width: "100%",
-                                padding: "15px auto",
-                              }}
-                              size="large"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                cancelSale(e);
-                                return false;
-                              }}
-                            >
-                              Cancel Marketing
-                            </Button>
-                          ) : (
-                            <Button
-                              className="btn-buy btn-default"
-                              css={{
-                                background: "$white",
-                                color: "$black",
-                                stroke: "$black",
-                                width: "100%",
-                              }}
-                              variant="primary"
-                              size="large"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                acceptSale(e);
-                                return false;
-                              }}
-                            >
-                              Accept Bid
-                            </Button>
-                          )}
-                        </ButtonGroup>
+                        {((nft.sale.duration_type.Time &&
+                          nft.sale.duration_type.Time[1] < time) ||
+                          !nft.sale.requests.length) && (
+                          <ButtonGroup>
+                            {parseFloat(nft.price) > 0 &&
+                            !nft.sale.requests.length ? (
+                              <Button
+                                className="btn-buy btn-default"
+                                css={{
+                                  background: "$white",
+                                  color: "$black",
+                                  stroke: "$black",
+                                  width: "100%",
+                                  padding: "15px auto",
+                                }}
+                                size="large"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  cancelSale(e);
+                                  return false;
+                                }}
+                              >
+                                Cancel Marketing
+                              </Button>
+                            ) : (
+                              <Button
+                                className="btn-buy btn-default"
+                                css={{
+                                  background: "$white",
+                                  color: "$black",
+                                  stroke: "$black",
+                                  width: "100%",
+                                }}
+                                variant="primary"
+                                size="large"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  acceptSale(e);
+                                  return false;
+                                }}
+                              >
+                                Accept Bid
+                              </Button>
+                            )}
+                            {Number(nft.sale.reserve_price) >
+                              Number(nft.sale.requests[0]?.price) && (
+                              <Button
+                                className="btn-buy btn-default"
+                                css={{
+                                  background: "$white",
+                                  color: "$black",
+                                  stroke: "$black",
+                                  width: "100%",
+                                  padding: "15px auto",
+                                }}
+                                size="large"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  cancelSale(e);
+                                  return false;
+                                }}
+                              >
+                                Cancel Marketing
+                              </Button>
+                            )}
+                          </ButtonGroup>
+                        )}
                       </>
                     ) : nft.sale.sale_type === "Auction" ? (
                       <Stack

@@ -256,7 +256,6 @@ export const CollectionPage = ({ id }: CollectionProps) => {
       setReloadCount(reloadCount + 1);
     })();
   }, [id, client]);
-  // useEffect(() => {
   //   (async () => {
   //     if (id === undefined || id == "[name]") return false;
   //     if (!client) {
@@ -419,6 +418,7 @@ export const CollectionPage = ({ id }: CollectionProps) => {
       })
     );
     setLoadedNfts(loadedNfts.concat(nftData));
+    if (nftData.length < 10) setHasMore(false);
     setReloadCount(reloadCount + 1);
   };
 

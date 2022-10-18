@@ -377,11 +377,10 @@ const OnSaleModal = ({ collectionId, id, handleEvent }) => {
         return;
       }
       setJsonUploading(true);
-
-      if (paymentTokens[sellingPriceSelectedOption].type == "cw20") {
-        denom = { cw20: paymentTokens[sellingPriceSelectedOption].address };
+      if (paymentTokens[priceSelectedOption].type == "cw20") {
+        denom = { cw20: paymentTokens[priceSelectedOption].address };
       } else {
-        denom = { native: paymentTokens[sellingPriceSelectedOption].address };
+        denom = { native: paymentTokens[priceSelectedOption].address };
       }
       msg = {
         start_sale: {
@@ -392,13 +391,13 @@ const OnSaleModal = ({ collectionId, id, handleEvent }) => {
           initial_price: parseInt(
             toMinDenom(
               parseFloat(price),
-              paymentTokens[sellingPriceSelectedOption].denom
+              paymentTokens[priceSelectedOption].denom
             )
           ).toString(),
           reserve_price: parseInt(
             toMinDenom(
               parseFloat(reserverPrice),
-              paymentTokens[sellingPriceSelectedOption].denom
+              paymentTokens[priceSelectedOption].denom
             )
           ).toString(),
           denom,
@@ -518,7 +517,6 @@ const OnSaleModal = ({ collectionId, id, handleEvent }) => {
                     }}
                     styles={customStyles}
                     onChange={(e) => {
-                      console.log("herehehwjherlkjwlekjr");
                       onPriceOptionClicked(e);
                     }}
                   />

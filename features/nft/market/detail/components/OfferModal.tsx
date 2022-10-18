@@ -282,8 +282,7 @@ export const OfferModal = ({
     );
   };
 
-  const baseToken = useBaseTokenInfo();
-  const { balance } = useTokenBalance(baseToken?.symbol);
+  const { balance } = useTokenBalance(nft.paymentToken?.symbol);
   const handleOpen = () => {
     if (!address || !signingClient) {
       toast.error(`Please connect your wallet.`, {
