@@ -123,6 +123,15 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
                   <span className={isActive("/defi")}>DeFi</span>
                 </a>
               </StyledLink>
+
+              <StyledLink>
+                <a
+                  className="dropdown-item"
+                  href="/stake"
+                >
+                  <span className={isActive("/stake")}>Stake</span>
+                </a>
+              </StyledLink>
             </StyledListForLinks>
 
             <ButtonField>

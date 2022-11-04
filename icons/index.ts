@@ -62,3 +62,6 @@ export { Trash } from "./Trash";
 export { NFTUploadImage } from "./NFTUploadImage";
 export { Email } from "./Email";
 export { DiscordT } from "./Discord2";
+export { AddCircle } from "./AddCircle";
+export { MinusHexagon } from "./MinusHexagon";
+export { Hexagon } from "./Hexagon";
