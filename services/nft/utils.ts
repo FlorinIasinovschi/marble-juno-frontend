@@ -1,4 +1,5 @@
 import { coins, Token } from "../config";
+import { getFileTypeFromURL, NftCollection } from "./type";
 
 export function formatAddress(wallet: string): string {
   return ellideMiddle(wallet, 24);
@@ -46,4 +47,35 @@ export function isValidURL(string) {
     /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g
   );
   return res !== null;
+}
+
+export async function getCollectionInfo(collectionConfig): Promise<NftCollection> {
+  let res_collection: any = {};
+  try {
+    let ipfs_collection = await fetch(
+      process.env.NEXT_PUBLIC_PINATA_URL + collectionConfig.uri
+    );
+    res_collection = await ipfs_collection.json();
+
+    let collection_info: any = {};
+    collection_info.id = 0;
+    collection_info.name = res_collection.name;
+    collection_info.description = res_collection.description;
+    collection_info.image =
+      process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
+    collection_info.banner_image = res_collection.featuredImage
+      ? process.env.NEXT_PUBLIC_PINATA_URL + res_collection.featuredImage
+      : process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
+    collection_info.slug = res_collection.slug;
+    collection_info.creator = collectionConfig.owner ?? "";
+    collection_info.cat_ids = res_collection.category;
+
+    let collection_type = await getFileTypeFromURL(
+      process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo
+    );
+    collection_info.type = collection_type.fileType;
+    return collection_info
+  } catch (err) {
+    console.log("err", err);
+  }
 }

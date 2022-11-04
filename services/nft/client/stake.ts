@@ -20,6 +20,8 @@ export interface StakeInstance {
 
 export interface StakeTxInstance {
   readonly contractAddress: string;
+  // @TODO: fix type
+  fetchUnstake: (data: any) => Promise<any>
 }
 
 export interface StakeContract {
@@ -53,9 +55,24 @@ export const Stake = (contractAddress: string): StakeContract => {
   };
 
   const useTx = (client: SigningCosmWasmClient): StakeTxInstance => {
+   
+    const fetchUnstake = async (
+      {owner}
+    ): Promise<any> => {
+      const result = await client.execute(
+        owner,
+        contractAddress,
+        {
+          fetch_unstake: {},
+        },
+        defaultExecuteFee
+      );
 
+      return result;
+    };
     return {
       contractAddress,
+      fetchUnstake
     };
   };
 

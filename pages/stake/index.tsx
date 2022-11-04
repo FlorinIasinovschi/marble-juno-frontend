@@ -5,67 +5,84 @@ import { AppLayout } from "components/Layout/AppLayout";
 import { NftCollectionCard } from "components/NFT/collection/nftCollenctionCard";
 import { AddCircle, Hexagon, MinusHexagon } from "icons";
 import { walletState } from "state/atoms/walletAtoms";
+import { toast } from "react-toastify";
 
 import {
-  useSdk,
   Collection,
   Stake,
-  getFileTypeFromURL,
   NftCollection,
+  StakeContractConfig,
+  getCollectionInfo,
+  CW721,
+  CollectionContractConfig,
 } from "services/nft";
 import { useRecoilValue } from "recoil";
+import { toBase64 } from "@cosmjs/encoding";
 
 const PUBLIC_STAKE_ADDRESS = process.env.NEXT_PUBLIC_STAKE_ADDRESS || "";
 
 export default function StakePage() {
-  const { address } = useRecoilValue(walletState);
-  const { client } = useSdk();
+  const { address, client } = useRecoilValue(walletState);
   const [collection, setCollection] = useState<NftCollection>();
+  const [stakeContractConfig, setStakeContractConfig] =
+    useState<StakeContractConfig>();
+  const [collectionContractConfig, setCollectionContractConfig] =
+    useState<CollectionContractConfig>();
 
   useEffect(() => {
     (async () => {
       if (!client || !address) {
         return;
       }
-
-      const stakeContract = Stake(PUBLIC_STAKE_ADDRESS).use(client);
-      const stakeConfig = await stakeContract.getConfig();
-      const collectionContract = Collection(stakeConfig.collection_address).use(
-        client
-      );
-      const collectionConfig = await collectionContract.getConfig();
-      let res_collection: any = {};
       try {
-        let ipfs_collection = await fetch(
-          process.env.NEXT_PUBLIC_PINATA_URL + collectionConfig.uri
-        );
-        res_collection = await ipfs_collection.json();
+        const stakeContract = Stake(PUBLIC_STAKE_ADDRESS).use(client);
+        const stakeConfig = await stakeContract.getConfig();
+        setStakeContractConfig(stakeConfig);
+        const collectionContract = Collection(
+          stakeConfig.collection_address
+        ).use(client);
+        const collectionConfig = await collectionContract.getConfig();
+        setCollectionContractConfig(collectionConfig);
 
-        let collection_info: any = {};
-        collection_info.id = 0;
-        collection_info.name = res_collection.name;
-        collection_info.description = res_collection.description;
-        collection_info.image =
-          process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
-        collection_info.banner_image = res_collection.featuredImage
-          ? process.env.NEXT_PUBLIC_PINATA_URL + res_collection.featuredImage
-          : process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
-        collection_info.slug = res_collection.slug;
-        collection_info.creator = collectionConfig.owner ?? "";
-        collection_info.cat_ids = res_collection.category;
-
-        let collection_type = await getFileTypeFromURL(
-          process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo
-        );
-        collection_info.type = collection_type.fileType;
+        const collection_info = await getCollectionInfo(collectionConfig);
         setCollection(collection_info);
-      } catch (err) {
-        console.log("err", err);
+      } catch (e) {
+        console.error(e);
       }
-
-      console.log(collectionConfig);
     })();
   }, [client]);
+
+  const onStake = async () => {
+    if (!collectionContractConfig) {
+      return;
+    }
+
+    const cw721Contract = CW721(collectionContractConfig.cw721_address).useTx(
+      client
+    );
+    const msg = { stake: {} };
+
+    let encodedMsg: string = toBase64(
+      new TextEncoder().encode(JSON.stringify(msg))
+    );
+
+    const token_id = Math.floor(
+      Math.random() * collectionContractConfig.unused_token_id
+    );
+
+    try {
+      let nft = await cw721Contract.sendNft(
+        address,
+        PUBLIC_STAKE_ADDRESS,
+        token_id.toString(),
+        encodedMsg
+      );
+      toast.success("Sucessfully staked.");
+    } catch (e) {
+      console.error(e);
+      toast.error(`Error:`, e.mesage);
+    }
+  };
 
   return (
     <AppLayout fullWidth={false}>
@@ -80,7 +97,9 @@ export default function StakePage() {
             <StyledRow>
               <StyledDiv>
                 <StyledSubHeading>Daily Rewards</StyledSubHeading>
-                <StyledText>100 Block/Day</StyledText>
+                <StyledText>
+                  {stakeContractConfig.daily_reward} Block/Day
+                </StyledText>
               </StyledDiv>
               <StyledDiv>
                 <StyledSubHeading>Claimable Reward</StyledSubHeading>
@@ -98,7 +117,7 @@ export default function StakePage() {
               </StyledDiv>
             </StyledRow>
             <StyledRow>
-              <StyledButton>
+              <StyledButton onClick={onStake}>
                 <AddCircle />
                 &nbsp;Stake
               </StyledButton>
