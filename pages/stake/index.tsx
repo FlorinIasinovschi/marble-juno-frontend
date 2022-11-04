@@ -1,119 +1,119 @@
 import { useEffect, useState } from "react";
-import {
-  ChakraProvider,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Text,
-  Tabs,
-} from "@chakra-ui/react";
+import { Text } from "@chakra-ui/react";
 import styled from "styled-components";
 import { AppLayout } from "components/Layout/AppLayout";
-import { Explore } from "features/nft/market/explore";
-import NFTExplorer from "features/nft/market/nftexplore";
-import Profiles from "features/nft/market/profile/allProfiles";
-import { fetchAllProfileCounts } from "hooks/useProfile";
 import { NftCollectionCard } from "components/NFT/collection/nftCollenctionCard";
 import { AddCircle, Hexagon, MinusHexagon } from "icons";
+import { walletState } from "state/atoms/walletAtoms";
 
-export default function Stake() {
-  // const [nfts, setNfts] = useState("");
-  // const [collections, setCollections] = useState("");
-  const [profiles, setProfiles] = useState<any>({});
-  // async function fetchAllNFTCounts() {
-  //   const allNFTs = await nftViewFunction({
-  //     methodName: 'nft_total_supply',
-  //     args: {},
-  //   })
-  //   return allNFTs
-  // }
-  // async function fetchAllCollectionCounts() {
-  //   const allCollections = await nftViewFunction({
-  //     methodName: 'nft_get_series_supply',
-  //     args: {},
-  //   })
-  //   return allCollections
-  // }
+import {
+  useSdk,
+  Collection,
+  Stake,
+  getFileTypeFromURL,
+  NftCollection,
+} from "services/nft";
+import { useRecoilValue } from "recoil";
+
+const PUBLIC_STAKE_ADDRESS = process.env.NEXT_PUBLIC_STAKE_ADDRESS || "";
+
+export default function StakePage() {
+  const { address } = useRecoilValue(walletState);
+  const { client } = useSdk();
+  const [collection, setCollection] = useState<NftCollection>();
 
   useEffect(() => {
-    // fetchCollections()
     (async () => {
-      // const [totalNFTs, totalCollections, totalProfiles] = await Promise.all([
-      //   fetchAllNFTCounts(),
-      //   fetchAllCollectionCounts(),
-      //   fetchAllProfileCounts(),
-      // ]);
-      const totalProfiles = await fetchAllProfileCounts();
-      // setNfts(totalNFTs)
-      // setCollections(totalCollections)
-      setProfiles(totalProfiles);
-    })();
-  }, []);
+      if (!client || !address) {
+        return;
+      }
 
-  const collection = {
-    banner_image:
-      "https://marbledao.mypinata.cloud/ipfs/QmeXU7nnBhJv1mspNJ3dfE2qL6LtFVKCA9EMEb2Zv8yAxs",
-    cat_ids: "0",
-    creator: "juno1y6j4usq3cvccquak780ht4n8xjwpr0relzdp5q",
-    description:
-      "The Marblenauts is a special collection of 1001 Cosmosnauts made of marble.",
-    id: 5,
-    image:
-      "https://marbledao.mypinata.cloud/ipfs/QmeXU7nnBhJv1mspNJ3dfE2qL6LtFVKCA9EMEb2Zv8yAxs",
-    name: "Marblenauts",
-    slug: "",
-    type: "image",
-    num_tokens: 3,
-  };
+      const stakeContract = Stake(PUBLIC_STAKE_ADDRESS).use(client);
+      const stakeConfig = await stakeContract.getConfig();
+      const collectionContract = Collection(stakeConfig.collection_address).use(
+        client
+      );
+      const collectionConfig = await collectionContract.getConfig();
+      let res_collection: any = {};
+      try {
+        let ipfs_collection = await fetch(
+          process.env.NEXT_PUBLIC_PINATA_URL + collectionConfig.uri
+        );
+        res_collection = await ipfs_collection.json();
+
+        let collection_info: any = {};
+        collection_info.id = 0;
+        collection_info.name = res_collection.name;
+        collection_info.description = res_collection.description;
+        collection_info.image =
+          process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
+        collection_info.banner_image = res_collection.featuredImage
+          ? process.env.NEXT_PUBLIC_PINATA_URL + res_collection.featuredImage
+          : process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
+        collection_info.slug = res_collection.slug;
+        collection_info.creator = collectionConfig.owner ?? "";
+        collection_info.cat_ids = res_collection.category;
+
+        let collection_type = await getFileTypeFromURL(
+          process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo
+        );
+        collection_info.type = collection_type.fileType;
+        setCollection(collection_info);
+      } catch (err) {
+        console.log("err", err);
+      }
+
+      console.log(collectionConfig);
+    })();
+  }, [client]);
 
   return (
     <AppLayout fullWidth={false}>
       <StyledTitle>NFT Staking</StyledTitle>
-      <StyledCard>
-        <StyledDivForNftCollection>
-          <NftCollectionCard collection={collection} />
-        </StyledDivForNftCollection>
-        <StyledDivForInfo>
-          <StyledHeading>{collection.name}</StyledHeading>
-          <StyledRow>
-            <StyledDiv>
-              <StyledSubHeading>Daily Rewards</StyledSubHeading>
-              <StyledText>100 Block/Day</StyledText>
-            </StyledDiv>
-            <StyledDiv>
-              <StyledSubHeading>Claimable Reward</StyledSubHeading>
-              <StyledText>10,000 Block</StyledText>
-            </StyledDiv>
-          </StyledRow>
-          <StyledRow>
-            <StyledDiv>
-              {" "}
-              bc
-              <StyledSubHeading>Day Staked</StyledSubHeading>
-              <StyledText>10</StyledText>
-            </StyledDiv>
-            <StyledDiv>
-              <StyledSubHeading>Days Left</StyledSubHeading>
-              <StyledText>9</StyledText>
-            </StyledDiv>
-          </StyledRow>
-          <StyledRow>
-            <StyledButton>
-              <AddCircle />
-              &nbsp;Stake
-            </StyledButton>
-            <StyledButton>
-              <MinusHexagon />
-              &nbsp;UnStake
-            </StyledButton>
-            <StyledButton>
-              <Hexagon />
-              &nbsp;Claim Rewards
-            </StyledButton>
-          </StyledRow>
-        </StyledDivForInfo>
-      </StyledCard>
+      {collection && (
+        <StyledCard>
+          <StyledDivForNftCollection>
+            <NftCollectionCard collection={collection} />
+          </StyledDivForNftCollection>
+          <StyledDivForInfo>
+            <StyledHeading>{collection.name}</StyledHeading>
+            <StyledRow>
+              <StyledDiv>
+                <StyledSubHeading>Daily Rewards</StyledSubHeading>
+                <StyledText>100 Block/Day</StyledText>
+              </StyledDiv>
+              <StyledDiv>
+                <StyledSubHeading>Claimable Reward</StyledSubHeading>
+                <StyledText>10,000 Block</StyledText>
+              </StyledDiv>
+            </StyledRow>
+            <StyledRow>
+              <StyledDiv>
+                <StyledSubHeading>Day Staked</StyledSubHeading>
+                <StyledText>10</StyledText>
+              </StyledDiv>
+              <StyledDiv>
+                <StyledSubHeading>Days Left</StyledSubHeading>
+                <StyledText>9</StyledText>
+              </StyledDiv>
+            </StyledRow>
+            <StyledRow>
+              <StyledButton>
+                <AddCircle />
+                &nbsp;Stake
+              </StyledButton>
+              <StyledButton>
+                <MinusHexagon />
+                &nbsp;UnStake
+              </StyledButton>
+              <StyledButton>
+                <Hexagon />
+                &nbsp;Claim Rewards
+              </StyledButton>
+            </StyledRow>
+          </StyledDivForInfo>
+        </StyledCard>
+      )}
     </AppLayout>
   );
 }

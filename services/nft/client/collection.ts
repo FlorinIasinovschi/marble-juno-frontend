@@ -84,7 +84,7 @@ export const Collection = (contractAddress: string): CollectionContract => {
   const use = (client: CosmWasmClient): CollectionInstance => {
     const getConfig = async (): Promise<CollectionContractConfig> => {
       const result = await client.queryContractSmart(contractAddress, {
-        config: {},
+        get_config: {},
       });
       return result;
     };
