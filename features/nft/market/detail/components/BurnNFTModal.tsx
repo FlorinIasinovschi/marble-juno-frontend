@@ -11,31 +11,19 @@ import {
   Input,
 } from "@chakra-ui/react";
 import { toast } from "react-toastify";
-import { Button } from "components/Button";
 import styled from "styled-components";
 import { NftCard } from "components/NFT/nft-card";
 import { isMobile } from "util/device";
 import { StyledCloseIcon } from "components/Dialog";
 
-const TransferNFTModal = ({ nftInfo, onHandle }) => {
+const BurnNFTModal = ({ nftInfo, onHandle }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [address, setAddress] = useState("");
+
   return (
     <ChakraProvider>
-      <Button
-        className="btn-buy btn-default"
-        css={{
-          background: "$white",
-          color: "$black",
-          stroke: "$black",
-          width: "100%",
-        }}
-        variant="primary"
-        size="large"
-        onClick={onOpen}
-      >
-        Transfer NFT
-      </Button>
+      <BurnButton className="btn-buy btn-default" onClick={onOpen}>
+        Burn NFT
+      </BurnButton>
       <Modal
         blockScrollOnMount={false}
         isOpen={isOpen}
@@ -45,33 +33,20 @@ const TransferNFTModal = ({ nftInfo, onHandle }) => {
         <ModalOverlay backdropFilter="blur(14px)" bg="rgba(0, 0, 0, 0.34)" />
         <Container>
           <StyledCloseIcon onClick={onClose} offset={20} size="40px" />
+
           <MainWrapper>
             <Stack spacing={10} width={isMobile() ? "100%" : "55%"}>
               <Stack>
-                <Title>Transfer NFT</Title>
+                <Title>Burn the NFT</Title>
                 <p>
-                  Transfer the NFT to another user or wallet by entering a valid
-                  address below
+                  Burning an NFT destroys the NFT and removes it from your
+                  creator profile. Please note, this action cannot be reversed.
                 </p>
               </Stack>
-              <Stack>
-                <StyledInput
-                  onChange={(e) => setAddress(e.target.value)}
-                  value={address}
-                />
-              </Stack>
-              <Button
+              <BurnButton
                 className="btn-buy btn-default"
-                css={{
-                  background: "$white",
-                  color: "$black",
-                  stroke: "$black",
-                  width: "100%",
-                }}
-                variant="primary"
-                size="large"
                 onClick={async () => {
-                  const result = await onHandle(address);
+                  const result = await onHandle();
                   if (result) {
                     toast.success(`Transaction Success!`, {
                       position: "top-right",
@@ -95,8 +70,8 @@ const TransferNFTModal = ({ nftInfo, onHandle }) => {
                     });
                 }}
               >
-                Transfer NFT
-              </Button>
+                Burn the NFT
+              </BurnButton>
             </Stack>
             <CardWrapper>
               <NftCard nft={nftInfo} id="" type="" />
@@ -112,9 +87,10 @@ const Container = styled(ModalContent)`
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
   background: rgba(255, 255, 255, 0.06) !important;
   border-radius: 30px !important;
-  padding: 50px;
+  padding: 70px;
   color: white !important;
   overflow: hidden;
+  position: relative;
   max-width: 1000px !important;
   @media (max-width: 480px) {
     width: 90vw !important;
@@ -122,6 +98,13 @@ const Container = styled(ModalContent)`
     max-height: 100vh;
     overflow: auto;
     border-radius: 10px !important;
+  }
+`;
+const Title = styled.div`
+  font-size: 30px;
+  font-weight: 700;
+  @media (max-width: 480px) {
+    font-size: 20px;
   }
 `;
 const MainWrapper = styled.div`
@@ -151,24 +134,22 @@ const CardWrapper = styled.div`
     margin-bottom: 20px;
   }
 `;
-const StyledInput = styled.input`
-  padding: 15px;
-  font-size: 20px;
-  font-weight: 600;
-  background: #272734;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0px 4px 40px rgba(42, 47, 50, 0.09);
-  backdrop-filter: blur(40px);
-  /* Note: backdrop-filter has minimal browser support */
-  font-family: Mulish;
-  border-radius: 20px;
+
+const BurnButton = styled.div`
+  background: #c80000;
+  font-size: 18px;
+  color: white;
+  stroke: white;
+  width: 100%;
+  margin-top: 20px;
+  border-radius: 10px;
   height: 70px;
+  cursor: pointer;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  box-shadow: 0px 4px 40px rgba(42, 47, 50, 0.09),
+    inset 0px 7px 8px rgba(0, 0, 0, 0.2);
 `;
-const Title = styled.div`
-  font-size: 30px;
-  font-weight: 600;
-  @media (max-width: 480px) {
-    font-size: 20px;
-  }
-`;
-export default TransferNFTModal;
+
+export default BurnNFTModal;

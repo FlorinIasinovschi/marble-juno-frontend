@@ -11,10 +11,9 @@ export const getLogoUriFromAddress = async (address) => {
       avatar: data.avatar
         ? process.env.NEXT_PUBLIC_PINATA_URL + data.avatar
         : "/default.png",
-      name: data.name || shortenAddress(address),
+      name: data.name ? data.name : shortenAddress(address),
     };
   } catch (err) {
-    console.log("axios get logo uri error: ", err);
-    return { avatar: "/default.png", name: address };
+    return { avatar: "/default.png", name: shortenAddress(address) };
   }
 };

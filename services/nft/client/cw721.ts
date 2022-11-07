@@ -86,6 +86,7 @@ export interface CW721TxInstance {
     msg: Record<string, unknown>,
     tokenId: string
   ) => Promise<string>;
+  burn: (sender: string, tokenId: string) => Promise<string>;
 }
 
 export interface CW721Contract {
@@ -193,7 +194,7 @@ export const CW721 = (contractAddress: string): CW721Contract => {
         sender,
         contractAddress,
         { transfer_nft: { recipient, token_id: tokenId } },
-        undefined
+        defaultExecuteFee
       );
       return result.transactionHash;
     };
@@ -218,12 +219,25 @@ export const CW721 = (contractAddress: string): CW721Contract => {
       );
       return result.transactionHash;
     };
-
+    const burn = async (sender: string, tokenId: string): Promise<string> => {
+      const result = await client.execute(
+        sender,
+        contractAddress,
+        {
+          burn: {
+            token_id: tokenId,
+          },
+        },
+        defaultExecuteFee
+      );
+      return result.transactionHash;
+    };
     return {
       contractAddress,
       sendNft,
       transfer,
       send,
+      burn,
     };
   };
 

@@ -413,24 +413,6 @@ const Explore = () => {
   };
 
   useEffect(() => {
-    if (isLargeNFT) {
-      if (nft_column_count <= 3) return;
-      //setUIData(NFT_COLUMN_COUNT, nft_column_count - 1)
-      dispatch({
-        type: NFT_COLUMN_COUNT,
-        payload: nft_column_count - 1,
-      });
-    } else {
-      if (nft_column_count >= 5) return;
-      //setUIData(NFT_COLUMN_COUNT, nft_column_count +1)
-      dispatch({
-        type: NFT_COLUMN_COUNT,
-        payload: nft_column_count + 1,
-      });
-    }
-  }, [dispatch, isLargeNFT]);
-
-  useEffect(() => {
     setBuyId(buy_status);
     setIsBuyShowing(true);
   }, [dispatch, buy_status]);

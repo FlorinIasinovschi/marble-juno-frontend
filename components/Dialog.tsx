@@ -1,18 +1,18 @@
-import Portal from '@reach/portal'
-import styled from 'styled-components'
-import gsap from 'gsap'
-import { useEffect, useState, useRef, ReactNode } from 'react'
-import { colorTokens } from '../util/constants'
+import Portal from "@reach/portal";
+import styled from "styled-components";
+import gsap from "gsap";
+import { useEffect, useState, useRef, ReactNode } from "react";
+import { colorTokens } from "../util/constants";
 
 type DialogProps = {
-  children: ReactNode
-  isShowing: boolean
-  onRequestClose: () => void
-  kind?: 'blank'
-  width?: 'normal' | 'large'
-}
+  children: ReactNode;
+  isShowing: boolean;
+  onRequestClose: () => void;
+  kind?: "blank";
+  width?: "normal" | "large";
+};
 
-const paddingX = 18
+const paddingX = 18;
 
 export const Dialog = ({
   children,
@@ -21,53 +21,53 @@ export const Dialog = ({
   kind,
   ...props
 }: DialogProps) => {
-  const [isRenderingDialog, setIsRenderingDialog] = useState(false)
-  const modalRef = useRef()
-  const overlayRef = useRef()
+  const [isRenderingDialog, setIsRenderingDialog] = useState(false);
+  const modalRef = useRef();
+  const overlayRef = useRef();
 
   // render the dialog
   useEffect(() => {
     if (isShowing) {
-      setIsRenderingDialog(true)
+      setIsRenderingDialog(true);
     }
-  }, [isShowing])
+  }, [isShowing]);
 
   useEffect(() => {
-    const shouldAnimateCloseOut = !isShowing && isRenderingDialog
+    const shouldAnimateCloseOut = !isShowing && isRenderingDialog;
 
     const tl = gsap.timeline({
       duration: 0.35,
-      ease: 'power.easeOut',
-    })
+      ease: "power.easeOut",
+    });
 
     if (shouldAnimateCloseOut) {
-      tl.to(modalRef.current, { opacity: 0 }, 0)
+      tl.to(modalRef.current, { opacity: 0 }, 0);
       tl.to(
         overlayRef.current,
         {
           opacity: 0,
           onComplete() {
             // unmount the dialog
-            setIsRenderingDialog(false)
+            setIsRenderingDialog(false);
           },
         },
         0
-      )
+      );
     }
 
     if (isShowing && isRenderingDialog) {
-      tl.to(overlayRef.current, { opacity: 0.6 }, 0)
-      tl.to(modalRef.current, { opacity: 1 }, 0.1)
-      return
+      tl.to(overlayRef.current, { opacity: 0.6 }, 0);
+      tl.to(modalRef.current, { opacity: 1 }, 0.1);
+      return;
     }
-  }, [isRenderingDialog, isShowing])
+  }, [isRenderingDialog, isShowing]);
 
   return (
     <Portal>
       {(isShowing || isRenderingDialog) && (
         <>
           <StyledDivForModal ref={modalRef} {...props}>
-            {kind !== 'blank' && (
+            {kind !== "blank" && (
               <StyledCloseIcon offset={paddingX} onClick={onRequestClose} />
             )}
             {children}
@@ -80,12 +80,12 @@ export const Dialog = ({
         </>
       )}
     </Portal>
-  )
-}
+  );
+};
 
 export const DialogBody = styled.div`
   padding: ${paddingX}px;
-`
+`;
 
 const StyledDivForModal = styled.div`
   opacity: 0;
@@ -99,7 +99,7 @@ const StyledDivForModal = styled.div`
   background-color: ${colorTokens.lightGray};
   border-radius: 6px;
   box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.02);
-`
+`;
 
 const StyledDivForOverlay = styled.div`
   opacity: 0;
@@ -110,7 +110,7 @@ const StyledDivForOverlay = styled.div`
   left: 0;
   top: 0;
   background-color: #000;
-`
+`;
 
 const CloseIcon = (props) => (
   <svg
@@ -125,19 +125,21 @@ const CloseIcon = (props) => (
       fill="currentColor"
     />
   </svg>
-)
+);
 
 export const StyledCloseIcon = styled(CloseIcon)`
-  width: ${(p) => p.size || '24px'};
-  height: ${(p) => p.size || '24px'};
+  width: ${(p) => p.size || "40px"};
+  height: ${(p) => p.size || "40px"};
   color: #323232;
   display: block;
   transition: opacity 0.15s ease-out;
   cursor: pointer;
-  margin-left: auto;
-  margin-right: ${(p) => p.offset}px;
-  margin-top: ${(p) => p.offset}px;
+  border-radius: 50%;
+  background: white;
   &:hover {
     opacity: 0.75;
   }
-`
+  position: absolute;
+  right: 10px;
+  top: 10px;
+`;

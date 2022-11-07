@@ -8,6 +8,8 @@ import { NftPrice, NftDollarPrice } from "components/NFT/nft-card/price";
 import { LoadingProgress } from "components/LoadingProgress";
 import { User, CopyNft, Heart, Clock, Package, Credit } from "icons";
 import { useHistory, useParams } from "react-router-dom";
+import TransferNFTModal from "./components/TransferNFTModal";
+import BurnNFTModal from "./components/BurnNFTModal";
 import { RoundedIcon, RoundedIconComponent } from "components/RoundedIcon";
 import { OfferModal } from "./components/OfferModal";
 import Card from "./components/card";
@@ -46,7 +48,7 @@ import OnSaleModal from "./components/OnSaleModal";
 import UpdateMarketModal from "./components/UpdateMarketModal";
 import { fromBase64, toBase64 } from "@cosmjs/encoding";
 import { RELOAD_STATUS } from "store/types";
-
+import { useRouter } from "next/router";
 interface DetailParams {
   readonly collectionId: string;
   readonly id: string;
@@ -73,7 +75,7 @@ export const NFTDetail = ({ collectionId, id }) => {
     isOnMarket: false,
     isStarted: false,
   });
-
+  const router = useRouter();
   const [time, setTime] = useState(Math.round(new Date().getTime() / 1000));
   const [highestBid, setHighestBid] = useState(0);
   const [isBidder, setIsBidder] = useState(false);
@@ -111,6 +113,7 @@ export const NFTDetail = ({ collectionId, id }) => {
       id == "[id]"
     )
       return false;
+
     const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
     let collection = await marketContract.collection(parseInt(collectionId));
     let ipfs_collection = await fetch(
@@ -400,6 +403,36 @@ export const NFTDetail = ({ collectionId, id }) => {
   };
   const handleEvent = () => {
     setReloadCount(reloadCount + 1);
+  };
+  const handleBurnNFT = async () => {
+    try {
+      const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
+      let collection = await marketContract.collection(collectionId);
+      const cw721Contract = CW721(collection.cw721_address).useTx(
+        signingClient
+      );
+      const data = await cw721Contract.burn(address, id);
+      router.push("/explore");
+      return data;
+    } catch (err) {
+      console.log("err: ", err);
+      return false;
+    }
+  };
+  const handleTransfer = async (_address) => {
+    try {
+      const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
+      let collection = await marketContract.collection(collectionId);
+      const cw721Contract = CW721(collection.cw721_address).useTx(
+        signingClient
+      );
+      const data = await cw721Contract.transfer(address, _address, id);
+      setReloadCount(reloadCount + 1);
+      return data;
+    } catch (err) {
+      console.log("err: ", err);
+      return false;
+    }
   };
   return (
     <ChakraProvider>
@@ -772,9 +805,27 @@ export const NFTDetail = ({ collectionId, id }) => {
                           id={id}
                           handleEvent={handleEvent}
                         />
-                        {/* TransferModal */}
+                        <TransferNFTModal
+                          nftInfo={{
+                            image: nft.image,
+                            name: nft.name,
+                            owner: nft.user,
+                            sale: {},
+                            type: nft.type,
+                          }}
+                          onHandle={handleTransfer}
+                        />
                       </Stack>
-                      {/* BurnNFTModal */}
+                      <BurnNFTModal
+                        nftInfo={{
+                          image: nft.image,
+                          name: nft.name,
+                          owner: nft.user,
+                          sale: {},
+                          type: nft.type,
+                        }}
+                        onHandle={handleBurnNFT}
+                      />
                     </PriceTag>
                   )}
                 </NftBuyOfferTag>

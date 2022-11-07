@@ -1,49 +1,20 @@
-import styled from "styled-components";
+import { Flex, HStack, Stack } from "@chakra-ui/react";
+import { RoundedIconComponent } from "components/RoundedIcon";
+import DateCountdown from "components/DateCountdownMin";
 import { useEffect, useState } from "react";
-import { Stack, Flex, HStack } from "@chakra-ui/react";
-import * as React from "react";
-import Link from "next/link";
-import { useRecoilValue } from "recoil";
-import { walletState } from "state/atoms/walletAtoms";
-import { toast } from "react-toastify";
-import { useDispatch, useSelector } from "react-redux";
-import { State } from "store/reducers";
 import {
-  NftInfo,
-  CW721,
   Collection,
-  Market,
-  useSdk,
+  CW721,
   getRealTokenAmount,
-  toMinDenom,
-  PaymentToken,
-  SALE_TYPE,
+  Market,
+  NftInfo,
+  useSdk,
 } from "services/nft";
-import { NftInfoResponse } from "services/nft";
-import { RoundedIcon, RoundedIconComponent } from "components/RoundedIcon";
-import { Dispatch, AnyAction } from "redux";
-import { BuyDialog } from "features/nft/market/detail/BuyDialog";
-import { OfferDialog } from "features/nft/market/detail/OfferDialog";
-import { NftPrice } from "./price";
-import { shortenAddress } from "util/shortenAddress";
-interface NftCardProps {
-  readonly nft: NftInfo;
-  readonly type: string;
-}
-export function NftAuctionTime(start: number, end: number) {
-  const [startTime, setStartTime] = useState(0);
-  const [endTime, setEndTime] = useState(0);
-  useEffect(() => {
-    setStartTime(start);
-    setEndTime(end);
-  }, [start, end]);
-  return (
-    <>
-      <p>{startTime}</p>
-      <p>{endTime}</p>
-    </>
-  );
-}
+import styled from "styled-components";
+// interface NftCardProps {
+//   readonly nft: NftInfo;
+//   readonly type: string;
+// }
 
 const saleType = {
   NotSale: "NOT ON SALE",
@@ -57,179 +28,66 @@ const backgroundColor = {
   Fixed: "#FFFFFF",
 };
 
-export function NftCard({ nft, type }: NftCardProps): JSX.Element {
-  const { client } = useSdk();
-  const { address, client: signingClient } = useRecoilValue(walletState);
-  const [time, setTime] = useState(Math.round(new Date().getTime()) / 1000);
-  const [isDisabled, setIsDisabled] = useState(false);
-  const dispatch = useDispatch();
-  const buyData = useSelector((state: State) => state.buyData);
-  const { buy_status } = buyData;
-  const offerData = useSelector((state: State) => state.offerData);
-  const { offer_status } = offerData;
-  const [reloadNft, setReloadNft] = useState(0);
-  const reloadData = useSelector((state: State) => state.reloadData);
-  const { reload_status } = reloadData;
-  const [tokenInfo, setTokenInfo] = useState<NftInfoResponse>();
+export function NftCard({ nft, type }: any): JSX.Element {
+  // useEffect(() => {
+  //   (async () => {
+  //     const response = await fetch(
+  //       process.env.NEXT_PUBLIC_COLLECTION_TOKEN_LIST_URL
+  //     );
+  //     const paymentTokenList = await response.json();
+  //     let paymentTokensAddress = [];
+  //     for (let i = 0; i < paymentTokenList.tokens.length; i++) {
+  //       paymentTokensAddress.push(paymentTokenList.tokens[i].address);
+  //     }
 
-  const [isBuyShowing, setIsBuyShowing] = useState(false);
-  const [buyId, setBuyId] = useState("");
-  const [isOfferShowing, setIsOfferShowing] = useState(false);
-  const [offerId, setOfferId] = useState("");
-  const showBuyDialog = async (e) => {
-    e.preventDefault();
-    // dispatch(
-    //   {
-    //     type: BUY_STATUS,
-    //     payload: nft.tokenId
-    //   }
-    // )
-    setBuyId(nft.tokenId);
-    setIsBuyShowing(true);
-    let reloadNftCnt = reloadNft + 1;
-    setReloadNft(reloadNftCnt);
-    return false;
-  };
-  const showOfferDialog = async (e) => {
-    e.preventDefault();
-    // dispatch(
-    //   {
-    //     type: OFFER_STATUS,
-    //     payload: nft.tokenId
-    //   }
-    // )
-    setOfferId(nft.tokenId);
-    setIsOfferShowing(true);
-    let reloadNftCnt = reloadNft + 1;
-    setReloadNft(reloadNftCnt);
-    return false;
-  };
-  const cancelSale = async (e) => {
-    e.preventDefault();
-    setIsDisabled(true);
-    const marketContract = Market(process.env.NEXT_PUBLIC_MARKETPLACE).use(
-      client
-    );
-    let collection = await marketContract.collection(Number(nft.collectionId));
-    const collectionContract = Collection(collection.collection_address).useTx(
-      signingClient
-    );
-    let cancel = await collectionContract.cancelSale(
-      address,
-      Number(nft.tokenId)
-    );
+  //     const marketContract = Market(process.env.NEXT_PUBLIC_MARKETPLACE).use(
+  //       client
+  //     );
+  //     let collection = await marketContract.collection(
+  //       Number(nft.collectionId)
+  //     );
+  //     const cwCollectionContract = Collection(
+  //       collection.collection_address
+  //     ).use(client);
+  //     const cw721Contract = CW721(collection.cw721_address).use(client);
+  //     let sales: any = await cwCollectionContract.getSales();
+  //     let saleIds = [];
+  //     for (let i = 0; i < sales.length; i++) {
+  //       saleIds.push(sales[i].token_id);
+  //     }
 
-    toast.success(`You have cancelled this NFT successfully.`, {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
-    setIsDisabled(false);
-    nft.paymentToken = {};
-    nft.price = "0";
-    let reloadNftCnt = reloadNft + 1;
-    setReloadNft(reloadNftCnt);
-    return false;
-  };
-  const acceptSale = async (e) => {
-    e.preventDefault();
-    setIsDisabled(true);
-    const marketContract = Market(process.env.NEXT_PUBLIC_MARKETPLACE).use(
-      client
-    );
-    let collection = await marketContract.collection(Number(nft.collectionId));
-    const collectionContract = Collection(collection.collection_address).useTx(
-      signingClient
-    );
-    let accept = await collectionContract.acceptSale(
-      address,
-      Number(nft.tokenId)
-    );
-
-    toast.success(`You have accepted this NFT Auction successfully.`, {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
-    setIsDisabled(false);
-    nft.paymentToken = {};
-    nft.price = "0";
-    let reloadNftCnt = reloadNft + 1;
-    setReloadNft(reloadNftCnt);
-    return false;
-  };
-
-  useEffect(() => {}, [reloadNft]);
-
-  useEffect(() => {
-    (async () => {
-      const response = await fetch(
-        process.env.NEXT_PUBLIC_COLLECTION_TOKEN_LIST_URL
-      );
-      const paymentTokenList = await response.json();
-      let paymentTokensAddress = [];
-      for (let i = 0; i < paymentTokenList.tokens.length; i++) {
-        paymentTokensAddress.push(paymentTokenList.tokens[i].address);
-      }
-
-      const marketContract = Market(process.env.NEXT_PUBLIC_MARKETPLACE).use(
-        client
-      );
-      let collection = await marketContract.collection(
-        Number(nft.collectionId)
-      );
-      const cwCollectionContract = Collection(
-        collection.collection_address
-      ).use(client);
-      const cw721Contract = CW721(collection.cw721_address).use(client);
-      let sales: any = await cwCollectionContract.getSales();
-      let saleIds = [];
-      for (let i = 0; i < sales.length; i++) {
-        saleIds.push(sales[i].token_id);
-      }
-
-      nft.paymentToken = {};
-      nft.price = "0";
-      nft.symbol = "Marble";
-      nft.sale = {};
-      nft.user = await cw721Contract.ownerOf(nft.tokenId);
-      setTokenInfo(await cw721Contract.nftInfo(nft.tokenId));
-      if (saleIds.indexOf(parseInt(nft.tokenId)) != -1) {
-        let sale = sales[saleIds.indexOf(parseInt(nft.tokenId))];
-        let paymentToken: any;
-        if (sale.denom.hasOwnProperty("cw20")) {
-          paymentToken =
-            paymentTokenList.tokens[
-              paymentTokensAddress.indexOf(sale.denom.cw20)
-            ];
-        } else {
-          paymentToken =
-            paymentTokenList.tokens[
-              paymentTokensAddress.indexOf(sale.denom.native)
-            ];
-        }
-        nft.symbol = paymentToken.symbol;
-        nft.paymentToken = paymentToken;
-        nft.price = getRealTokenAmount({
-          amount: sale.initial_price,
-          denom: paymentToken.denom,
-        }).toString();
-        nft.user = sale.provider;
-        nft.sale = sale;
-      }
-      let reloadNftCnt = reloadNft + 1;
-      setReloadNft(reloadNftCnt);
-    })();
-  }, [dispatch, reload_status]);
-
+  //     nft.paymentToken = {};
+  //     nft.price = "0";
+  //     nft.symbol = "Marble";
+  //     nft.sale = {};
+  //     nft.user = await cw721Contract.ownerOf(nft.tokenId);
+  //     // setTokenInfo(await cw721Contract.nftInfo(nft.tokenId));
+  //     if (saleIds.indexOf(parseInt(nft.tokenId)) != -1) {
+  //       let sale = sales[saleIds.indexOf(parseInt(nft.tokenId))];
+  //       let paymentToken: any;
+  //       if (sale.denom.hasOwnProperty("cw20")) {
+  //         paymentToken =
+  //           paymentTokenList.tokens[
+  //             paymentTokensAddress.indexOf(sale.denom.cw20)
+  //           ];
+  //       } else {
+  //         paymentToken =
+  //           paymentTokenList.tokens[
+  //             paymentTokensAddress.indexOf(sale.denom.native)
+  //           ];
+  //       }
+  //       nft.symbol = paymentToken.symbol;
+  //       nft.paymentToken = paymentToken;
+  //       nft.price = getRealTokenAmount({
+  //         amount: sale.initial_price,
+  //         denom: paymentToken.denom,
+  //       }).toString();
+  //       nft.user = sale.provider;
+  //       nft.sale = sale;
+  //       setShowNft(nft);
+  //     }
+  //   })();
+  // }, [nft, client]);
   return (
     <NftCardDiv
       className="nft-card"
@@ -242,31 +100,6 @@ export function NftCard({ nft, type }: NftCardProps): JSX.Element {
         Object.keys(nft.sale).length > 0 && nft.sale.sale_type === "Fixed"
       }
     >
-      {/* {/* {buyId != "" && 
-        <BuyDialog 
-          isShowing={isBuyShowing}
-          onRequestClose={() => {
-            setIsBuyShowing(false)
-            setBuyId("")
-            
-          }}
-          collectionId={nft.collectionId.toString()}
-          id={buyId}
-        />
-      }
-      {offerId != "" && 
-        <OfferDialog 
-          isShowing={isOfferShowing}
-          onRequestClose={() => {
-            setIsOfferShowing(false)
-            setOfferId("")
-            
-          }}
-          collectionId={nft.collectionId.toString()}
-          id={offerId}
-        />
-      } */}
-      {/* <Link href={`/nft/${nft.collectionId}/${nft.tokenId}`} passHref > */}
       <>
         {nft.type == "video" && (
           <video controls>
@@ -290,9 +123,7 @@ export function NftCard({ nft, type }: NftCardProps): JSX.Element {
           <Flex justifyContent="space-between">
             <NFTName>{nft.name}</NFTName>
             <HStack>
-              <RoundedIconComponent size="26px" address={nft.user} />
-              {/* <Logo src={"/default.png"} alt="logo" size="34px" />
-              <p>{shortenAddress(nft.user)}</p> */}
+              <RoundedIconComponent size="26px" address={nft.owner} />
             </HStack>
           </Flex>
 
@@ -347,15 +178,42 @@ export function NftCard({ nft, type }: NftCardProps): JSX.Element {
                         />
                       </>
                     ) : (
-                      "No requests"
+                      <>
+                        <Value>
+                          {getRealTokenAmount({
+                            amount: nft.sale.initial_price,
+                            denom: nft.paymentToken.denom,
+                          })}
+                        </Value>
+                        &nbsp;
+                        <img
+                          src={nft.paymentToken.logoUri}
+                          alt="token"
+                          width="20px"
+                          height="20px"
+                        />
+                      </>
                     )}
                   </Flex>
                 )}
             </Stack>
+            {nft.sale.sale_type === "Auction" && (
+              <Stack>
+                <Title>ENDS IN</Title>
+                <Timetrack>
+                  <DateCountdown
+                    dateTo={Number(nft.sale.duration_type.Time[1]) * 1000}
+                    dateFrom={Date.now()}
+                    interval={0}
+                    mostSignificantFigure="none"
+                    numberOfFigures={3}
+                  />
+                </Timetrack>
+              </Stack>
+            )}
           </Flex>
         </Stack>
       </>
-      {/* </Link> */}
     </NftCardDiv>
   );
 }

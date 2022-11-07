@@ -3,39 +3,80 @@ import { Text } from "@chakra-ui/react";
 import styled from "styled-components";
 import { AppLayout } from "components/Layout/AppLayout";
 import { NftCollectionCard } from "components/NFT/collection/nftCollenctionCard";
-import { AddCircle, Hexagon, MinusHexagon } from "icons";
+import { Button } from "components/Button";
 import { walletState } from "state/atoms/walletAtoms";
-
+import { getRandomInt } from "util/numbers";
+import { toast } from "react-toastify";
+import { fromBase64, toBase64 } from "@cosmjs/encoding";
 import {
   useSdk,
   Collection,
   Stake,
   getFileTypeFromURL,
   NftCollection,
+  CW721,
+  UserStakeInfoType,
 } from "services/nft";
 import { useRecoilValue } from "recoil";
 
 const PUBLIC_STAKE_ADDRESS = process.env.NEXT_PUBLIC_STAKE_ADDRESS || "";
+interface StakeConfigType {
+  daily_reward: string;
+  enabled: boolean;
+  cw20_address: string;
+  interval: number;
+  lock_time: number;
+  collection_address: string;
+  cw721_address: string;
+}
 
 export default function StakePage() {
-  const { address } = useRecoilValue(walletState);
   const { client } = useSdk();
   const [collection, setCollection] = useState<NftCollection>();
-
+  const { address, client: signingClient } = useRecoilValue(walletState);
+  const [stakeConfig, setStakeConfig] = useState<StakeConfigType>({
+    daily_reward: "0",
+    enabled: false,
+    cw20_address: "",
+    interval: 0,
+    lock_time: 0,
+    collection_address: "",
+    cw721_address: "",
+  });
+  const [rCount, setRCount] = useState(0);
+  const [userStakeInfo, setUserStakeInfo] = useState<UserStakeInfoType>({
+    address: "",
+    claimed_amount: "0",
+    unclaimed_amount: "0",
+    create_unstake_timestamp: 0,
+    token_ids: [],
+    last_timestamp: 0,
+    claimed_timestamp: 0,
+  });
+  const [ownedNfts, setOwnedNfts] = useState([]);
   useEffect(() => {
     (async () => {
       if (!client || !address) {
         return;
       }
-
       const stakeContract = Stake(PUBLIC_STAKE_ADDRESS).use(client);
-      const stakeConfig = await stakeContract.getConfig();
-      const collectionContract = Collection(stakeConfig.collection_address).use(
-        client
-      );
-      const collectionConfig = await collectionContract.getConfig();
-      let res_collection: any = {};
       try {
+        const userStakeInfo = await stakeContract.getStaking(address);
+        setUserStakeInfo(userStakeInfo);
+      } catch (err) {
+        console.log("userStakeInfoError: ", err);
+      }
+      try {
+        const stakeConfig = await stakeContract.getConfig();
+        const collectionContract = Collection(
+          stakeConfig.collection_address
+        ).use(client);
+        const collectionConfig = await collectionContract.getConfig();
+        setStakeConfig({
+          ...stakeConfig,
+          cw721_address: collectionConfig.cw721_address,
+        });
+        let res_collection: any = {};
         let ipfs_collection = await fetch(
           process.env.NEXT_PUBLIC_PINATA_URL + collectionConfig.uri
         );
@@ -58,15 +99,103 @@ export default function StakePage() {
           process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo
         );
         collection_info.type = collection_type.fileType;
+
         setCollection(collection_info);
       } catch (err) {
         console.log("err", err);
       }
-
-      console.log(collectionConfig);
     })();
-  }, [client]);
+  }, [client, address, rCount]);
 
+  useEffect(() => {
+    (async () => {
+      if (!client || !address) {
+        return;
+      }
+      try {
+        const cw721Contract = CW721(stakeConfig.cw721_address).use(client);
+        const tokenIdsInfo = await cw721Contract.tokens(address);
+        const tokenIds = tokenIdsInfo.tokens;
+        setOwnedNfts(tokenIds);
+      } catch (err) {
+        console.log("get ownedToekns Error: ", err);
+      }
+    })();
+  }, [stakeConfig, client, address]);
+  const handleStake = async () => {
+    try {
+      const selectedNum = getRandomInt(ownedNfts.length);
+      const cw721Contract = CW721(stakeConfig.cw721_address).useTx(
+        signingClient
+      );
+      let encodedMsg: string = toBase64(
+        new TextEncoder().encode(JSON.stringify({ stake: {} }))
+      );
+
+      const result = await cw721Contract.sendNft(
+        address,
+        PUBLIC_STAKE_ADDRESS,
+        ownedNfts[selectedNum],
+        encodedMsg
+      );
+      setRCount(rCount + 1);
+    } catch (err) {}
+  };
+  const handleUnstake = async () => {
+    try {
+      if (
+        userStakeInfo.create_unstake_timestamp > 0 &&
+        userStakeInfo.create_unstake_timestamp + stakeConfig.lock_time >
+          Date.now() / 1000
+      ) {
+        return;
+      }
+      const stakeContract = Stake(PUBLIC_STAKE_ADDRESS).useTx(signingClient);
+      if (userStakeInfo.create_unstake_timestamp === 0) {
+        const unCrateUnstakeResult = await stakeContract.createUnstake(address);
+      } else {
+        const fetchUnstakeResult = await stakeContract.fetchUnstake(address);
+      }
+      setRCount(rCount + 1);
+    } catch (err) {
+      console.log("unstakeError: ", err);
+    }
+  };
+
+  const handleClaim = async () => {
+    const stakeContract = Stake(PUBLIC_STAKE_ADDRESS).useTx(signingClient);
+    try {
+      const handleClaimResult = await stakeContract.claim(address);
+      setRCount(rCount + 1);
+    } catch (err) {
+      toast.error(`Insufficient funds.`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+  };
+  const getClaimableReward = () => {
+    if (stakeConfig.interval === 0) return 0;
+    if (userStakeInfo.create_unstake_timestamp !== 0)
+      return userStakeInfo.unclaimed_amount;
+    const claimable =
+      Number(userStakeInfo.unclaimed_amount) +
+      Math.floor(
+        Math.abs(
+          (Date.now() / 1000 - userStakeInfo.last_timestamp) /
+            stakeConfig.interval
+        )
+      ) *
+        Number(stakeConfig.daily_reward) *
+        userStakeInfo.token_ids.length;
+
+    return claimable;
+  };
   return (
     <AppLayout fullWidth={false}>
       <StyledTitle>NFT Staking</StyledTitle>
@@ -80,37 +209,81 @@ export default function StakePage() {
             <StyledRow>
               <StyledDiv>
                 <StyledSubHeading>Daily Rewards</StyledSubHeading>
-                <StyledText>100 Block/Day</StyledText>
+                <StyledText>
+                  {Number(stakeConfig.daily_reward) *
+                    userStakeInfo.token_ids.length}{" "}
+                  Block/Day
+                </StyledText>
               </StyledDiv>
               <StyledDiv>
                 <StyledSubHeading>Claimable Reward</StyledSubHeading>
-                <StyledText>10,000 Block</StyledText>
+                <StyledText>{getClaimableReward()} Block</StyledText>
               </StyledDiv>
             </StyledRow>
             <StyledRow>
               <StyledDiv>
-                <StyledSubHeading>Day Staked</StyledSubHeading>
-                <StyledText>10</StyledText>
+                <StyledSubHeading>Total Staked</StyledSubHeading>
+                <StyledText>
+                  {ownedNfts.length + userStakeInfo.token_ids.length}/
+                  {userStakeInfo.token_ids.length}
+                </StyledText>
               </StyledDiv>
               <StyledDiv>
                 <StyledSubHeading>Days Left</StyledSubHeading>
                 <StyledText>9</StyledText>
               </StyledDiv>
             </StyledRow>
-            <StyledRow>
-              <StyledButton>
-                <AddCircle />
-                &nbsp;Stake
-              </StyledButton>
-              <StyledButton>
-                <MinusHexagon />
-                &nbsp;UnStake
-              </StyledButton>
-              <StyledButton>
-                <Hexagon />
-                &nbsp;Claim Rewards
-              </StyledButton>
-            </StyledRow>
+            <ButtonWrapper>
+              {userStakeInfo.create_unstake_timestamp === 0 && (
+                <Button
+                  className="btn-buy btn-default"
+                  css={{
+                    background: "$white",
+                    color: "$black",
+                    stroke: "$black",
+                    padding: "15px auto",
+                  }}
+                  disabled={ownedNfts.length === 0}
+                  onClick={handleStake}
+                >
+                  Stake
+                </Button>
+              )}
+              <Button
+                className="btn-buy btn-default"
+                css={{
+                  background: "$white",
+                  color: "$black",
+                  stroke: "$black",
+                  padding: "15px auto",
+                }}
+                disabled={
+                  userStakeInfo.create_unstake_timestamp +
+                    stakeConfig.lock_time >
+                    Date.now() / 1000 || userStakeInfo.token_ids.length === 0
+                }
+                onClick={handleUnstake}
+              >
+                {userStakeInfo.create_unstake_timestamp === 0
+                  ? "Unstake"
+                  : "Fetch Nft"}
+              </Button>
+              {userStakeInfo.create_unstake_timestamp === 0 && (
+                <Button
+                  className="btn-buy btn-default"
+                  css={{
+                    background: "$white",
+                    color: "$black",
+                    stroke: "$black",
+                    padding: "15px auto",
+                  }}
+                  disabled={getClaimableReward() === 0}
+                  onClick={handleClaim}
+                >
+                  Claim Rewards
+                </Button>
+              )}
+            </ButtonWrapper>
           </StyledDivForInfo>
         </StyledCard>
       )}
@@ -180,14 +353,8 @@ const StyledDivForNftCollection = styled("div")`
   width: 400px;
 `;
 
-const StyledButton = styled("button")`
-  display: flex;
-  background: #ffffff;
-  box-shadow: 0px 4px 40px rgba(42, 47, 50, 0.09),
-    inset 0px 7px 8px rgba(0, 0, 0, 0.2);
-  border-radius: 16px;
-  padding: 25px;
-  justify-content: center;
-  color: black;
-  width: 230px;
+export const ButtonWrapper = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  column-gap: 50px;
 `;

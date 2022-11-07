@@ -151,8 +151,10 @@ export const CollectionPage = ({ id }: CollectionProps) => {
       collection_info.name = res_collection.name;
       collection_info.description = res_collection.description;
       collection_info.image =
+        res_collection.logo &&
         process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
       collection_info.banner_image =
+        res_collection.featuredImage &&
         process.env.NEXT_PUBLIC_PINATA_URL + res_collection.featuredImage;
       collection_info.slug = res_collection.slug;
       collection_info.creator = collection.owner ?? "";
@@ -256,85 +258,6 @@ export const CollectionPage = ({ id }: CollectionProps) => {
       setReloadCount(reloadCount + 1);
     })();
   }, [id, client]);
-  //   (async () => {
-  //     if (id === undefined || id == "[name]") return false;
-  //     if (!client) {
-  //       return;
-  //     }
-  //     let currentTraits = [];
-  //     //getMoreNfts()
-  //     console.log("loadedNfts: ", loadedNfts);
-  //     setNfts([]);
-
-  //     currentTraits = loadedNfts;
-
-  //     setTraits(currentTraits);
-
-  //     let nftsForCollection = [];
-  //     let hasMoreFlag = false;
-  //     let i = 0;
-  //     let nftIndex = 0;
-  //     let isPageEnd = false;
-  //     if (currentTraits.length == 0) isPageEnd = true;
-  //     while (!isPageEnd) {
-  //       if (searchVal == "" || currentTraits[i].name.indexOf(searchVal) != -1) {
-  //         let uri = currentTraits[i].uri;
-  //         if (uri.indexOf("https://") == -1) {
-  //           uri = process.env.NEXT_PUBLIC_PINATA_URL + currentTraits[i].uri;
-  //         }
-  //         if (currentTraits[i].price > 0) {
-  //           nftsForCollection.push({
-  //             tokenId: currentTraits[i].tokenId,
-  //             address: "",
-  //             image: uri,
-  //             name: currentTraits[i].name,
-  //             user: currentTraits[i].owner,
-  //             price: currentTraits[i].price,
-  //             total: 2,
-  //             collectionName: "",
-  //             sale: currentTraits[i].sale,
-  //             symbol: currentTraits[i].symbol,
-  //             paymentToken: currentTraits[i].paymentToken,
-  //             type: currentTraits[i].type,
-  //             created: currentTraits[i].created,
-  //             collectionId: id,
-  //           });
-  //         } else {
-  //           nftsForCollection.push({
-  //             tokenId: currentTraits[i].tokenId,
-  //             address: "",
-  //             image: uri,
-  //             name: currentTraits[i].name,
-  //             user: currentTraits[i].owner,
-  //             price: currentTraits[i].price,
-  //             total: 2,
-  //             collectionName: "",
-  //             sale: currentTraits[i].sale,
-  //             symbol: "Marble",
-  //             paymentToken: {},
-  //             type: currentTraits[i].type,
-  //             created: currentTraits[i].created,
-  //             collectionId: id,
-  //           });
-  //         }
-
-  //         hasMoreFlag = true;
-  //         nftIndex++;
-  //         if (nftIndex == pageCount) {
-  //           isPageEnd = true;
-  //         }
-  //       }
-  //       i++;
-  //       if (i == currentTraits.length) {
-  //         isPageEnd = true;
-  //         hasMoreFlag = false;
-  //       }
-  //     }
-  //     nftCurrentIndex = i;
-  //     setNfts(nftsForCollection);
-  //     // setHasMore(hasMoreFlag);
-  //   })();
-  // }, [reloadCount, loadedNfts]);
   const getMoreNfts = async () => {
     if (id === undefined || id == "[name]" || !hasMore) return false;
     let start_after = loadedNfts.length.toString();
@@ -435,28 +358,20 @@ export const CollectionPage = ({ id }: CollectionProps) => {
     })();
   }, [id]);
 
-  // useEffect(() => {
-  //   setBuyId(buy_status);
-  //   setIsBuyShowing(true);
-  // }, [dispatch, buy_status]);
-  // useEffect(() => {
-  //   setOfferId(offer_status);
-  //   setIsOfferShowing(true);
-  // }, [dispatch, offer_status]);
   return (
     <CollectionWrapper>
       <Banner>
-        {collectionInfo.type === "image" && (
+        {collectionInfo.type === "image" && collectionInfo.banner_image && (
           <BannerImage src={collectionInfo.banner_image} alt="banner" />
         )}
-        {collectionInfo.type === "video" && (
+        {collectionInfo.type === "video" && collectionInfo.banner_image && (
           <BannerImageForVideoAndAudio>
             <video controls>
               <source src={collectionInfo.banner_image} />
             </video>
           </BannerImageForVideoAndAudio>
         )}
-        {collectionInfo.type === "audio" && (
+        {collectionInfo.type === "audio" && collectionInfo.banner_image && (
           <BannerImageForVideoAndAudio>
             <audio controls>
               <source src={collectionInfo.banner_image} />
@@ -464,17 +379,17 @@ export const CollectionPage = ({ id }: CollectionProps) => {
           </BannerImageForVideoAndAudio>
         )}
         <Stack spacing={5}>
-          {collectionInfo.type === "image" && (
+          {collectionInfo.type === "image" && collectionInfo.image && (
             <Logo src={collectionInfo.image} alt="logo" />
           )}
-          {collectionInfo.type === "video" && (
+          {collectionInfo.type === "video" && collectionInfo.image && (
             <LogoForVideoAndAudio>
               <video>
                 <source src={collectionInfo.image} />
               </video>
             </LogoForVideoAndAudio>
           )}
-          {collectionInfo.type === "audio" && (
+          {collectionInfo.type === "audio" && collectionInfo.image && (
             <LogoForVideoAndAudio>
               <audio>
                 <source src={collectionInfo.image} />
@@ -482,9 +397,6 @@ export const CollectionPage = ({ id }: CollectionProps) => {
             </LogoForVideoAndAudio>
           )}
           <LogoTitle>{collectionInfo.name}</LogoTitle>
-          {address === collectionInfo.owner && (
-            <Stack width="250px">{/* edit collection modal */}</Stack>
-          )}
           <ProfileLogo>
             <RoundedIconComponent
               size="44px"
@@ -676,6 +588,9 @@ const LogoForVideoAndAudio = styled.div`
     width: 100px;
     height: 100px;
     border: 3px solid #ffffff21;
+  }
+  video {
+    border-radius: 50%;
   }
 `;
 

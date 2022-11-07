@@ -8,18 +8,31 @@ export interface StakeContractConfig {
   cw20_address: string;
   daily_reward: string;
   enabled: boolean;
-  interval:number;
-  owner: string
+  interval: number;
+  owner: string;
+  lock_time: number;
 }
 
+export interface UserStakeInfoType {
+  address: string;
+  claimed_amount: string;
+  claimed_timestamp: number;
+  create_unstake_timestamp: number;
+  last_timestamp: number;
+  token_ids: string[];
+  unclaimed_amount: string;
+}
 export interface StakeInstance {
   readonly contractAddress: string;
   getConfig: () => Promise<StakeContractConfig>;
-  getStaking: (address: string) => Promise<StakeContractConfig>
+  getStaking: (address: string) => Promise<UserStakeInfoType>;
 }
 
 export interface StakeTxInstance {
   readonly contractAddress: string;
+  claim: (owner: string) => Promise<any>;
+  createUnstake: (owner: string) => Promise<any>;
+  fetchUnstake: (owner: string) => Promise<any>;
 }
 
 export interface StakeContract {
@@ -31,9 +44,9 @@ export const Stake = (contractAddress: string): StakeContract => {
   const defaultExecuteFee = unsafelyGetDefaultExecuteFee();
 
   const use = (client: CosmWasmClient): StakeInstance => {
-    const getStaking = async (address): Promise<StakeContractConfig> => {
+    const getStaking = async (address): Promise<UserStakeInfoType> => {
       const result = await client.queryContractSmart(contractAddress, {
-        query_get_staking: {address},
+        get_staking: { address },
       });
       return result;
     };
@@ -42,9 +55,10 @@ export const Stake = (contractAddress: string): StakeContract => {
       const result = await client.queryContractSmart(contractAddress, {
         get_config: {},
       });
+      console.log("resut: ", result);
       return result;
     };
-    
+
     return {
       contractAddress,
       getConfig,
@@ -53,9 +67,44 @@ export const Stake = (contractAddress: string): StakeContract => {
   };
 
   const useTx = (client: SigningCosmWasmClient): StakeTxInstance => {
-
+    const claim = async (owner: string): Promise<any> => {
+      const result = await client.execute(
+        owner,
+        contractAddress,
+        {
+          claim: {},
+        },
+        defaultExecuteFee
+      );
+      return result;
+    };
+    const createUnstake = async (owner: string): Promise<any> => {
+      const result = await client.execute(
+        owner,
+        contractAddress,
+        {
+          create_unstake: {},
+        },
+        defaultExecuteFee
+      );
+      return result;
+    };
+    const fetchUnstake = async (owner: string): Promise<any> => {
+      const result = await client.execute(
+        owner,
+        contractAddress,
+        {
+          fetch_unstake: {},
+        },
+        defaultExecuteFee
+      );
+      return result;
+    };
     return {
       contractAddress,
+      claim,
+      createUnstake,
+      fetchUnstake,
     };
   };
 
