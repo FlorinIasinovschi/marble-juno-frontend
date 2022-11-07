@@ -9,13 +9,13 @@ import { getRandomInt } from "util/numbers";
 import { toast } from "react-toastify";
 import { fromBase64, toBase64 } from "@cosmjs/encoding";
 import {
-  useSdk,
   Collection,
   Stake,
-  getFileTypeFromURL,
   NftCollection,
   CW721,
   UserStakeInfoType,
+  useSdk,
+  getFileTypeFromURL,
 } from "services/nft";
 import { useRecoilValue } from "recoil";
 
@@ -101,8 +101,8 @@ export default function StakePage() {
         collection_info.type = collection_type.fileType;
 
         setCollection(collection_info);
-      } catch (err) {
-        console.log("err", err);
+      } catch (e) {
+        console.error(e);
       }
     })();
   }, [client, address, rCount]);
