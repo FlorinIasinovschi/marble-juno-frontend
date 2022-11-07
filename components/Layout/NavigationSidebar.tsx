@@ -92,7 +92,11 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
             <StyledListForLinks className="top-menu-links">
               <Link href="/" passHref>
                 <StyledDivForLogo as="a">
-                  <img className="logo-img" src="/images/logotext.svg" />
+                  <img
+                    className="logo-img"
+                    src="/images/logotext.svg"
+                    alt="logo"
+                  />
                 </StyledDivForLogo>
               </Link>
 
@@ -125,12 +129,11 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
               </StyledLink>
 
               <StyledLink>
-                <a
-                  className="dropdown-item"
-                  href="/stake"
-                >
-                  <span className={isActive("/stake")}>Stake</span>
-                </a>
+                <Link href="/stake" passHref>
+                  <a className="dropdown-item">
+                    <span className={isActive("/stake")}>Stake</span>
+                  </a>
+                </Link>
               </StyledLink>
             </StyledListForLinks>
 
