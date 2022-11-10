@@ -62,9 +62,18 @@ export default function StakePage() {
       const stakeContract = Stake(PUBLIC_STAKE_ADDRESS).use(client);
       try {
         const userStakeInfo = await stakeContract.getStaking(address);
+        console.log("userStakeInfo: ", userStakeInfo);
         setUserStakeInfo(userStakeInfo);
       } catch (err) {
-        console.log("userStakeInfoError: ", err);
+        setUserStakeInfo({
+          address: "",
+          claimed_amount: "0",
+          unclaimed_amount: "0",
+          create_unstake_timestamp: 0,
+          token_ids: [],
+          last_timestamp: 0,
+          claimed_timestamp: 0,
+        });
       }
       try {
         const stakeConfig = await stakeContract.getConfig();
@@ -224,8 +233,8 @@ export default function StakePage() {
               <StyledDiv>
                 <StyledSubHeading>Total Staked</StyledSubHeading>
                 <StyledText>
-                  {ownedNfts.length + userStakeInfo.token_ids.length}/
-                  {userStakeInfo.token_ids.length}
+                  {userStakeInfo.token_ids.length}/
+                  {ownedNfts.length + userStakeInfo.token_ids.length}
                 </StyledText>
               </StyledDiv>
               <StyledDiv>
@@ -268,21 +277,19 @@ export default function StakePage() {
                   ? "Unstake"
                   : "Fetch Nft"}
               </Button>
-              {userStakeInfo.create_unstake_timestamp === 0 && (
-                <Button
-                  className="btn-buy btn-default"
-                  css={{
-                    background: "$white",
-                    color: "$black",
-                    stroke: "$black",
-                    padding: "15px auto",
-                  }}
-                  disabled={getClaimableReward() === 0}
-                  onClick={handleClaim}
-                >
-                  Claim Rewards
-                </Button>
-              )}
+              <Button
+                className="btn-buy btn-default"
+                css={{
+                  background: "$white",
+                  color: "$black",
+                  stroke: "$black",
+                  padding: "15px auto",
+                }}
+                disabled={getClaimableReward() === 0}
+                onClick={handleClaim}
+              >
+                Claim Rewards
+              </Button>
             </ButtonWrapper>
           </StyledDivForInfo>
         </StyledCard>
