@@ -461,7 +461,8 @@ const OnSaleModal = ({ collectionId, id, handleEvent }) => {
         }}
         variant="primary"
         size="large"
-        onClick={onOpen}
+        disabled={true}
+        // onClick={onOpen}
       >
         Sell Your NFT
       </Button>
