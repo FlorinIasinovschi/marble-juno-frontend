@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import styled from "styled-components";
 
 export const StyledWrapper = styled.div`
   color: #ffffff;
@@ -10,13 +10,13 @@ export const StyledWrapper = styled.div`
   @media (max-width: 1550px) {
     height: 80px;
   }
-`
+`;
 export const StyledListForLinks = styled.div`
   display: flex;
   row-gap: 10px;
   flex-direction: row;
   align-items: center;
-`
+`;
 export const StyledLink = styled.div`
   font-size: 16px;
   margin: 0 40px;
@@ -25,18 +25,21 @@ export const StyledLink = styled.div`
   @media (max-width: 1550px) {
     margin: 0 10px;
   }
-`
+`;
 
 export const StyledDivForLogo = styled.div`
   align-items: center;
   margin-right: 40px;
+  img {
+    width: 200px;
+  }
   @media (max-width: 1550px) {
     margin: 0 00px;
     img {
-      width: 200px;
+      width: 150px;
     }
   }
-`
+`;
 
 export const CreateButton = styled.div`
   background: #ffffff;
@@ -66,4 +69,4 @@ export const CreateButton = styled.div`
     border-radius: 14px;
     margin-left: 0px;
   }
-`
+`;
