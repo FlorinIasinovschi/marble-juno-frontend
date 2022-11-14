@@ -8,6 +8,7 @@ import { walletState } from "state/atoms/walletAtoms";
 import { getRandomInt } from "util/numbers";
 import { toast } from "react-toastify";
 import { fromBase64, toBase64 } from "@cosmjs/encoding";
+import { convertToFixedDecimalNumber } from "util/conversion";
 import {
   Collection,
   Stake,
@@ -28,6 +29,7 @@ interface StakeConfigType {
   lock_time: number;
   collection_address: string;
   cw721_address: string;
+  total_supply: number;
 }
 
 export default function StakePage() {
@@ -42,6 +44,7 @@ export default function StakePage() {
     lock_time: 0,
     collection_address: "",
     cw721_address: "",
+    total_supply: 0,
   });
   const [rCount, setRCount] = useState(0);
   const [userStakeInfo, setUserStakeInfo] = useState<UserStakeInfoType>({
@@ -192,18 +195,31 @@ export default function StakePage() {
     if (stakeConfig.interval === 0) return 0;
     if (userStakeInfo.create_unstake_timestamp !== 0)
       return userStakeInfo.unclaimed_amount;
+    if (stakeConfig.total_supply === 0) return 0;
     const claimable =
       Number(userStakeInfo.unclaimed_amount) +
-      Math.floor(
+      (Math.floor(
         Math.abs(
           (Date.now() / 1000 - userStakeInfo.last_timestamp) /
             stakeConfig.interval
         )
       ) *
         Number(stakeConfig.daily_reward) *
-        userStakeInfo.token_ids.length;
+        userStakeInfo.token_ids.length) /
+        stakeConfig.total_supply;
 
-    return claimable;
+    return convertToFixedDecimalNumber(claimable);
+  };
+  const getDailyRewards = () => {
+    if (
+      stakeConfig.total_supply === 0 ||
+      userStakeInfo.create_unstake_timestamp !== 0
+    )
+      return 0;
+    const dailyReward =
+      (Number(stakeConfig.daily_reward) * userStakeInfo.token_ids.length) /
+      stakeConfig.total_supply;
+    return convertToFixedDecimalNumber(dailyReward);
   };
   return (
     <AppLayout fullWidth={false}>
@@ -219,8 +235,7 @@ export default function StakePage() {
               <StyledDiv>
                 <StyledSubHeading>Daily Rewards</StyledSubHeading>
                 <StyledText>
-                  {Number(stakeConfig.daily_reward) *
-                    userStakeInfo.token_ids.length}{" "}
+                  {getDailyRewards()}
                   Block/Day
                 </StyledText>
               </StyledDiv>

@@ -11,6 +11,7 @@ export interface StakeContractConfig {
   interval: number;
   owner: string;
   lock_time: number;
+  total_supply: number;
 }
 
 export interface UserStakeInfoType {
@@ -55,7 +56,6 @@ export const Stake = (contractAddress: string): StakeContract => {
       const result = await client.queryContractSmart(contractAddress, {
         get_config: {},
       });
-      console.log("resut: ", result);
       return result;
     };
 

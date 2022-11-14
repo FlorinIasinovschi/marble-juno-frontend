@@ -19,6 +19,10 @@ export function convertDenomToMicroDenom(
     parseInt(String(Number(value) * Math.pow(10, decimals)), 10)
   );
 }
+export function convertToFixedDecimalNumber(value: number | string): number {
+  const amount = Number(value);
+  return Number(amount.toFixed(2));
+}
 
 export function convertFromMicroDenom(denom: string) {
   return denom?.substring(1).toUpperCase();
