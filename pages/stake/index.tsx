@@ -32,6 +32,8 @@ interface StakeConfigType {
   total_supply: number;
 }
 
+const end_date = 1670414400;
+
 export default function StakePage() {
   const { client } = useSdk();
   const [collection, setCollection] = useState<NftCollection>();
@@ -206,8 +208,16 @@ export default function StakePage() {
       ) *
         Number(stakeConfig.daily_reward) *
         userStakeInfo.token_ids.length) /
-        stakeConfig.total_supply;
-
+        stakeConfig.total_supply -
+      Math.floor(
+        Math.abs(
+          (Date.now() / 1000 - userStakeInfo.last_timestamp) /
+            stakeConfig.interval
+        )
+      ) *
+        Number(stakeConfig.daily_reward) *
+        userStakeInfo.token_ids.length;
+    console.log("info: ", userStakeInfo, stakeConfig);
     return convertToFixedDecimalNumber(claimable);
   };
   const getDailyRewards = () => {
@@ -220,6 +230,12 @@ export default function StakePage() {
       (Number(stakeConfig.daily_reward) * userStakeInfo.token_ids.length) /
       stakeConfig.total_supply;
     return convertToFixedDecimalNumber(dailyReward);
+  };
+  const getLeftDays = () => {
+    if (Date.now() / 1000 > end_date) {
+      return "Staking Finished";
+    }
+    return ((end_date - Date.now() / 1000) / 86400).toFixed(0);
   };
   return (
     <AppLayout fullWidth={false}>
@@ -254,7 +270,7 @@ export default function StakePage() {
               </StyledDiv>
               <StyledDiv>
                 <StyledSubHeading>Days Left</StyledSubHeading>
-                <StyledText>9</StyledText>
+                <StyledText>{getLeftDays()}</StyledText>
               </StyledDiv>
             </StyledRow>
             <ButtonWrapper>

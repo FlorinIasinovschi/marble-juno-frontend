@@ -128,13 +128,15 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
                 </a>
               </StyledLink>
 
-              <StyledLink>
-                <Link href="/stake" passHref>
-                  <a className="dropdown-item">
-                    <span className={isActive("/stake")}>Stake</span>
-                  </a>
-                </Link>
-              </StyledLink>
+              {Boolean(key?.name) && (
+                <StyledLink>
+                  <Link href="/stake" passHref>
+                    <a className="dropdown-item">
+                      <span className={isActive("/stake")}>Stake</span>
+                    </a>
+                  </Link>
+                </StyledLink>
+              )}
             </StyledListForLinks>
 
             <ButtonField>
