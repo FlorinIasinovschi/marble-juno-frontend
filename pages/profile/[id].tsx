@@ -118,12 +118,12 @@ export default function Home() {
                 <h1>{profile.name || getReducedAddress(id)}</h1>
                 <HStack justifyContent="space-around">
                   <Stack>
-                    <h1>{profile.following && profile.following.length}</h1>
+                    <h1>{profile.followers && profile.followers.length}</h1>
                     <p>Following</p>
                   </Stack>
                   <VerticalDivider />
                   <Stack>
-                    <h1>{profile.followers && profile.followers.length}</h1>
+                    <h1>{profile.following && profile.following.length}</h1>
                     <p>Followers</p>
                   </Stack>
                 </HStack>
