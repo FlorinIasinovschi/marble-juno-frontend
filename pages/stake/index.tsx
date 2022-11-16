@@ -8,7 +8,10 @@ import { walletState } from "state/atoms/walletAtoms";
 import { getRandomInt } from "util/numbers";
 import { toast } from "react-toastify";
 import { fromBase64, toBase64 } from "@cosmjs/encoding";
-import { convertToFixedDecimalNumber } from "util/conversion";
+import {
+  convertToFixedDecimalNumber,
+  convertMicroDenomToDenom,
+} from "util/conversion";
 import {
   Collection,
   Stake,
@@ -30,9 +33,8 @@ interface StakeConfigType {
   collection_address: string;
   cw721_address: string;
   total_supply: number;
+  end_date: number;
 }
-
-const end_date = 1670414400;
 
 export default function StakePage() {
   const { client } = useSdk();
@@ -47,6 +49,7 @@ export default function StakePage() {
     collection_address: "",
     cw721_address: "",
     total_supply: 0,
+    end_date: 0,
   });
   const [rCount, setRCount] = useState(0);
   const [userStakeInfo, setUserStakeInfo] = useState<UserStakeInfoType>({
@@ -81,13 +84,13 @@ export default function StakePage() {
         });
       }
       try {
-        const stakeConfig = await stakeContract.getConfig();
+        const _stakeConfig = await stakeContract.getConfig();
         const collectionContract = Collection(
-          stakeConfig.collection_address
+          _stakeConfig.collection_address
         ).use(client);
         const collectionConfig = await collectionContract.getConfig();
         setStakeConfig({
-          ...stakeConfig,
+          ..._stakeConfig,
           cw721_address: collectionConfig.cw721_address,
         });
         let res_collection: any = {};
@@ -120,7 +123,7 @@ export default function StakePage() {
       }
     })();
   }, [client, address, rCount]);
-
+  console.log("stakeConfig: ", stakeConfig);
   useEffect(() => {
     (async () => {
       if (!client || !address) {
@@ -182,6 +185,7 @@ export default function StakePage() {
       const handleClaimResult = await stakeContract.claim(address);
       setRCount(rCount + 1);
     } catch (err) {
+      console.log("error: ", err);
       toast.error(`Insufficient funds.`, {
         position: "top-right",
         autoClose: 5000,
@@ -198,28 +202,12 @@ export default function StakePage() {
     if (userStakeInfo.create_unstake_timestamp !== 0)
       return userStakeInfo.unclaimed_amount;
     if (stakeConfig.total_supply === 0) return 0;
-    const claimable =
-      Number(userStakeInfo.unclaimed_amount) +
-      (Math.floor(
-        Math.abs(
-          (Date.now() / 1000 - userStakeInfo.last_timestamp) /
-            stakeConfig.interval
-        )
-      ) *
-        Number(stakeConfig.daily_reward) *
-        userStakeInfo.token_ids.length) /
-        stakeConfig.total_supply -
-      Math.floor(
-        Math.abs(
-          (Date.now() / 1000 - userStakeInfo.last_timestamp) /
-            stakeConfig.interval
-        )
-      ) *
-        Number(stakeConfig.daily_reward) *
-        userStakeInfo.token_ids.length;
-    console.log("info: ", userStakeInfo, stakeConfig);
-    return convertToFixedDecimalNumber(claimable);
+
+    return convertToFixedDecimalNumber(
+      convertMicroDenomToDenom(userStakeInfo.unclaimed_amount, 6)
+    );
   };
+  console.log("userStakedInfo: ", userStakeInfo);
   const getDailyRewards = () => {
     if (
       stakeConfig.total_supply === 0 ||
@@ -229,13 +217,15 @@ export default function StakePage() {
     const dailyReward =
       (Number(stakeConfig.daily_reward) * userStakeInfo.token_ids.length) /
       stakeConfig.total_supply;
-    return convertToFixedDecimalNumber(dailyReward);
+    return convertToFixedDecimalNumber(
+      convertMicroDenomToDenom(dailyReward, 6)
+    );
   };
   const getLeftDays = () => {
-    if (Date.now() / 1000 > end_date) {
+    if (Date.now() / 1000 > stakeConfig.end_date) {
       return "Staking Finished";
     }
-    return ((end_date - Date.now() / 1000) / 86400).toFixed(0);
+    return ((stakeConfig.end_date - Date.now() / 1000) / 86400).toFixed(0);
   };
   return (
     <AppLayout fullWidth={false}>

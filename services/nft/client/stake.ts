@@ -12,6 +12,7 @@ export interface StakeContractConfig {
   owner: string;
   lock_time: number;
   total_supply: number;
+  end_date: number;
 }
 
 export interface UserStakeInfoType {
