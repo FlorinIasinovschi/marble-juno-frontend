@@ -18,6 +18,8 @@ import { config } from "services/config";
 import React from "react";
 import { wrapper, store } from "../store/store";
 import { Provider } from "react-redux";
+// add bootstrap css 
+import 'bootstrap/dist/css/bootstrap.css'
 
 function SafeHydrate({ children }) {
   return (
