@@ -132,7 +132,7 @@ const Explore = () => {
       else{
         collection_info.type ='image';
       }
-    
+     
       collection_info.image =process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo + ImageSizePrimary;
       collection_info.banner_image =process.env.NEXT_PUBLIC_PINATA_URL + res_collection.featuredImage + ImageSizeSecondary;
 

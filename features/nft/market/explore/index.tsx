@@ -24,7 +24,7 @@ export const Explore = () => {
     (async () => {
       if (!client) {
         return;
-      }
+      } 
 
       const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
       let collectionList = await marketContract.listCollections();
