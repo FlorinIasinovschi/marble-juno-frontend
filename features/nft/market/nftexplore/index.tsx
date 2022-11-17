@@ -72,8 +72,6 @@ const Explore = () => {
   const [activeOfferNFTs, setActiveOfferNFTs] = useState(0);
   const [collectionInfo, setCollectionInfo] = useState<any>({});
   const [filter, setFilter] = useState("All");
-  const ImageSizePrimary= process.env.NEXT_PUBLIC_PINATA_PRIMARY_IMAGE_SIZE;
-  const ImageSizeSecondary=process.env.NEXT_PUBLIC_PINATA_SECONDARY_IMAGE_SIZE;
 
   const closeFilterStatusButton = (fstatus) => {
     filter_status.splice(filter_status.indexOf(fstatus), 1);
@@ -103,10 +101,11 @@ const Explore = () => {
       if (!client) {
         return;
       }
+
       const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
       let collection = await marketContract.collection(parseInt(id));
       let ipfs_collection = await fetch(
-        process.env.NEXT_PUBLIC_PINATA_URL + collection.uri 
+        process.env.NEXT_PUBLIC_PINATA_URL + collection.uri
       );
       let res_collection = await ipfs_collection.json();
       // set collection info
@@ -116,25 +115,18 @@ const Explore = () => {
       collection_info.cw721_address = collection.cw721_address;
       collection_info.name = res_collection.name;
       collection_info.description = res_collection.description;
-     
+      collection_info.image =
+        process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
+      collection_info.banner_image =
+        process.env.NEXT_PUBLIC_PINATA_URL + res_collection.featuredImage;
       collection_info.slug = res_collection.slug;
       collection_info.creator = collection.owner ?? "";
       collection_info.cat_ids = res_collection.category;
       collection_info.royalties = res_collection.royalties;
-
-
-      if(res_collection.logo){
-        let collection_type = await getFileTypeFromURL(
-          process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo
-        );
-        collection_info.type = collection_type.fileType;
-      }
-      else{
-        collection_info.type ='image';
-      }
-    
-      collection_info.image =process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo + ImageSizePrimary;
-      collection_info.banner_image =process.env.NEXT_PUBLIC_PINATA_URL + res_collection.featuredImage + ImageSizeSecondary;
+      let collection_type = await getFileTypeFromURL(
+        process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo
+      );
+      collection_info.type = collection_type.fileType;
 
       setCollectionInfo(collection_info);
       const response = await fetch(
@@ -191,9 +183,9 @@ const Explore = () => {
           res_nft["owner"] = nftInfo.access.owner;
           if (res_nft["uri"].indexOf("https://") == -1) {
             res_nft["image"] =
-              process.env.NEXT_PUBLIC_PINATA_URL + res_nft["uri"] + ImageSizePrimary;
+              process.env.NEXT_PUBLIC_PINATA_URL + res_nft["uri"];
           } else {
-            res_nft["image"] = res_nft["uri"] + ImageSizePrimary;
+            res_nft["image"] = res_nft["uri"];
           }
           let nft_type = await getFileTypeFromURL(res_nft["image"]);
           res_nft["type"] = nft_type.fileType;
@@ -280,7 +272,6 @@ const Explore = () => {
           if (uri.indexOf("https://") == -1) {
             uri = process.env.NEXT_PUBLIC_PINATA_URL + currentTraits[i].uri;
           }
-          uri+=ImageSizePrimary;
           if (currentTraits[i].price > 0) {
             nftsForCollection.push({
               tokenId: currentTraits[i].tokenId,
@@ -387,9 +378,9 @@ const Explore = () => {
         res_nft.collectionId = id;
         if (res_nft["uri"].indexOf("https://") == -1) {
           res_nft["image"] =
-            process.env.NEXT_PUBLIC_PINATA_URL + res_nft["uri"]+ ImageSizePrimary;
+            process.env.NEXT_PUBLIC_PINATA_URL + res_nft["uri"];
         } else {
-          res_nft["image"] = res_nft["uri"] + ImageSizePrimary;
+          res_nft["image"] = res_nft["uri"];
         }
         let nft_type = await getFileTypeFromURL(res_nft["image"]);
         res_nft["type"] = nft_type.fileType;
