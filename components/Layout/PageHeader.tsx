@@ -48,6 +48,7 @@ export const PageHeader = ({ title, subtitle, align='center', className='' }) =>
         <title>
           {APP_NAME} — {title}
         </title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" ></meta>
       </Head>
         <HeaderContainer className={`${className}`}>
         <Text
