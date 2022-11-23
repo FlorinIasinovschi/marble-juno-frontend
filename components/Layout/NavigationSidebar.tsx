@@ -127,8 +127,6 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
                   <span className={isActive("/defi")}>DeFi</span>
                 </a>
               </StyledLink>
-
-              {Boolean(key?.name) && (
                 <StyledLink>
                   <Link href="/stake" passHref>
                     <a className="dropdown-item">
@@ -136,7 +134,6 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
                     </a>
                   </Link>
                 </StyledLink>
-              )}
             </StyledListForLinks>
 
             <ButtonField>
