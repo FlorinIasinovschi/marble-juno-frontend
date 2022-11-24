@@ -50,6 +50,7 @@ interface StakeConfigType {
 export default function StakePage() {
   const [maxToken, setMaxToken] = useState(0)
   const [soldCnt, setSoldCnt] = useState(0)
+  const [price, setPrice] = useState(0)
   const [mintedNFTs, setMintedNFTs] = useState<number>(50)
   const [royalties, setRoyalties] = useState(0)
   const totalNFTs = 1001
@@ -170,6 +171,7 @@ export default function StakePage() {
     const contractConfig = await marbleContract.getConfig()
     setMaxToken(totalNFTs)
     setSoldCnt(594 + contractConfig.sold_index + 1)
+    setPrice(contractConfig.price)
     // setRoyalties(contractConfig.royalty)
     console.log('cw721:', contractConfig.cw721_address)
     const contract = CW721(contractConfig.cw721_address).use(client)
@@ -243,7 +245,7 @@ export default function StakePage() {
 
             <StyledDiv>
               <StyledSubHeading>Price</StyledSubHeading>
-              <StyledText>{Number((8).toFixed(2))} JUNO</StyledText>
+              <StyledText>{Number((price / 1000000).toFixed(2))} JUNO</StyledText>
             </StyledDiv>
 
             <StyledDiv>
