@@ -3,8 +3,8 @@ import {
   SigningCosmWasmClient,
 } from "@cosmjs/cosmwasm-stargate";
 import { Coin } from "@cosmjs/stargate";
-import { coin } from '@cosmjs/launchpad'
-import { convertDenomToMicroDenom } from 'util/conversion'
+import { coin } from "@cosmjs/launchpad";
+import { convertDenomToMicroDenom } from "util/conversion";
 
 export interface ContractConfig {
   airdrop: boolean;
@@ -21,6 +21,7 @@ export interface ContractConfig {
   symbol: string;
   unused_token_id: number;
   sold_index: number;
+  price: string;
 }
 
 export interface MerkleRootResponse {
@@ -52,7 +53,7 @@ export interface MarbleTxInstance {
     uri: string[],
     price: number[]
   ) => Promise<string>;
-  buyNative: (sender: string  ) => Promise<string>;
+  buyNative: (sender: string, price: number) => Promise<string>;
   moveNative: (tokenId: string, receipient: string) => Promise<string>;
   registerMerkleRoot: (
     merkle_root: string,
@@ -76,6 +77,7 @@ export const Marble = (contractAddress: string): MarbleContract => {
       const result = await client.queryContractSmart(contractAddress, {
         get_config: {},
       });
+      console.log("result: ", result);
       return result;
     };
 
@@ -107,7 +109,10 @@ export const Marble = (contractAddress: string): MarbleContract => {
       gas: "400000",
     };
 
-    const buyNative = async (sender: string): Promise<string> => {
+    const buyNative = async (
+      sender: string,
+      amount: number
+    ): Promise<string> => {
       const result = await client.execute(
         sender,
         contractAddress,
@@ -115,12 +120,10 @@ export const Marble = (contractAddress: string): MarbleContract => {
         { buy: {} },
         defaultFee,
         undefined,
-        [coin(convertDenomToMicroDenom(1 * 8000000), 'ujuno')]
-      )
-      return result.transactionHash
-    }
-;
-
+        [coin(convertDenomToMicroDenom(amount), "ujuno")]
+      );
+      return result.transactionHash;
+    };
     const batchMint = async (
       sender: string,
       uri: string[],
