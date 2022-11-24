@@ -22,6 +22,7 @@ import {
   getFileTypeFromURL,
 } from "services/nft";
 import { useRecoilValue } from "recoil";
+import { GradientBackground, SecondGradientBackground } from "styles/styles";
 
 const PUBLIC_STAKE_ADDRESS = process.env.NEXT_PUBLIC_STAKE_ADDRESS || "";
 interface StakeConfigType {
@@ -229,160 +230,209 @@ export default function StakePage() {
   };
   return (
     <AppLayout fullWidth={false}>
-      <StyledTitle>NFT Staking</StyledTitle>
-      {collection && (
-        <StyledCard>
-          <StyledDivForNftCollection>
-            <NftCollectionCard collection={collection} />
-          </StyledDivForNftCollection>
-          <StyledDivForInfo>
-            <StyledHeading>{collection.name}</StyledHeading>
-            <StyledRow>
-              <StyledDiv>
-                <StyledSubHeading>Daily Rewards</StyledSubHeading>
-                <StyledText>
-                  {getDailyRewards()}
-                  Block/Day
-                </StyledText>
-              </StyledDiv>
-              <StyledDiv>
-                <StyledSubHeading>Claimable Reward</StyledSubHeading>
-                <StyledText>{getClaimableReward()} Block</StyledText>
-              </StyledDiv>
-            </StyledRow>
-            <StyledRow>
-              <StyledDiv>
-                <StyledSubHeading>Total Staked</StyledSubHeading>
-                <StyledText>
-                  {userStakeInfo.token_ids.length}/
-                  {ownedNfts.length + userStakeInfo.token_ids.length}
-                </StyledText>
-              </StyledDiv>
-              <StyledDiv>
-                <StyledSubHeading>Days Left</StyledSubHeading>
-                <StyledText>{getLeftDays()}</StyledText>
-              </StyledDiv>
-            </StyledRow>
-            <ButtonWrapper>
-              {userStakeInfo.create_unstake_timestamp === 0 && (
-                <Button
-                  className="btn-buy btn-default"
-                  css={{
-                    background: "$white",
-                    color: "$black",
-                    stroke: "$black",
-                    padding: "15px auto",
-                  }}
-                  disabled={ownedNfts.length === 0}
-                  onClick={handleStake}
+      <Container>
+        <Header>NFT Staking</Header>
+        {collection && (
+          <StakingCardWrapper>
+            <CollectionCardWrapper>
+              <NftCollectionCard collection={collection} />
+            </CollectionCardWrapper>
+            <CollectionContent>
+              <h1>{collection.name}</h1>
+              <StakingInfoContainer>
+                <InfoContent>
+                  <h2>Daily Rewards</h2>
+                  <h3>
+                    {getDailyRewards()}
+                    Block/Day
+                  </h3>
+                </InfoContent>
+                <InfoContent>
+                  <h2>Claimable Reward</h2>
+                  <h3>{getClaimableReward()} Block</h3>
+                </InfoContent>
+                <InfoContent>
+                  <h2>Total Staked</h2>
+                  <h3>
+                    {userStakeInfo.token_ids.length}/
+                    {ownedNfts.length + userStakeInfo.token_ids.length}
+                  </h3>
+                </InfoContent>
+                <InfoContent>
+                  <h2>Days Left</h2>
+                  <h3>{getLeftDays()}</h3>
+                </InfoContent>
+              </StakingInfoContainer>
+
+              <ButtonWrapper>
+                {userStakeInfo.create_unstake_timestamp === 0 && (
+                  <StyledButton
+                    disabled={ownedNfts.length === 0}
+                    onClick={handleStake}
+                  >
+                    Stake
+                  </StyledButton>
+                )}
+                <StyledButton
+                  disabled={
+                    userStakeInfo.create_unstake_timestamp +
+                      stakeConfig.lock_time >
+                      Date.now() / 1000 || userStakeInfo.token_ids.length === 0
+                  }
+                  onClick={handleUnstake}
                 >
-                  Stake
-                </Button>
-              )}
-              <Button
-                className="btn-buy btn-default"
-                css={{
-                  background: "$white",
-                  color: "$black",
-                  stroke: "$black",
-                  padding: "15px auto",
-                }}
-                disabled={
-                  userStakeInfo.create_unstake_timestamp +
-                    stakeConfig.lock_time >
-                    Date.now() / 1000 || userStakeInfo.token_ids.length === 0
-                }
-                onClick={handleUnstake}
-              >
-                {userStakeInfo.create_unstake_timestamp === 0
-                  ? "Unstake"
-                  : "Fetch Nft"}
-              </Button>
-              <Button
-                className="btn-buy btn-default"
-                css={{
-                  background: "$white",
-                  color: "$black",
-                  stroke: "$black",
-                  padding: "15px auto",
-                }}
-                disabled={getClaimableReward() === 0}
-                onClick={handleClaim}
-              >
-                Claim Rewards
-              </Button>
-            </ButtonWrapper>
-          </StyledDivForInfo>
-        </StyledCard>
-      )}
+                  {userStakeInfo.create_unstake_timestamp === 0
+                    ? "Unstake"
+                    : "Fetch Nft"}
+                </StyledButton>
+                <StyledButton
+                  disabled={getClaimableReward() === 0}
+                  onClick={handleClaim}
+                >
+                  Claim Rewards
+                </StyledButton>
+              </ButtonWrapper>
+            </CollectionContent>
+          </StakingCardWrapper>
+        )}
+      </Container>
     </AppLayout>
   );
 }
 
-const StyledCard = styled("div")`
+const Container = styled.div`
+  max-width: 1000px;
+  margin: 0 auto;
   display: flex;
-  padding: 40px;
-  margin-top: 30px;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.06) 0%,
-    rgba(255, 255, 255, 0.06) 70%
-  );
-  box-shadow: 0px 7px 14px rgba(0, 0, 0, 0.1),
-    inset 0px 14px 24px rgba(17, 20, 29, 0.4);
-  backdrop-filter: blur(15px);
-  border-radius: 30px;
-  max-width: 1530px;
-  margin: auto;
+  flex-direction: column;
+  align-items: center;
 `;
-
-const StyledDiv = styled("div")`
-  flex: 1;
-  padding-top: 30px;
-  padding-bottom: 30px;
-`;
-
-const StyledDivForInfo = styled("div")`
-  flex: 1;
-  padding-left: 60px;
-`;
-
-const StyledRow = styled("div")`
-  display: flex;
-  justify-content: space-between;
-`;
-
-const StyledTitle = styled(Text)`
+const Header = styled.div`
   font-size: 50px;
-  text-align: center;
-  line-height: 60px;
-  margin-top: 30px;
-  margin-bottom: 30px;
+  font-weight: 700;
+  padding-bottom: 20px;
+  @media (max-width: 1550px) {
+    font-size: 40px;
+    font-weight: 500;
+    margin-top: 20px;
+  }
+`;
+const StakingCardWrapper = styled(SecondGradientBackground)`
+  &:before {
+    border-radius: 20px;
+    opacity: 0.5;
+  }
+  padding: 40px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  @media (max-width: 1550px) {
+    padding: 20px;
+  }
+  @media (max-width: 1024px) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    row-gap: 20px;
+    padding: 10px;
+  }
+`;
+const CollectionCardWrapper = styled.div``;
+
+const CollectionContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-left: 30px;
+  width: 100%;
+  h1 {
+    font-size: 42px;
+    font-weight: 500;
+  }
+  @media (max-width: 1550px) {
+    h1 {
+      font-size: 36px;
+    }
+  }
+  @media (max-width: 1024px) {
+    text-align: center;
+    padding-left: 0;
+  }
 `;
 
-const StyledHeading = styled(Text)`
-  font-size: 42px;
-  line-height: 50.4px;
+const StakingInfoContainer = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  row-gap: 30px;
+  @media (max-width: 650px) {
+    display: flex;
+    flex-direction: column;
+  }
 `;
-
-const StyledSubHeading = styled(Text)`
-  font-size: 28px;
-  line-height: 40px;
-`;
-
-const StyledText = styled(Text)`
-  font-size: 26px;
-  line-height: 31.2px;
-  opacity: 0.5;
-  padding-top: 10px;
-`;
-
-const StyledDivForNftCollection = styled("div")`
-  width: 400px;
+const InfoContent = styled.div`
+  h2 {
+    font-size: 28px;
+    font-weight: 500;
+  }
+  h3 {
+    font-size: 26px;
+    font-weight: 500;
+    opacity: 0.5;
+  }
+  @media (max-width: 1550px) {
+    h2 {
+      font-size: 20px;
+    }
+    h3 {
+      font-size: 16px;
+    }
+  }
+  @media (max-width: 650px) {
+    display: flex;
+    justify-content: space-between;
+    h2 {
+      font-size: 18px;
+    }
+    h3 {
+      font-size: 15px;
+    }
+  }
 `;
 
 export const ButtonWrapper = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   column-gap: 50px;
+  @media (max-width: 650px) {
+    display: flex;
+    flex-direction: column;
+    row-gap: 20px;
+    padding-top: 50px;
+  }
+`;
+
+const OwnedNftsContainer = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+  width: 100%;
+  margin-top: 50px;
+`;
+const CountDownWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  font-size: 28px;
+  font-weight: 700;
+`;
+const StyledButton = styled(Button)`
+  background: white;
+  color: black;
+  stroke: black;
+  padding: 10px;
+  font-weight: 500;
+
+  @media (max-width: 1550px) {
+    height: 56px;
+    font-size: 15px;
+  }
 `;

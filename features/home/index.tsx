@@ -12,7 +12,8 @@ import {
   Button,
 } from "@chakra-ui/react";
 import { CW721, Market, useSdk, getFileTypeFromURL } from "services/nft";
-import { isMobile } from "util/device";
+import { isMobile, isPC } from "util/device";
+import { SecondGradientBackground } from "styles/styles";
 
 const PUBLIC_MARKETPLACE = process.env.NEXT_PUBLIC_MARKETPLACE || "";
 
@@ -110,7 +111,7 @@ const Home = () => {
                 <Round>
                   <StyledImg src="/images/createIcon.svg" alt="create" />
                 </Round>
-                <Stack spacing={isMobile() ? "5px" : 5}>
+                <Stack spacing={isPC() ? 5 : "5px"}>
                   <h1>Create</h1>
                   <TextContent>
                     Mint NFTs in stunning Augmented Reality (AR) and Virtual
@@ -122,7 +123,7 @@ const Home = () => {
                 <Round>
                   <StyledImg src="/images/earnIcon.svg" alt="earn" />
                 </Round>
-                <Stack spacing={isMobile() ? "5px" : 5}>
+                <Stack spacing={isPC() ? 5 : "5px"}>
                   <h1>Earn</h1>
                   <TextContent>
                     Accrue royalties on secondary NFT sales using our smart
@@ -134,7 +135,7 @@ const Home = () => {
                 <Round>
                   <StyledImg src="/images/followIcon.svg" alt="follow" />
                 </Round>
-                <Stack spacing={isMobile() ? "5px" : 5}>
+                <Stack spacing={isPC() ? 5 : "5px"}>
                   <h1>Follow</h1>
                   <TextContent>
                     Keep an eye on your favourite NFT creators with Marble
@@ -163,7 +164,11 @@ const Home = () => {
                 <StyledImg src="/images/cosmos.svg" alt="cosmos" />
               </PartnerPaper>
               <PartnerPaper>
-                <StyledImg src="/images/juno.svg" alt="juno" />
+                <StyledImg
+                  src="/images/juno.svg"
+                  alt="juno"
+                  style={{ width: "150px" }}
+                />
               </PartnerPaper>
               <PartnerPaper>
                 <StyledImg src="/images/pinata.svg" alt="pinata" />
@@ -175,12 +180,11 @@ const Home = () => {
     </Container>
   );
 };
-
 const DestinationGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  column-gap: 60px;
-  @media (max-width: 480px) {
+  column-gap: 20px;
+  @media (max-width: 800px) {
     display: flex;
     flex-direction: column;
     row-gap: 15px;
@@ -191,8 +195,8 @@ const PartnerGrid = styled.div`
   grid-template-columns: 1fr 1fr 1fr 1fr;
   column-gap: 10px;
   overflow: auto;
-  @media (max-width: 480px) {
-    width: 100vw;
+  @media (max-width: 650px) {
+    width: 90vw;
   }
 `;
 const StyledButton = styled.button`
@@ -205,7 +209,7 @@ const StyledButton = styled.button`
   color: black;
   font-size: 18px;
   font-weight: bold;
-  @media (max-width: 480px) {
+  @media (max-width: 650px) {
     width: 100%;
     height: 56px;
     font-size: 16px;
@@ -215,9 +219,15 @@ const MarbleCardGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: center;
-  @media (max-width: 480px) {
+  @media (max-width: 1550px) {
+    padding: 0 30px;
+  }
+  @media (max-width: 1000px) {
     display: flex;
     flex-direction: column-reverse;
+    * {
+      align-items: center;
+    }
   }
 `;
 const StyledImg = styled.img`
@@ -226,6 +236,10 @@ const StyledImg = styled.img`
 
 const Container = styled.div`
   color: white;
+  @media (max-width: 1550px) {
+    max-width: 1100px;
+    margin-inline: auto;
+  }
 `;
 const StyledP = styled.div`
   color: white;
@@ -233,11 +247,14 @@ const StyledP = styled.div`
   opacity: 0.5;
   font-family: Mulish;
   text-align: center;
-  width: 700px;
-  @media (max-width: 1450px) {
+  width: 1000px;
+  @media (max-width: 1550px) {
     font-size: 18px;
   }
-  @media (max-width: 480px) {
+  @media (max-width: 1050px) {
+    width: 100%;
+  }
+  @media (max-width: 650px) {
     font-size: 16px;
     padding: 0 20px;
     width: 100%;
@@ -247,50 +264,48 @@ const Collections = styled.div`
   padding: 50px 0;
 `;
 
-const Paper = styled.div<{ width?: string }>`
-  border-radius: 30px;
-  background: rgba(255, 255, 255, 0.06);
-  border: rgba(255, 255, 255, 0.2);
-  box-shadow: 0px 7px 14px 0px #0000001a;
-  backdrop-filter: blur(30px);
+const Paper = styled(SecondGradientBackground)<{ width?: string }>`
+  &:before {
+    border-radius: 30px;
+    opacity: 0.3;
+  }
   padding: 40px 80px;
   width: ${({ width }) => width || "100%"};
   display: flex;
   align-items: center;
-  @media (max-width: 1450px) {
+  @media (max-width: 1550px) {
     padding: 20px;
   }
 `;
 const PartnerPaper = styled(Paper)`
-  @media (max-width: 1450px) {
+  @media (max-width: 650px) {
     width: 120px;
     height: 50px;
   }
 `;
-const StyledPaper = styled.div`
-  border-radius: 30px;
-  background: rgba(255, 255, 255, 0.06);
-  border: rgba(255, 255, 255, 0.2);
-  box-shadow: 0px 7px 14px 0px #0000001a;
-  backdrop-filter: blur(30px);
+const StyledPaper = styled(SecondGradientBackground)`
+  &:before {
+    opacity: 0.5;
+    border-radius: 30px;
+  }
   justify-content: center;
-  padding: 40px 80px;
+  padding: 40px 60px;
   flex-direction: column;
   h1 {
     font-size: 36px;
     font-weight: 700;
     text-align: center;
   }
-  @media (max-width: 1450px) {
-    padding: 40px 40px;
+  @media (max-width: 1550px) {
+    padding: 40px 30px;
   }
-  @media (max-width: 480px) {
-    display: flex;
-    flex-direction: row;
+  @media (max-width: 800px) {
+    display: grid;
+    justify-content: start;
+    grid-template-columns: auto auto;
     padding: 10px;
     align-items: center;
     column-gap: 10px;
-    justify-content: start;
     h1 {
       font-size: 20px;
       font-weight: 700;
@@ -307,9 +322,10 @@ const TextTitle = styled.div`
   font-weight: 700;
   text-align: center;
   @media (max-width: 1550px) {
-    font-size: 40px;
+    font-size: 35px;
+    font-weight: 500;
   }
-  @media (max-width: 480px) {
+  @media (max-width: 650px) {
     font-size: 24px;
   }
 `;
@@ -320,10 +336,10 @@ const TextContent = styled.div<{ textAlign?: string }>`
   font-weight: 300;
   opacity: 0.5;
   font-family: Mulish;
-  @media (max-width: 1440px) {
+  @media (max-width: 1550px) {
     font-size: 20px;
   }
-  @media (max-width: 480px) {
+  @media (max-width: 650px) {
     font-size: 16px;
   }
 `;
@@ -336,7 +352,7 @@ const Round = styled.div`
   align-items: center;
   border-radius: 50%;
   margin: 50px auto;
-  @media (max-width: 480px) {
+  @media (max-width: 800px) {
     width: 70px;
     height: 70px;
     margin: 0;
@@ -348,11 +364,11 @@ const Round = styled.div`
 `;
 const Title = styled.div`
   font-size: 65px;
-  font-weight: 700;
+  font-weight: 400;
   @media (max-width: 1550px) {
     font-size: 40px;
   }
-  @media (max-width: 480px) {
+  @media (max-width: 650px) {
     font-size: 30px;
     text-align: center;
   }

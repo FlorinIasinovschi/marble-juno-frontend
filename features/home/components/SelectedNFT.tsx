@@ -4,6 +4,11 @@ import styled from "styled-components";
 import { Stack, Text, HStack } from "@chakra-ui/react";
 import { RoundedIconComponent } from "components/RoundedIcon";
 import { CW721, Market, useSdk } from "services/nft";
+import { GradientBackground, SecondGradientBackground } from "styles/styles";
+import {
+  PINATA_PRIMARY_IMAGE_SIZE,
+  PINATA_SECONDARY_IMAGE_SIZE,
+} from "util/constants";
 
 const PUBLIC_MARKETPLACE = process.env.NEXT_PUBLIC_MARKETPLACE || "";
 
@@ -28,48 +33,45 @@ const SelectedNFT = () => {
       const show_data = {
         creator: collection.owner,
         collection_logo:
-          process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo,
+          process.env.NEXT_PUBLIC_PINATA_URL +
+          res_collection.logo +
+          PINATA_SECONDARY_IMAGE_SIZE,
         collection_name: res_collection.name,
-        nft_uri: res_nft.uri,
+        nft_uri: res_nft.uri + PINATA_PRIMARY_IMAGE_SIZE,
       };
       setShowData(show_data);
     })();
   }, [client]);
   return (
     <IntroContainer>
-      <div>
-        <IntroWrapper>
-          <Title>
-            {/* TILL DEATH DO US PART */}
-            Marblenauts
-          </Title>
+      <IntroWrapper>
+        <Title>Marblenauts</Title>
 
-          <HStack spacing={5}>
-            <MiniInfoCard>
-              <MiniInfoTitle>Created by</MiniInfoTitle>
+        <HStack spacing={5}>
+          <MiniInfoCard>
+            <MiniInfoTitle>Created by</MiniInfoTitle>
 
-              <RoundedIconComponent
-                size="36px"
-                address={showData?.creator}
-                font="16px"
-              />
-            </MiniInfoCard>
+            <RoundedIconComponent
+              size="36px"
+              address={showData?.creator}
+              font="16px"
+            />
+          </MiniInfoCard>
 
-            <MiniInfoCard>
-              <MiniInfoTitle>Collection</MiniInfoTitle>
-              <Info>
-                <Image src={showData.collection_logo} alt="" />
-                <Name>&nbsp;{showData.collection_name}</Name>
-              </Info>
-            </MiniInfoCard>
-          </HStack>
-          <Stack>
-            <Link href="/nft/9/1" passHref>
-              <StyledButton>View Nft</StyledButton>
-            </Link>
-          </Stack>
-        </IntroWrapper>
-      </div>
+          <MiniInfoCard>
+            <MiniInfoTitle>Collection</MiniInfoTitle>
+            <Info>
+              <Image src={showData.collection_logo} alt="" />
+              <Name>&nbsp;{showData.collection_name}</Name>
+            </Info>
+          </MiniInfoCard>
+        </HStack>
+        <Stack>
+          <Link href="/nft/9/1" passHref>
+            <StyledButton>View Nft</StyledButton>
+          </Link>
+        </Stack>
+      </IntroWrapper>
       <NFTPicture>
         <ImgDiv>
           <Img alt="logo" src={showData?.nft_uri} />
@@ -78,7 +80,6 @@ const SelectedNFT = () => {
     </IntroContainer>
   );
 };
-
 const StyledButton = styled.button`
   width: 326px;
   height: 68px;
@@ -89,7 +90,8 @@ const StyledButton = styled.button`
   color: black;
   font-size: 18px;
   font-weight: bold;
-  @media (max-width: 480px) {
+  margin-top: 70px;
+  @media (max-width: 800px) {
     width: 100%;
   }
 `;
@@ -97,10 +99,8 @@ const IntroContainer = styled.div`
   display: flex;
   margin-top: 50px;
   justify-content: space-between;
-  padding: 0 120px;
-  @media (max-width: 480px) {
+  @media (max-width: 800px) {
     flex-direction: column-reverse;
-    padding: 0 10px;
     margin-top: 0px;
   }
 `;
@@ -109,25 +109,31 @@ const Title = styled.div`
   font-size: 50px;
   font-weight: 700;
   padding: 40px 0;
+  margin-right: 200px;
   @media (max-width: 1550px) {
-    font-size: 35px;
+    font-size: 40px;
   }
-  @media (max-width: 480px) {
+  @media (max-width: 800px) {
     font-size: 26px;
     text-align: center;
     margin-top: 20px;
+    padding: 0 0 10px 0;
+    margin-right: 0;
   }
 `;
 
-const MiniInfoCard = styled.div`
-  width: 50%;
+const MiniInfoCard = styled(GradientBackground)`
+  width: 40%;
   height: 110px;
-  box-shadow: 0px 4px 40px rgba(42, 47, 50, 0.09), inset 0px 7px 24px #6d6d78;
-  border-radius: 20px;
   padding: 15px;
-  border: 1px solid rgba(5, 6, 22, 0.2);
-  backdrop-filter: blur(40px);
-  @media (max-width: 480px) {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  &:before {
+    border-radius: 20px;
+    opacity: 0.2;
+  }
+  @media (max-width: 800px) {
     width: 100%;
   }
 `;
@@ -154,21 +160,17 @@ const Info = styled.div`
   display: flex;
   align-items: center;
 `;
-const NFTPicture = styled.div`
+const NFTPicture = styled(SecondGradientBackground)`
   width: 40%;
-  border-radius: 30px;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.06) 0%,
-    rgba(255, 255, 255, 0.06) 100%
-  );
-  box-shadow: 0px 7px 14px rgba(0, 0, 0, 0.1),
-    inset 0px 14px 24px rgba(17, 20, 29, 0.4);
+  &:before {
+    border-radius: 30px;
+    opacity: 0.7;
+  }
   padding: 37px;
   @media (max-width: 1550px) {
     padding: 30px;
   }
-  @media (max-width: 480px) {
+  @media (max-width: 800px) {
     width: 100%;
     padding: 20px;
   }
@@ -201,9 +203,6 @@ const IntroWrapper = styled.div`
   @media (max-width: 1550px) {
     row-gap: 20px;
   }
-  @media (max-width: 480px) {
-    row-gap: 20px;
-  }
 `;
 const PriceArea = styled.div`
   display: flex;
@@ -213,8 +212,9 @@ const PriceArea = styled.div`
     font-size: 20px;
   }
   h1 {
-    font-size: 36px;
+    font-size: 40px;
     font-family: Mulish;
+    font-weight: 900;
   }
   h2 {
     font-size: 22px;
@@ -231,7 +231,7 @@ const PriceArea = styled.div`
       font-size: 16px;
     }
   }
-  @media (max-width: 480px) {
+  @media (max-width: 800px) {
     align-items: center;
 
     p {

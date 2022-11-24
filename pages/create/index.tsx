@@ -10,6 +10,7 @@ import { useRecoilValue } from "recoil";
 import { walletState } from "../../state/atoms/walletAtoms";
 import { isMobile } from "util/device";
 import { CW721, Market, useSdk, getFileTypeFromURL } from "services/nft";
+import { GradientBackground } from "styles/styles";
 const PUBLIC_MARKETPLACE = process.env.NEXT_PUBLIC_MARKETPLACE || "";
 
 export default function Home() {
@@ -57,59 +58,54 @@ export default function Home() {
   return (
     <AppLayout fullWidth={true}>
       <Container>
-        <Stack spacing={isMobile() ? "20px" : "50px"}>
-          <Title>Create On Marble Dao</Title>
-          <Collections>
-            <Stack spacing={isMobile() ? "10px" : "30px"}>
-              <SubTitle>Your Collection</SubTitle>
+        <Title>Create On Marble Dao</Title>
+        <Collections>
+          <Stack spacing={isMobile() ? "10px" : "30px"}>
+            <SubTitle>Your Collection</SubTitle>
 
-              <Link href={`/collection/create`} passHref>
+            <Link href={`/collection/create`} passHref>
+              <Card>
+                <IconWrapper>
+                  <Create />
+                </IconWrapper>
+                <Text fontSize={isMobile() ? "14px" : "20px"} fontWeight="700">
+                  Create A New Collection
+                </Text>
+              </Card>
+            </Link>
+
+            {ownedCollections.map((info, index) => (
+              <Link
+                href={`/collection/${info.collection_id}`}
+                passHref
+                key={index}
+              >
                 <Card>
-                  <IconWrapper>
-                    <Create />
-                  </IconWrapper>
-                  <Text
-                    fontSize={isMobile() ? "14px" : "20px"}
-                    fontWeight="700"
-                  >
-                    Create A New Collection
-                  </Text>
+                  <RoundedIcon
+                    size={isMobile() ? "50px" : "70px"}
+                    src={info.media}
+                    alt="collection"
+                  />
+                  <Stack marginLeft="20px">
+                    <Text
+                      fontSize={isMobile() ? "14px" : "20px"}
+                      fontWeight="700"
+                    >
+                      {info.title}
+                    </Text>
+                    <Text
+                      fontSize={isMobile() ? "14px" : "20px"}
+                      fontWeight="600"
+                      fontFamily="Mulish"
+                    >
+                      {info.counts} NFTs
+                    </Text>
+                  </Stack>
                 </Card>
               </Link>
-
-              {ownedCollections.map((info, index) => (
-                <Link
-                  href={`/collection/${info.collection_id}`}
-                  passHref
-                  key={index}
-                >
-                  <Card>
-                    <RoundedIcon
-                      size={isMobile() ? "50px" : "70px"}
-                      src={info.media}
-                      alt="collection"
-                    />
-                    <Stack marginLeft="20px">
-                      <Text
-                        fontSize={isMobile() ? "14px" : "20px"}
-                        fontWeight="700"
-                      >
-                        {info.title}
-                      </Text>
-                      <Text
-                        fontSize={isMobile() ? "14px" : "20px"}
-                        fontWeight="600"
-                        fontFamily="Mulish"
-                      >
-                        {info.counts} NFTs
-                      </Text>
-                    </Stack>
-                  </Card>
-                </Link>
-              ))}
-            </Stack>
-          </Collections>
-        </Stack>
+            ))}
+          </Stack>
+        </Collections>
       </Container>
     </AppLayout>
   );
@@ -124,7 +120,7 @@ const IconWrapper = styled.div`
   justify-content: center;
   align-items: center;
   margin-right: 20px;
-  @media (max-width: 480px) {
+  @media (max-width: 650px) {
     width: 50px;
     height: 50px;
   }
@@ -135,7 +131,12 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  @media (max-width: 480px) {
+  row-gap: 50px;
+  @media (max-width: 1024px) {
+    padding: 100px 30px;
+    row-gap: 30px;
+  }
+  @media (max-width: 650px) {
     padding: 10px;
   }
 `;
@@ -144,7 +145,10 @@ const Title = styled.div`
   font-size: 46px;
   font-weight: 600;
   text-align: center;
-  @media (max-width: 480px) {
+  @media (max-width: 1024px) {
+    font-size: 30px;
+  }
+  @media (max-width: 650px) {
     font-size: 22px;
   }
 `;
@@ -152,7 +156,7 @@ const SubTitle = styled.div`
   font-size: 30px;
   font-weight: 600;
   text-align: center;
-  @media (max-width: 480px) {
+  @media (max-width: 650px) {
     font-size: 20px;
   }
 `;
@@ -167,7 +171,8 @@ const Collections = styled.div`
     inset 0px 14px 24px rgba(17, 20, 29, 0.4);
   backdrop-filter: blur(30px);
   border-radius: 30px;
-  width: 1000px;
+  max-width: 1000px;
+  width: 100%;
   padding: 50px;
   border: 1px solid;
   border-image-source: linear-gradient(
@@ -175,23 +180,18 @@ const Collections = styled.div`
     rgba(255, 255, 255, 0.2) 1.02%,
     rgba(255, 255, 255, 0) 100%
   );
-  @media (max-width: 480px) {
-    width: 100%;
+  @media (max-width: 1024px) {
+    padding: 20px;
+  }
+  @media (max-width: 650px) {
     padding: 20px;
   }
 `;
-const Card = styled.div`
-  background: linear-gradient(0deg, #050616, #050616) padding-box,
-    linear-gradient(90.65deg, #ffffff 0.82%, rgba(0, 0, 0, 0) 98.47%) border-box;
-  box-shadow: 0px 4px 40px rgba(42, 47, 50, 0.09), inset 0px 7px 24px #6d6d78;
-  backdrop-filter: blur(40px);
-  border-radius: 20px;
-  border: 1px solid;
-  border-image-source: linear-gradient(
-    90.65deg,
-    #ffffff 0.82%,
-    rgba(0, 0, 0, 0) 98.47%
-  );
+const Card = styled(GradientBackground)`
+  &:before {
+    opacity: 0.2;
+    border-radius: 20px;
+  }
   padding: 25px;
   display: flex;
   align-items: center;

@@ -3,7 +3,7 @@ import Link from "next/link";
 import styled from "styled-components";
 import { NftCard } from "../nft-card";
 
-export function NftTable({ data, type, nft_column_count = 4 }) {
+export function NftTable({ data, type, nft_column_count = 3 }) {
   return (
     <NftGrid columns={nft_column_count}>
       {data.map((nft, index) => (

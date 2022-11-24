@@ -4,8 +4,12 @@ import { NftCollection } from "services/nft";
 import styled from "styled-components";
 import { Stack, HStack, LinkBox } from "@chakra-ui/react";
 import { isClientMobie } from "util/device";
+import { GradientBackground } from "styles/styles";
 import { RoundedIconComponent } from "components/RoundedIcon";
-
+import {
+  PINATA_PRIMARY_IMAGE_SIZE,
+  PINATA_SECONDARY_IMAGE_SIZE,
+} from "util/constants";
 interface NftCollectionCardProps {
   readonly collection: NftCollection;
 }
@@ -25,7 +29,10 @@ export function NftCollectionCard({
         <CollectionDiv className="collection">
           <ImgDiv className="nft-img-div">
             {collection.type == "image" && (
-              <Image src={collection.banner_image} alt="NFT Image" />
+              <Image
+                src={collection.banner_image + PINATA_PRIMARY_IMAGE_SIZE}
+                alt="NFT Image"
+              />
             )}
             {collection.type == "video" && (
               <video controls>
@@ -41,7 +48,10 @@ export function NftCollectionCard({
           <HStack marginTop="30px">
             <BannerDiv className="nft-banner-div">
               {collection.type == "image" && (
-                <Image src={collection.image} alt="NFT Image" />
+                <Image
+                  src={collection.image + PINATA_SECONDARY_IMAGE_SIZE}
+                  alt="NFT Image"
+                />
               )}
               {collection.type == "video" && (
                 <video>
@@ -69,24 +79,21 @@ export function NftCollectionCard({
   );
 }
 
-const CollectionDiv = styled.div`
-  border-radius: 20px;
-  box-shadow: 0px 4px 40px rgba(42, 47, 50, 0.09), inset 0px 7px 24px #6d6d78;
-  border: 1px solid;
-  border-image-source: linear-gradient(
-    90.65deg,
-    #ffffff 0.82%,
-    rgba(0, 0, 0, 0) 98.47%
-  );
-  background: linear-gradient(0deg, #050616, #050616) padding-box,
-    linear-gradient(90.65deg, #ffffff 0.82%, rgba(0, 0, 0, 0) 98.47%) border-box;
+const CollectionDiv = styled(GradientBackground)`
+  &:before {
+    border-radius: 20px;
+    opacity: 0.2;
+  }
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   padding: 30px;
   height: 100%;
   cursor: pointer;
   @media (max-width: 1450px) {
     padding: 15px;
   }
-  @media (max-width: 480px) {
+  @media (max-width: 1024px) {
     width: 320px;
   }
 `;

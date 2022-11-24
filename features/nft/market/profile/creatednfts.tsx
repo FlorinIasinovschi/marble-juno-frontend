@@ -233,7 +233,7 @@ const MyCreatedNFTs = ({ id }) => {
             loader={<h3> Loading...</h3>}
             endMessage={<h4></h4>}
           >
-            <NftTable data={filtered} type="sell" nft_column_count={3} />
+            <NftTable data={filtered} type="sell" nft_column_count={2} />
           </InfiniteScroll>
         )}
       </NftList>

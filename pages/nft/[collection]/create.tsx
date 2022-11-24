@@ -13,6 +13,7 @@ import { AppLayout } from "components/Layout/AppLayout";
 import NFTUpload from "components/NFTUpload";
 import { isMobile } from "util/device";
 import { Market, CW721, Collection, useSdk } from "services/nft";
+import { GradientBackground, SecondGradientBackground } from "styles/styles";
 
 const PUBLIC_PINATA_API_KEY = process.env.NEXT_PUBLIC_PINATA_API_KEY || "";
 const PUBLIC_PINATA_SECRET_API_KEY =
@@ -145,12 +146,12 @@ export default function NFTCreate() {
       ipfsHash = response.data.IpfsHash;
     }
     const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
-    let collection = await marketContract.collection(Number(collection_id));
+    let _collection = await marketContract.collection(Number(collection_id));
     // const cw721Contract = CW721(collection.collection_address).useTx(
     //   signingClient
     // );
     const cwCollectionContract = Collection(
-      collection.collection_address
+      _collection.collection_address
     ).useTx(signingClient);
     let nft = await cwCollectionContract.mint(address, ipfsHash);
     // const nft = await marketContract.mint(
@@ -175,6 +176,7 @@ export default function NFTCreate() {
       </Stack>
     );
   };
+  console.log("collection: ", collection);
   return (
     <AppLayout fullWidth={true}>
       <ChakraProvider>
@@ -232,7 +234,12 @@ export default function NFTCreate() {
                           <CollectionCard>
                             <RoundedIcon
                               size="70px"
-                              src={collection.logo}
+                              src={
+                                collection.logo.startsWith("https://")
+                                  ? collection.logo
+                                  : process.env.NEXT_PUBLIC_PINATA_URL +
+                                    collection.logo
+                              }
                               alt="collection"
                             />
                             <Stack marginLeft="20px">
@@ -326,7 +333,7 @@ export default function NFTCreate() {
                     </Stack>
                   </Stack>
                   <Divider />
-                  <Stack spacing="50px" padding="0 150px">
+                  <Stack spacing="50px" maxWidth="600px" margin="0 auto">
                     <a>Read our full community guidelines here</a>
                     <Stack>
                       {error && (
@@ -375,7 +382,6 @@ const Container = styled.div`
   p {
     font-size: 18px;
     font-family: Mulish;
-    font-weight: 600;
   }
   h1 {
     font-size: 46px;
@@ -398,7 +404,23 @@ const Container = styled.div`
     font-family: Mulish;
     cursor: pointer;
   }
-  @media (max-width: 480px) {
+  @media (max-width: 1024px) {
+    padding-top: 100px;
+    h1 {
+      font-size: 30px;
+    }
+    h2 {
+      font-size: 20px;
+    }
+    h3 {
+      font-size: 14px;
+    }
+    p {
+      font-size: 14px;
+      font-family: Mulish;
+    }
+  }
+  @media (max-width: 650px) {
     padding: 0;
     h1 {
       font-size: 22px;
@@ -412,27 +434,18 @@ const Container = styled.div`
     p {
       font-size: 14px;
       font-family: Mulish;
-      font-weight: 400;
     }
   }
 `;
-const Card = styled.div<{ fullWidth: boolean }>`
+const Card = styled(SecondGradientBackground)<{ fullWidth: boolean }>`
+  &:before {
+    opacity: 0.3;
+    border-radius: 30px;
+  }
   padding: 40px;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.06) 0%,
-    rgba(255, 255, 255, 0.06) 100%
-  );
-  box-shadow: 0px 7px 14px rgba(0, 0, 0, 0.1),
-    inset 0px 14px 24px rgba(17, 20, 29, 0.4);
-  backdrop-filter: blur(30px);
-  /* Note: backdrop-filter has minimal browser support */
-
-  border-radius: 30px;
-  width: ${({ fullWidth }) => (fullWidth ? "100%" : "60%")};
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  @media (max-width: 480px) {
-    width: 100%;
+  max-width: 1000px;
+  width: 100%;
+  @media (max-width: 1024px) {
     padding: 20px;
   }
 `;
@@ -445,7 +458,7 @@ const StyledInput = styled.input`
   padding: 20px;
   font-size: 20px;
   font-family: Mulish;
-  @media (max-width: 480px) {
+  @media (max-width: 650px) {
     font-size: 16px;
   }
 `;
@@ -468,40 +481,28 @@ const Footer = styled.div`
     font-family: Mulish;
   }
 `;
-const CollectionCard = styled.div`
-  background: linear-gradient(0deg, #050616, #050616) padding-box,
-    linear-gradient(90.65deg, #ffffff 0.82%, rgba(0, 0, 0, 0) 98.47%) border-box;
-  box-shadow: 0px 4px 40px rgba(42, 47, 50, 0.09), inset 0px 7px 24px #6d6d78;
-  backdrop-filter: blur(40px);
-  border-radius: 20px;
-  border: 1px solid;
-  border-image-source: linear-gradient(
-    90.65deg,
-    #ffffff 0.82%,
-    rgba(0, 0, 0, 0) 98.47%
-  );
+const CollectionCard = styled(GradientBackground)`
+  &:before {
+    opacity: 0.2;
+    border-radius: 20px;
+  }
   padding: 25px;
   display: flex;
   align-items: center;
   cursor: pointer;
 `;
-const NFTContainer = styled.div`
+const NFTContainer = styled(SecondGradientBackground)`
+  &:before {
+    border-radius: 30px;
+    opacity: 0.3;
+  }
   width: 35%;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.06) 0%,
-    rgba(255, 255, 255, 0.06) 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 25px;
-  border-radius: 30px;
-  backdrop-filter: blur(30px);
-  box-shadow: 0px 7px 14px rgba(0, 0, 0, 0.1),
-    inset 0px 14px 24px rgba(17, 20, 29, 0.4);
-  @media (max-width: 480px) {
+
+  height: fit-content;
+  @media (max-width: 800px) {
     width: 100%;
   }
-  height: fit-content;
 `;
 const ImgDiv = styled.div`
   width: 100%;
@@ -523,10 +524,10 @@ const Image = styled.img`
 `;
 const MainWrapper = styled.div`
   display: flex;
-  aling-items: start;
+  align-items: start;
   column-gap: 40px;
   justify-content: space-between;
-  @media (max-width: 480px) {
+  @media (max-width: 800px) {
     flex-direction: column-reverse;
     width: 100%;
     row-gap: 20px;

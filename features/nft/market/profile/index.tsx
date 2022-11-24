@@ -95,8 +95,9 @@ export const MyCollectedNFTs = ({ id }) => {
             res_nft["tokenId"] = tokenIds[i];
             res_nft["created"] = res_nft["owner"];
             res_nft["collectionId"] = collections[k].id;
-            res_nft["image"] =
-              process.env.NEXT_PUBLIC_PINATA_URL + res_nft["uri"];
+            res_nft["image"] = res_nft.uri.includes("https://")
+              ? res_nft["uri"]
+              : process.env.NEXT_PUBLIC_PINATA_URL + res_nft["uri"];
             res_nft["owner"] = await cw721Contract.ownerOf(res_nft["tokenId"]);
             if (res_nft["created"] != id && res_nft["owner"] != id) {
               continue;
@@ -137,26 +138,13 @@ export const MyCollectedNFTs = ({ id }) => {
             collectionNFTs.push(res_nft);
           }
           let start_after = tokenIds[tokenIds.length - 1];
-          // tokenIds.splice(0, tokenIds.length);
-          // tokenIds.length = 0;
           tokenIds = [];
-          // if (collection.owner != id) {
           tokenIdsInfo = await cw721Contract.tokens(id, start_after);
-          // } else {
-          // tokenIdsInfo = await cw721Contract.allTokens(start_after);
-          // }
           tokenIds = tokenIdsInfo.tokens;
           rCount++;
           setReloadCount(rCount);
         }
       }
-      // ownedNFTs = await nftViewFunction({
-      //   methodName: "nft_tokens_for_owner",
-      //   args: {
-      //     account_id: id,
-      //   },
-      // });
-      // console.log("ownedNFTs: ", ownedNFTs);
     } catch (err) {
       console.log("fetchOwnedNFTs Error: ", err);
     }
@@ -174,6 +162,11 @@ export const MyCollectedNFTs = ({ id }) => {
   }, [id, fetchOwnedNFTs]);
   const getMoreNfts = async () => {};
   const handleFilter = (id: string) => {
+    if (id == filterTab) {
+      setFilterTab("");
+      setFiltered(nfts);
+      return;
+    }
     const filteredNFTs = nfts.filter((nft) => nft.saleType === id);
     setFiltered(filteredNFTs);
     setFilterTab(id);
@@ -181,7 +174,7 @@ export const MyCollectedNFTs = ({ id }) => {
   return (
     <CollectionWrapper>
       <NftList>
-        {/* <Filter>
+        <Filter>
           <FilterCard onClick={() => handleFilter("Direct Sell")}>
             <NumberWrapper isActive={filterTab === "Direct Sell"}>
               {nftCounts["Direct Sell"]}
@@ -200,7 +193,7 @@ export const MyCollectedNFTs = ({ id }) => {
             </NumberWrapper>
             Active Offers
           </FilterCard>
-        </Filter> */}
+        </Filter>
         {loading ? (
           <ChakraProvider>
             <div
@@ -223,7 +216,7 @@ export const MyCollectedNFTs = ({ id }) => {
             loader={<h3> Loading...</h3>}
             endMessage={<h4></h4>}
           >
-            <NftTable data={filtered} type="sell" nft_column_count={3} />
+            <NftTable data={filtered} type="sell" nft_column_count={2} />
           </InfiniteScroll>
         )}
       </NftList>

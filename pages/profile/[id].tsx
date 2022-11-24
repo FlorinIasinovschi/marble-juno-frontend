@@ -10,6 +10,7 @@ import {
   TabList,
   TabPanel,
   TabPanels,
+  ChakraProvider,
 } from "@chakra-ui/react";
 import { AppLayout } from "components/Layout/AppLayout";
 import { Button } from "components/Button";
@@ -31,11 +32,13 @@ import ProfilleLogoImageUpload from "components/ProfileLogoImageUpload";
 import EditProfileModal from "features/profile/EditProfileModal";
 import { getReducedAddress } from "util/conversion";
 import { isMobile } from "util/device";
+import { GradientBackground } from "styles/styles";
 
 export default function Home() {
   const { asPath } = useRouter();
   const { address, client: signingClient } = useRecoilValue(walletState);
   const [profile, setProfile] = useState<any>({});
+  const [tab, setTab] = useState("owned");
   const id = asPath && asPath.split("/")[2].split("?")[0];
   useEffect(() => {
     (async () => {
@@ -190,17 +193,24 @@ export default function Home() {
           <ProfileNFTInfo>
             <Tabs>
               <StyledTabList>
-                <StyledTab>{`Owned`}</StyledTab>
-                <StyledTab>{`Created`}</StyledTab>
+                <StyledTab
+                  onClick={() => {
+                    setTab("owned");
+                  }}
+                  isActive={tab === "owned"}
+                >{`Owned`}</StyledTab>
+                <StyledTab
+                  onClick={() => {
+                    setTab("created");
+                  }}
+                  isActive={tab === "created"}
+                >{`Created`}</StyledTab>
               </StyledTabList>
-              <TabPanels>
-                <TabPanel overflow="auto">
-                  <MyCollectedNFTs id={id} />
-                </TabPanel>
-                <TabPanel overflow="auto">
-                  <CreatedNFTs id={id} />
-                </TabPanel>
-              </TabPanels>
+              {tab === "owned" ? (
+                <MyCollectedNFTs id={id} />
+              ) : (
+                <CreatedNFTs id={id} />
+              )}
             </Tabs>
           </ProfileNFTInfo>
         </ProfileContainer>
@@ -223,7 +233,7 @@ const Banner = styled.div`
   backdrop-filter: blur(30px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   z-index: 10;
-  @media (max-width: 480px) {
+  @media (max-width: 650px) {
     height: 216px;
   }
 `;
@@ -236,7 +246,13 @@ const LogoImage = styled.div`
   top: -100px;
   left: calc(50% - 100px);
   z-index: 1000;
-  @media (max-width: 480px) {
+  @media (max-width: 1550px) {
+    width: 150px;
+    height: 150px;
+    top: -75px;
+    left: calc(50% - 75px);
+  }
+  @media (max-width: 650px) {
     width: 120px;
     height: 120px;
     top: -60px;
@@ -246,7 +262,7 @@ const LogoImage = styled.div`
 `;
 const ProfileContainer = styled.div`
   display: grid;
-  grid-template-columns: 1fr 3fr;
+  grid-template-columns: 1fr 2.5fr;
   padding: 0 50px;
   p {
     font-size: 18px;
@@ -267,7 +283,7 @@ const ProfileContainer = styled.div`
     font-weight: 600;
     text-align: center;
   }
-  @media (max-width: 480px) {
+  @media (max-width: 1200px) {
     display: flex;
     flex-direction: column;
     padding: 0 20px;
@@ -282,16 +298,19 @@ const ProfileContainer = styled.div`
     }
   }
 `;
-const ProfileInfo = styled.div`
+const ProfileInfo = styled(GradientBackground)`
   padding: 120px 50px 50px 50px;
-  background: rgba(05, 06, 22, 0.2);
-  box-shadow: 0px 4px 40px rgba(42, 47, 50, 0.09), inset 0px 7px 24px #6d6d78;
-  /* Note: backdrop-filter has minimal browser support */
 
-  border-radius: 0px 0px 20px 20px;
+  &:before {
+    border-radius: 0px 0px 20px 20px;
+    opacity: 0.2;
+  }
   height: fit-content;
   position: relative;
-  @media (max-width: 480px) {
+  @media (max-width: 1550px) {
+    padding: 120px 30px 30px 30px;
+  }
+  @media (max-width: 650px) {
     padding: 80px 25px 25px 25px;
   }
 `;
@@ -301,13 +320,14 @@ const VerticalDivider = styled.div`
   width: 90px;
   height: 0px;
 `;
-const Card = styled.div`
-  background: rgba(05, 06, 22, 0.2);
-  box-shadow: 0px 4px 40px rgba(42, 47, 50, 0.09), inset 0px 7px 24px #6d6d78;
+const Card = styled(GradientBackground)`
   backdrop-filter: blur(40px);
-  border-radius: 20px;
+  &:before {
+    border-radius: 20px;
+    opacity: 0.2;
+  }
   padding: 20px;
-  @media (max-width: 480px) {
+  @media (max-width: 650px) {
     p {
       font-size: 14px;
     }
@@ -315,34 +335,41 @@ const Card = styled.div`
 `;
 const ProfileNFTInfo = styled.div`
   padding: 10px 50px;
-  @media (max-width: 480px) {
+  @media (max-width: 1200px) {
+    padding: 10px 10px;
+  }
+  @media (max-width: 650px) {
     padding: 10px 0px;
     width: 100%;
   }
 `;
-const StyledTabList = styled(TabList)`
-  width: fit-content;
+const StyledTabList = styled.div`
   border-bottom: 2px solid;
-  border-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.1) !important;
   font-weight: 400;
-  margin: 0px !important;
-  [aria-selected="true"] {
-    border-color: #ffffff !important;
-    border-bottom: 2px solid;
-    font-weight: 600;
-    color: white;
+  display: flex;
+  margin-bottom: 20px;
+  overflow: auto;
+  width: fit-content;
+  @media (max-width: 800px) {
+    width: auto;
   }
 `;
 
-const StyledTab = styled(Tab)`
+const StyledTab = styled.div<{ isActive: boolean }>`
   font-size: 22px;
   font-weight: 400;
-  padding: 20px 70px 20px 10px;
-  @media (max-width: 480px) {
-    font-size: 12px;
-    padding: 10px 35px 10px 0px;
+  padding: 20px;
+  margin: 0 20px;
+  cursor: pointer;
+  ${({ isActive }) => isActive && "border-bottom: 2px solid"};
+  @media (max-width: 1550px) {
+    font-size: 18px;
+    margin: 0 15px;
+    padding: 15px;
   }
 `;
+
 const IconButtonWrapper = styled.div`
   position: absolute;
   right: 50px;

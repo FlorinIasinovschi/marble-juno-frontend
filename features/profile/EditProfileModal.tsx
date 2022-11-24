@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   ChakraProvider,
@@ -11,21 +11,21 @@ import {
   InputRightElement,
   Input,
   IconButton,
-} from '@chakra-ui/react'
-import { EditIcon } from '@chakra-ui/icons'
-import { Button } from 'components/Button'
-import styled from 'styled-components'
-import { NftCard } from 'components/NFT/nft-card'
+} from "@chakra-ui/react";
+import { EditIcon } from "@chakra-ui/icons";
+import { Button } from "components/Button";
+import styled from "styled-components";
+import { NftCard } from "components/NFT/nft-card";
 
 const PlaceBidModal = ({ onHandleSave, profileInfo }) => {
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const [profile, setProfile] = useState(profileInfo)
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [profile, setProfile] = useState(profileInfo);
   useEffect(() => {
-    setProfile(profileInfo)
-  }, [profileInfo])
+    setProfile(profileInfo);
+  }, [profileInfo]);
   const onHandleChange = (e) => {
-    setProfile({ ...profile, [e.target.name]: e.target.value })
-  }
+    setProfile({ ...profile, [e.target.name]: e.target.value });
+  };
   return (
     <ChakraProvider>
       <IconButton
@@ -42,14 +42,14 @@ const PlaceBidModal = ({ onHandleSave, profileInfo }) => {
         isCentered
       >
         <ModalOverlay backdropFilter="blur(14px)" bg="rgba(0, 0, 0, 0.34)" />
-        <Container maxW="900px">
+        <Container>
           <Stack spacing={10}>
             <Stack>
-              <Text fontSize="30px" fontWeight="700">
+              <Text fontSize="30px" fontWeight="700" textAlign="center">
                 Edit your Profile
               </Text>
             </Stack>
-            <Stack spacing="40px">
+            <GridContainer>
               <Stack>
                 <InputLabel>User name</InputLabel>
                 <StyledInput
@@ -82,21 +82,21 @@ const PlaceBidModal = ({ onHandleSave, profileInfo }) => {
                   value={profile.discord}
                 />
               </Stack>
-            </Stack>
+            </GridContainer>
             <Button
               className="btn-buy btn-default"
               css={{
-                background: '$white',
-                color: '$black',
-                stroke: '$black',
-                width: '100%',
+                background: "$white",
+                color: "$black",
+                stroke: "$black",
+                width: "100%",
               }}
               variant="primary"
               size="large"
               onClick={() => {
                 onHandleSave(profile).then((value) => {
-                  if (value) onClose()
-                })
+                  if (value) onClose();
+                });
               }}
             >
               Save
@@ -105,46 +105,44 @@ const PlaceBidModal = ({ onHandleSave, profileInfo }) => {
         </Container>
       </Modal>
     </ChakraProvider>
-  )
-}
+  );
+};
 
 const Container = styled(ModalContent)`
   border: 1px solid rgba(255, 255, 255, 0.2) !important;
   background: rgba(255, 255, 255, 0.06) !important;
   border-radius: 30px !important;
-  padding: 70px;
+  padding: 30px;
   color: white !important;
-`
+  max-width: 900px !important;
+  @media (max-width: 1000px) {
+    max-width: 90vw !important;
+    padding: 5px;
+  }
+`;
 const InputLabel = styled.div`
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 500;
   padding: 0 20px;
-`
+`;
 const StyledInput = styled.input`
   border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 15px;
-  font-size: 30px;
-  font-weight: 600;
+  font-size: 20px;
   background: #272734;
   border-radius: 20px !important;
   display: flex;
   align-items: center;
-  height: 70px !important;
   font-family: Mulish;
-`
+`;
+const GridContainer = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  @media (max-width: 650px) {
+    display: flex;
+    flex-direction: column;
+  }
+`;
 
-const TokenLogoWrapper = styled.div`
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 60px;
-  padding: 10px 20px 10px 10px;
-  display: flex;
-  align-items: center;
-`
-
-const StyledInputRightElement = styled.div`
-  position: absolute;
-  right: 30px;
-  top: 8px;
-`
-
-export default PlaceBidModal
+export default PlaceBidModal;

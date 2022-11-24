@@ -65,3 +65,7 @@ export { DiscordT } from "./Discord2";
 export { AddCircle } from "./AddCircle";
 export { MinusHexagon } from "./MinusHexagon";
 export { Hexagon } from "./Hexagon";
+export { Setting } from "./Setting";
+export { Help } from "./Help";
+export { Disconnect } from "./Disconnect";
+export { More } from "./More";

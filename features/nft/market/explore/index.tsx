@@ -10,8 +10,6 @@ import { Market, useSdk, Collection } from "services/nft";
 const PUBLIC_MARKETPLACE = process.env.NEXT_PUBLIC_MARKETPLACE || "";
 
 export const Explore = () => {
-  //const fetcher = (url) => fetch(url).then((res) => res.json());
-  //const { data } = useSWR('/api/readfiles', fetcher);
   const data = ["marblenauts"];
 
   const [nftcategories, setNftCategories] = useState<NftCategory[]>([]);
@@ -19,12 +17,12 @@ export const Explore = () => {
   const [activeCategoryId, setActiveCategoryId] = useState(0);
   const { client } = useSdk();
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     (async () => {
       if (!client) {
         return;
-      } 
+      }
 
       const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
       let collectionList = await marketContract.listCollections();
@@ -39,7 +37,7 @@ export const Explore = () => {
             process.env.NEXT_PUBLIC_PINATA_URL + collectionList[i].uri
           );
           res_collection = await ipfs_collection.json();
-          
+
           let collection_info: any = {};
           collection_info.id = collectionList[i].id;
           collection_info.name = res_collection.name;
@@ -47,41 +45,30 @@ export const Explore = () => {
           collection_info.slug = res_collection.slug;
           collection_info.creator = collectionList[i].owner ?? "";
           collection_info.cat_ids = res_collection.category;
-          
-          if(res_collection.logo){
+
+          if (res_collection.logo) {
             let collection_type = await getFileTypeFromURL(
               process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo
             );
             collection_info.type = collection_type.fileType;
-          }
-          else{
-            collection_info.type ='image';
-          }
-          
-          let ImageSizePrimary= process.env.NEXT_PUBLIC_PINATA_PRIMARY_IMAGE_SIZE;
-          let ImageSizeSecondary=process.env.NEXT_PUBLIC_PINATA_SECONDARY_IMAGE_SIZE;
-
-          if(collection_info.type=='video' || collection_info.type=='audio'){
-            ImageSizePrimary='';
-            ImageSizeSecondary='';
+          } else {
+            collection_info.type = "image";
           }
 
-          if(res_collection.logo){
-            collection_info.image =process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo + ImageSizeSecondary;
-          }
-          else{
-            collection_info.image ='https://via.placeholder.com/70';
+          if (res_collection.logo) {
+            collection_info.image =
+              process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
+          } else {
+            collection_info.image = "https://via.placeholder.com/70";
           }
 
-          if(res_collection.logo || res_collection.featuredImage){
+          if (res_collection.logo || res_collection.featuredImage) {
             collection_info.banner_image = res_collection.featuredImage
-            ? process.env.NEXT_PUBLIC_PINATA_URL + res_collection.featuredImage
-            : process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
-
-            collection_info.banner_image +=ImageSizePrimary;
-          }
-          else{
-            collection_info.banner_image ='https://via.placeholder.com/300';
+              ? process.env.NEXT_PUBLIC_PINATA_URL +
+                res_collection.featuredImage
+              : process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
+          } else {
+            collection_info.banner_image = "https://via.placeholder.com/300";
           }
 
           collections.push(collection_info);

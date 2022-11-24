@@ -2,6 +2,11 @@ import * as React from "react";
 import styled from "styled-components";
 import { default_image } from "util/constants";
 import { getReducedAddress } from "util/conversion";
+import { GradientBackground } from "styles/styles";
+import {
+  PINATA_PRIMARY_IMAGE_SIZE,
+  PINATA_SECONDARY_IMAGE_SIZE,
+} from "util/constants";
 
 const ProfileCard = ({ profileInfo }) => {
   return (
@@ -10,16 +15,20 @@ const ProfileCard = ({ profileInfo }) => {
         <Image
           src={
             profileInfo.banner
-              ? process.env.NEXT_PUBLIC_PINATA_URL + profileInfo.banner
-              : default_image
+              ? process.env.NEXT_PUBLIC_PINATA_URL +
+                profileInfo.banner +
+                PINATA_PRIMARY_IMAGE_SIZE
+              : default_image + PINATA_PRIMARY_IMAGE_SIZE
           }
           alt="NFT Image"
         />
         <LogoImage
           src={
             profileInfo.avatar
-              ? process.env.NEXT_PUBLIC_PINATA_URL + profileInfo.avatar
-              : default_image
+              ? process.env.NEXT_PUBLIC_PINATA_URL +
+                profileInfo.avatar +
+                PINATA_SECONDARY_IMAGE_SIZE
+              : default_image + PINATA_SECONDARY_IMAGE_SIZE
           }
           alt="avatar"
         />
@@ -35,11 +44,12 @@ const ProfileCard = ({ profileInfo }) => {
 
 export default ProfileCard;
 
-const Container = styled.div`
+const Container = styled(GradientBackground)`
+  &:before {
+    opacity: 0.2;
+    border-radius: 20px;
+  }
   padding: 30px;
-  border-radius: 60px;
-  background: rgba(05, 06, 22, 0.2);
-  box-shadow: 0px 4px 40px rgba(42, 47, 50, 0.09), inset 0px 7px 24px #6d6d78;
   backdrop-filter: blur(40px);
   /* Note: backdrop-filter has minimal browser support */
   cursor: pointer;
@@ -48,7 +58,7 @@ const Container = styled.div`
   @media (max-width: 1550px) {
     padding: 15px;
   }
-  @media (max-width: 480px) {
+  @media (max-width: 800px) {
     width: 320px;
   }
 `;

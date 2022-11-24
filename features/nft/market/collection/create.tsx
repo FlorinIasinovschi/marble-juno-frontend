@@ -11,7 +11,7 @@ import {
   NftCollection,
   CollectionToken,
 } from "services/nft";
-
+import { Button } from "components/Button";
 import {
   Stack,
   useRadioGroup,
@@ -21,14 +21,10 @@ import {
   Text,
   HStack,
   IconButton,
-  Button,
 } from "@chakra-ui/react";
 import { AddIcon, CloseIcon } from "@chakra-ui/icons";
 
 import { toast } from "react-toastify";
-import DropZone from "components/DropZone";
-import FeaturedImageUpload from "components/FeaturedImageUpload";
-import BannerImageUpload from "components/BannerImageUpload";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { walletState, WalletStatusType } from "state/atoms/walletAtoms";
 import { Market, useSdk } from "services/nft";
@@ -120,39 +116,6 @@ const PUBLIC_PINATA_SECRET_API_KEY =
   process.env.NEXT_PUBLIC_PINATA_SECRET_API_KEY || "";
 const PUBLIC_PINATA_URL = process.env.NEXT_PUBLIC_PINATA_URL || "";
 let themeValue = "1";
-function RadioCard(props) {
-  const { getInputProps, getCheckboxProps } = useRadio(props);
-  const input = getInputProps();
-  const checkbox = getCheckboxProps();
-
-  return (
-    <Box as="label">
-      <input {...input} />
-      <Box
-        {...checkbox}
-        cursor="pointer"
-        borderWidth="1px"
-        borderRadius="md"
-        boxShadow="md"
-        _checked={
-          {
-            // boxShadow: 'outline',
-          }
-        }
-        _focus={
-          {
-            // boxShadow: 'outline',
-          }
-        }
-        className={props.isChecked ? "active" : ""}
-        px={5}
-        py={3}
-      >
-        {props.children}
-      </Box>
-    </Box>
-  );
-}
 
 let collectionTokenArr = [];
 let collectionTokenCount = 0;
@@ -493,14 +456,14 @@ export const CollectionCreate = () => {
                       icon={<AddIcon />}
                       onClick={addFormFields}
                       width="100%"
-                      style={{ backgroundColor: "transparent" }}
+                      background="transparent"
+                      _hover={{ background: "transparent" }}
                     />
                   </IconWrapper>
                 )}
               </Stack>
               <Stack padding="0 20%">
                 <Button
-                  className="btn-buy btn-default"
                   css={{
                     background: "#ffffff",
                     color: "#000000",
@@ -530,47 +493,57 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  @media (max-width: 480px) {
+  @media (max-width: 1024px) {
+    padding: 100px 50px;
+  }
+  @media (max-width: 650px) {
     padding: 10px;
   }
 `;
+const HorizontalDivider = styled.div`
+  border-bottom: 1px solid #363b4e;
+  width: 100%;
+`;
+
 const Title = styled.div`
   font-size: 46px;
   font-weight: 600;
   text-align: center;
-  @media (max-width: 480px) {
+  @media (max-width: 1024px) {
+    font-size: 30px;
+  }
+  @media (max-width: 650px) {
     font-size: 22px;
   }
 `;
 const CardTitle = styled.div`
   font-size: 30px;
-  font-weight: 700;
-  @media (max-width: 480px) {
+  font-weight: 500;
+  @media (max-width: 1024px) {
     font-size: 20px;
-    text-align: center;
   }
 `;
 const SubTitle = styled.div`
-  font-size: 30px;
-  font-weight: 700;
-  @media (max-width: 480px) {
+  font-size: 25px;
+  font-weight: 500;
+  @media (max-width: 1024px) {
     font-size: 14px;
   }
 `;
 const InputLabel = styled.div`
-  font-size: 25px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 500;
   margin-left: 30px;
-  @media (max-width: 480px) {
+  @media (max-width: 1024px) {
     font-size: 12px;
     font-weight: 400;
   }
 `;
 const RoyaltyLabel = styled.div`
-  font-size: 30px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 500;
   margin-left: 30px;
-  @media (max-width: 480px) {
+  @media (max-width: 1024px) {
     font-size: 12px;
     margin-left: 0;
   }
@@ -585,7 +558,7 @@ const Collections = styled.div`
     inset 0px 14px 24px rgba(17, 20, 29, 0.4);
   backdrop-filter: blur(30px);
   border-radius: 30px;
-  width: 1000px;
+  max-width: 1000px;
   padding: 50px;
   border: 1px solid;
   border-image-source: linear-gradient(
@@ -593,7 +566,7 @@ const Collections = styled.div`
     rgba(255, 255, 255, 0.2) 1.02%,
     rgba(255, 255, 255, 0) 100%
   );
-  @media (max-width: 480px) {
+  @media (max-width: 1024px) {
     width: 100%;
     padding: 20px;
   }
@@ -601,18 +574,19 @@ const Collections = styled.div`
 const SubText = styled.div`
   font-size: 18px;
   font-family: Mulish;
-  font-weight: 600;
-  @media (max-width: 480px) {
+  @media (max-width: 1024px) {
     font-size: 14px;
     font-weight: 400;
   }
 `;
 const StyledLink = styled.a`
+  padding-top: 10px;
   font-size: 18px;
   font-family: Mulish;
   font-weight: 600;
   color: #cccccc;
-  @media (max-width: 480px) {
+  text-decoration: underline;
+  @media (max-width: 1024px) {
     font-size: 14px;
     font-weight: 400;
   }
@@ -627,7 +601,7 @@ const StyledInput = styled.input`
   padding: 20px;
   font-size: 20px;
   font-family: Mulish;
-  @media (max-width: 480px) {
+  @media (max-width: 1024px) {
     font-size: 16px;
   }
 `;

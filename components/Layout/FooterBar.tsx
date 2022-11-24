@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Text } from "../Text";
-import { styled } from "../theme";
+import styled from "styled-components";
 import Link from "next/link";
 import { Button } from "../Button";
 import { UpRightArrow, CollapseUp, CollapseDown } from "../../icons";
@@ -20,19 +20,35 @@ export const FooterBar = () => {
 
   const buttonIconCss = {
     borderRadius: "50%",
-    background: "rgba(18, 21, 33)",
-    boxShadow:
-      "0px 4px 40px rgba(42, 47, 50, 0.09), inset 0px 7px 24px #6D6D78",
-    "& svg": {
-      fill: "white",
-    },
+
     width: "45px",
     height: "45px",
     backdropFilter: "blur(40px)",
+    position: "relative",
+    background: "transparent",
+    "& svg": {
+      fill: "white",
+    },
+
+    "&::before": {
+      content: "",
+      position: "absolute",
+      left: 0,
+      top: 0,
+      borderRadius: "50%",
+      width: "100%",
+      height: "100%",
+      background: "rgba(18, 21, 33)",
+      boxShadow:
+        "0px 4px 40px rgba(42, 47, 50, 0.09), inset 0px 7px 24px #6D6D78",
+      zIndex: "-1",
+      opacity: "0.3",
+    },
   };
   return (
     <ChakraProvider>
       <StyledFooter>
+        {/* <img src="/images/CurveLine.svg" alt="" /> */}
         <Flex width="80%" justifyContent="space-between">
           <Stack width="40%">
             <ContainerForColumn className="bottom-desc-section">
@@ -44,19 +60,10 @@ export const FooterBar = () => {
                   />
                 </StyledLogo>
               </Link>
-              <Text
-                className="footer-desc"
-                css={{
-                  color: "#C7C7C7",
-                  fontSize: "18px",
-                  padding: "$space$10 0",
-                  lineHeight: "32px",
-                }}
-              >
-                Marble is the first community-driven DAO on Juno Network. Marble
-                is an all-in-one platform with DeFi products, NFT Marketplace
-                and exclusive NFTs of real artworks.
-              </Text>
+              <TextContent>
+                Made of Phygital NFTs. Built on COSMOS and NEAR. We empower
+                Creators and Brands by connecting them with AR and VR.
+              </TextContent>
               <HStack spacing={3}>
                 <Button
                   as="a"
@@ -96,47 +103,33 @@ export const FooterBar = () => {
               </HStack>
             </ContainerForColumn>
           </Stack>
+          <Stack width="10%" />
           <Stack width="20%">
             <ContainerForColumn className="bottom-quick-section">
               <h3 className="desktop-section">MARBLE</h3>
               <ContainerForFooterLinks
                 className={`footer-links ${openQuickNav ? "open" : "close"}`}
               >
-                <Link href="#" passHref>
+                <a
+                  href="https://app.marbledao.finance/dashboard"
+                  target="__blank"
+                >
                   Feed
-                </Link>
-                <Link href="#" passHref>
+                </a>
+                <Link href="/explore" passHref>
                   Browse
                 </Link>
-                <Link href="/transfer" passHref>
+                <a href="https://near.marbledao.finance" target="__blank">
                   DeFi
-                </Link>
+                </a>
               </ContainerForFooterLinks>
             </ContainerForColumn>
           </Stack>
           <Stack width="20%">
             <ContainerForColumn className="bottom-community-section">
               <h3 className="desktop-section">COMMUNITY</h3>
-              <h3
-                className={`mobile-section collapse-header ${
-                  openCommunityNav ? "open" : "close"
-                }`}
-                onClick={() => {
-                  setOpenCommunityNav(!openCompanyNav);
-                }}
-              >
-                Community
-                {openCommunityNav ? (
-                  <IconWrapper icon={<CollapseUp />} />
-                ) : (
-                  <IconWrapper icon={<CollapseDown />} />
-                )}
-              </h3>
-              <ContainerForFooterLinks
-                className={`footer-links ${
-                  openCommunityNav ? "open" : "close"
-                }`}
-              >
+
+              <ContainerForFooterLinks>
                 <Link href={process.env.NEXT_PUBLIC_MEDIUM_LINK} passHref>
                   Medium
                 </Link>
@@ -155,24 +148,8 @@ export const FooterBar = () => {
           <Stack width="10%">
             <ContainerForColumn className="bottom-company-section">
               <h3 className="desktop-section">Company</h3>
-              <h3
-                className={`mobile-section collapse-header ${
-                  openCompanyNav ? "open" : "close"
-                }`}
-                onClick={() => {
-                  setOpenCompanyNav(!openCompanyNav);
-                }}
-              >
-                Company
-                {openCompanyNav ? (
-                  <IconWrapper icon={<CollapseUp />} />
-                ) : (
-                  <IconWrapper icon={<CollapseDown />} />
-                )}
-              </h3>
-              <ContainerForFooterLinks
-                className={`footer-links ${openCompanyNav ? "open" : "close"}`}
-              >
+
+              <ContainerForFooterLinks>
                 <Link href="https://marbledao.finance" passHref>
                   Home
                 </Link>
@@ -203,58 +180,106 @@ export const FooterBar = () => {
     </ChakraProvider>
   );
 };
-const HorizontalDivider = styled("div", {
-  height: 0,
-  border: "1px solid #363B4E",
-  width: "80%",
-  margin: "40px 0",
-});
-const StyledImage = styled("img", {
-  // width: "50px",
-  marginRight: "10px",
-});
-const StyledLogo = styled("div", {
-  display: "flex",
-  flexDirection: "row",
-});
-const ContainerForColumn = styled("div", {
-  display: "flex",
-  minWidth: "180px",
-  flexDirection: "column",
-  " h3": {
-    fontSize: "22px",
-    fontWeight: "700",
-    marginBottom: "10px",
-  },
-});
 
-const ContainerForFooterLinks = styled("div", {
-  display: "flex",
-  flexDirection: "column",
-  " a": {
-    padding: "15px",
-    color: "$textColors$white",
-    fontSize: "16px",
-    opacity: "0.5",
-  },
-  height: "100%",
-});
-const StyledFooter = styled("footer", {
-  color: "white",
-  position: "relative",
-  padding: "200px 0 50px 0",
-  display: "flex",
-  justifyContent: "center",
-  flexDirection: "column",
-  alignItems: "center",
-  backgroundImage: `url(/images/CurveLine.svg)`,
-  backgroundPosition: "center",
-  backgroundRepeat: "no-repeat",
-  backgroundSize: "cover",
-});
+const HorizontalDivider = styled.div`
+  height: 0;
+  border: 1px solid #363b4e;
+  width: 80%;
+  margin: 40px 0;
+`;
 
-const FooterText = styled("div", {
-  fontSize: "16px",
-  textAlign: "center",
-  opacity: "0.5",
-});
+const StyledImage = styled.img`
+  margin-right: 10px;
+  width: 200px;
+`;
+
+const StyledLogo = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
+const ContainerForColumn = styled.div`
+  display: flex;
+  min-width: 180px;
+  flex-direction: column;
+  h3 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  @media (max-width: 1550px) {
+    h3 {
+      font-size: 18px;
+    }
+  }
+`;
+const ContainerForFooterLinks = styled.div`
+  display: flex;
+  flex-direction: column;
+  a {
+    padding: 15px;
+    color: white;
+    font-size: 16px;
+    opacity: 0.5;
+    font-family: Mulish;
+  }
+  height: 100%;
+  @media (max-width: 1550px) {
+    a {
+      padding: 12px;
+      color: white;
+      font-size: 16px;
+      opacity: 0.5;
+    }
+  }
+`;
+
+const StyledFooter = styled.footer`
+  color: white;
+  position: relative;
+  /* background: transparent; */
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  padding: 150px 0 50px 0;
+  &:before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url(/images/CurveLine.svg);
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  /* background-image: url(/images/CurveLine.svg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: top; */
+  /* & > img {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+  } */
+`;
+const TextContent = styled.div`
+  color: white;
+  font-size: 18px;
+  padding: 20px 0;
+  line-height: 32px;
+  font-family: Mulish;
+  opacity: 0.5;
+  @media (max-width: 1550px) {
+    font-size: 16px;
+  }
+`;
+const FooterText = styled.div`
+  font-size: 16px;
+  text-align: center;
+  opacity: 0.5;
+`;

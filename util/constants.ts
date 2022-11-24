@@ -45,3 +45,7 @@ export const __TRANSFERS_ENABLED__ = JSON.parse(
 /* /feature flags */
 export const backend_url = "https://marble-juno-backend.herokuapp.com";
 // export const backend_url = "http://localhost:3030";
+export const PINATA_PRIMARY_IMAGE_SIZE =
+  process.env.NEXT_PUBLIC_PINATA_PRIMARY_IMAGE_SIZE;
+export const PINATA_SECONDARY_IMAGE_SIZE =
+  process.env.NEXT_PUBLIC_PINATA_SECONDARY_IMAGE_SIZE;

@@ -23,6 +23,7 @@ import {
   getRealTokenAmount,
   getFileTypeFromURL,
 } from "services/nft";
+import { SecondGradientBackground } from "styles/styles";
 
 const CollectionInfo = ({ info }) => {
   const [nfts, setNfts] = useState([]);
@@ -36,7 +37,7 @@ const CollectionInfo = ({ info }) => {
       const cw721Contract = CW721(info.cw721_address).use(client);
       let tokenIdsInfo = await cw721Contract.allTokens();
 
-      let tokenIds = tokenIdsInfo.tokens.slice(0, 4);
+      let tokenIds = tokenIdsInfo.tokens.slice(0, 3);
       let collectionNFTs = [];
       for (let i = 0; i < tokenIds.length; i++) {
         let nftInfo = await cw721Contract.nftInfo(tokenIds[i]);
@@ -101,7 +102,7 @@ const CollectionInfo = ({ info }) => {
           )}
         </Flex>
         <Grid
-          templateColumns="repeat(4, 1fr)"
+          templateColumns="repeat(3, 1fr)"
           gap={6}
           overflowX="auto"
           overflowY="hidden"
@@ -141,16 +142,15 @@ const CollectionInfo = ({ info }) => {
   );
 };
 
-const Container = styled.div`
-  border-radius: 30px;
-  background: rgba(255, 255, 255, 0.06);
-  border: rgba(255, 255, 255, 0.2);
-  box-shadow: 0px 7px 14px 0px #0000001a;
-  backdrop-filter: blur(30px);
+const Container = styled(SecondGradientBackground)`
+  &:before {
+    border-radius: 30px;
+    opacity: 0.3;
+  }
   margin: 10px 0;
-  padding: 40px 0 20px 0;
+  padding: 30px 0 20px 0;
   height: 100%;
-  @media (max-width: 480px) {
+  @media (max-width: 650px) {
     padding: 10px 0 10px 0;
   }
 `;
@@ -176,23 +176,22 @@ const ImgDiv = styled.div`
     padding-bottom: 55px;
     width: 55px;
   }
-  @media (max-width: 480px) {
+  @media (max-width: 650px) {
     width: 50px;
   }
 `;
-const CreatorInfo = styled.div`
-  background: rgba(255, 255, 255, 0.06);
-  border: rgba(255, 255, 255, 0.2);
-  border-radius: 60px;
+const CreatorInfo = styled(SecondGradientBackground)`
+  &:before {
+    opacity: 0.7;
+    border-radius: 60px;
+  }
   display: flex;
   padding: 10px;
   align-items: center;
   height: 70px;
-  width: 210px;
   justify-content: space-around;
   @media (max-width: 1550px) {
     height: 50px;
-    width: 160px;
   }
 `;
 
@@ -202,17 +201,16 @@ const Title = styled.div`
   @media (max-width: 1550px) {
     font-size: 23px;
   }
-  @media (max-width: 480px) {
+  @media (max-width: 650px) {
     font-size: 16px;
   }
 `;
 const SubTitle = styled.div`
   font-size: 20px;
-  font-weight: 600;
   @media (max-width: 1550px) {
     font-size: 15px;
   }
-  @media (max-width: 480px) {
+  @media (max-width: 650px) {
     font-size: 12px;
   }
 `;

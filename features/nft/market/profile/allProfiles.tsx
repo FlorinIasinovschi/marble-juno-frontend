@@ -13,7 +13,8 @@ import { getAllUsers, getFilteredUsers } from "hooks/useProfile";
 import { Sort, Filter, CloseCircle } from "icons";
 import ProfileCard from "components/profile/ProfileCard";
 import Link from "next/link";
-import { isMobile } from "util/device";
+import { isMobile, isPC } from "util/device";
+import { GradientBackground } from "styles/styles";
 
 const AllProfiles = ({ profileCounts }) => {
   const [profiles, setProfiles] = useState([]);
@@ -71,7 +72,7 @@ const AllProfiles = ({ profileCounts }) => {
   };
   return (
     <Container>
-      {isMobile() ? (
+      {!isPC() ? (
         <HStack justifyContent="space-between" paddingBottom="20px">
           <MobileSortWrapper onClick={() => setFilterShow(true)}>
             Filter
@@ -181,7 +182,7 @@ const AllProfiles = ({ profileCounts }) => {
         endMessage={<h4></h4>}
       >
         <ProfilesContainer>
-          {!isMobile() && (
+          {isPC() && (
             <SortComponent>
               <p>Sort by</p>
               <SortWrapper onClick={() => setAsc(!asc)}>
@@ -220,18 +221,15 @@ const Container = styled.div`
   }
   h1 {
     font-size: 24px;
-    font-weight: 700;
   }
   h2 {
     font-size: 18px;
-    font-weight: 700;
   }
   h3 {
     font-size: 16px;
     font-family: Mulish;
-    font-weight: 700;
   }
-  @media (max-width: 480px) {
+  @media (max-width: 1024px) {
     display: flex;
     flex-direction: column;
     padding: 20px 0;
@@ -247,15 +245,16 @@ const ProfilesContainer = styled.div`
   @media (max-width: 1550px) {
     padding: 0 30px;
   }
-  @media (max-width: 480px) {
+  @media (max-width: 1024px) {
     padding: 0 0px;
+    grid-template-columns: 1fr 1fr 1fr;
   }
 `;
-const Card = styled.div`
-  background: rgba(05, 06, 22, 0.2);
-  box-shadow: 0px 4px 40px rgba(42, 47, 50, 0.09), inset 0px 7px 24px #6d6d78;
-  backdrop-filter: blur(40px);
-  border-radius: 20px;
+const Card = styled(GradientBackground)`
+  &:before {
+    opacity: 0.2;
+    border-radius: 20px;
+  }
   padding: 30px;
   @media (max-width: 1550px) {
   }
@@ -268,7 +267,7 @@ const HorizontalDivider = styled.div`
 const SortComponent = styled.div`
   position: absolute;
   right: 60px;
-  top: -100px;
+  top: 60px;
   display: flex;
   align-items: center;
   p {
@@ -292,6 +291,7 @@ const SortWrapper = styled.div`
     rgba(255, 255, 255, 0.06) 0%,
     rgba(255, 255, 255, 0.06) 100%
   );
+  width: 150px;
   box-shadow: 0px 7px 14px rgba(0, 0, 0, 0.1),
     inset 0px 14px 24px rgba(17, 20, 29, 0.4);
   backdrop-filter: blur(30px);
@@ -332,8 +332,6 @@ const MobileFilterWrapper = styled.div`
   bottom: 0;
   left: 0;
   background: #171a29;
-  box-shadow: 0px 4px 40px rgba(42, 47, 50, 0.09),
-    inset 0px 7px 24px rgba(109, 109, 120, 0.22);
   backdrop-filter: blur(40px);
   /* Note: backdrop-filter has minimal browser support */
 

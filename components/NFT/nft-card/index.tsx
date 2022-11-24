@@ -10,11 +10,12 @@ import {
   NftInfo,
   useSdk,
 } from "services/nft";
+import { GradientBackground } from "styles/styles";
 import styled from "styled-components";
-// interface NftCardProps {
-//   readonly nft: NftInfo;
-//   readonly type: string;
-// }
+import {
+  PINATA_PRIMARY_IMAGE_SIZE,
+  PINATA_SECONDARY_IMAGE_SIZE,
+} from "util/constants";
 
 const saleType = {
   NotSale: "NOT ON SALE",
@@ -29,65 +30,6 @@ const backgroundColor = {
 };
 
 export function NftCard({ nft, type }: any): JSX.Element {
-  // useEffect(() => {
-  //   (async () => {
-  //     const response = await fetch(
-  //       process.env.NEXT_PUBLIC_COLLECTION_TOKEN_LIST_URL
-  //     );
-  //     const paymentTokenList = await response.json();
-  //     let paymentTokensAddress = [];
-  //     for (let i = 0; i < paymentTokenList.tokens.length; i++) {
-  //       paymentTokensAddress.push(paymentTokenList.tokens[i].address);
-  //     }
-
-  //     const marketContract = Market(process.env.NEXT_PUBLIC_MARKETPLACE).use(
-  //       client
-  //     );
-  //     let collection = await marketContract.collection(
-  //       Number(nft.collectionId)
-  //     );
-  //     const cwCollectionContract = Collection(
-  //       collection.collection_address
-  //     ).use(client);
-  //     const cw721Contract = CW721(collection.cw721_address).use(client);
-  //     let sales: any = await cwCollectionContract.getSales();
-  //     let saleIds = [];
-  //     for (let i = 0; i < sales.length; i++) {
-  //       saleIds.push(sales[i].token_id);
-  //     }
-
-  //     nft.paymentToken = {};
-  //     nft.price = "0";
-  //     nft.symbol = "Marble";
-  //     nft.sale = {};
-  //     nft.user = await cw721Contract.ownerOf(nft.tokenId);
-  //     // setTokenInfo(await cw721Contract.nftInfo(nft.tokenId));
-  //     if (saleIds.indexOf(parseInt(nft.tokenId)) != -1) {
-  //       let sale = sales[saleIds.indexOf(parseInt(nft.tokenId))];
-  //       let paymentToken: any;
-  //       if (sale.denom.hasOwnProperty("cw20")) {
-  //         paymentToken =
-  //           paymentTokenList.tokens[
-  //             paymentTokensAddress.indexOf(sale.denom.cw20)
-  //           ];
-  //       } else {
-  //         paymentToken =
-  //           paymentTokenList.tokens[
-  //             paymentTokensAddress.indexOf(sale.denom.native)
-  //           ];
-  //       }
-  //       nft.symbol = paymentToken.symbol;
-  //       nft.paymentToken = paymentToken;
-  //       nft.price = getRealTokenAmount({
-  //         amount: sale.initial_price,
-  //         denom: paymentToken.denom,
-  //       }).toString();
-  //       nft.user = sale.provider;
-  //       nft.sale = sale;
-  //       setShowNft(nft);
-  //     }
-  //   })();
-  // }, [nft, client]);
   return (
     <NftCardDiv
       className="nft-card"
@@ -115,7 +57,10 @@ export function NftCard({ nft, type }: any): JSX.Element {
         {nft.type == "image" && (
           <ImgDiv className="nft-img-url">
             {" "}
-            <Image src={nft.image} alt="NFT Image" />
+            <Image
+              src={nft.image + PINATA_PRIMARY_IMAGE_SIZE}
+              alt="NFT Image"
+            />
           </ImgDiv>
         )}
 
@@ -217,15 +162,20 @@ export function NftCard({ nft, type }: any): JSX.Element {
     </NftCardDiv>
   );
 }
-
-const NftCardDiv = styled.div<{ color: string; revertColor: boolean }>`
-  border-radius: 20px;
-  box-shadow: 0px 4px 40px rgba(42, 47, 50, 0.09), inset 0px 7px 24px #6d6d78;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+const NftCardDiv = styled(GradientBackground)<{
+  color: string;
+  revertColor: boolean;
+}>`
+  &:before {
+    border-radius: 20px;
+    opacity: 0.2;
+  }
   background: ${({ color }) => color};
+  border-radius: 20px;
   padding: 30px;
   height: 100%;
   width: 100%;
+  min-width: 320px;
   cursor: pointer;
   color: ${({ revertColor }) => (revertColor ? "black" : "white")};
   @media (max-width: 1550px) {
@@ -238,7 +188,7 @@ const NftCardDiv = styled.div<{ color: string; revertColor: boolean }>`
       font-size: 16px;
     }
   }
-  @media (max-width: 480px) {
+  @media (max-width: 800px) {
     width: 320px;
   }
 `;
@@ -252,7 +202,6 @@ const Title = styled.div`
   }
 `;
 const Value = styled.div`
-  margin-top: 3px;
   font-size: 18px;
   @media (max-width: 1550px) {
     font-size: 14px;
