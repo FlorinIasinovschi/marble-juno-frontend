@@ -3,6 +3,8 @@ import {
   SigningCosmWasmClient,
 } from "@cosmjs/cosmwasm-stargate";
 import { Coin } from "@cosmjs/stargate";
+import { coin } from '@cosmjs/launchpad'
+import { convertDenomToMicroDenom } from 'util/conversion'
 
 export interface ContractConfig {
   airdrop: boolean;
@@ -50,10 +52,7 @@ export interface MarbleTxInstance {
     uri: string[],
     price: number[]
   ) => Promise<string>;
-  buyNative: (
-    sender: string,
-    tokenId?: Record<string, number>
-  ) => Promise<string>;
+  buyNative: (sender: string  ) => Promise<string>;
   moveNative: (tokenId: string, receipient: string) => Promise<string>;
   registerMerkleRoot: (
     merkle_root: string,
@@ -108,18 +107,19 @@ export const Marble = (contractAddress: string): MarbleContract => {
       gas: "400000",
     };
 
-    const buyNative = async (
-      sender: string,
-      tokenId?: Record<string, number>
-    ): Promise<string> => {
+    const buyNative = async (sender: string): Promise<string> => {
       const result = await client.execute(
         sender,
         contractAddress,
-        { buy_native: { token_id: tokenId } },
-        defaultFee
-      );
-      return result.transactionHash;
-    };
+        // { buy_native: {} },
+        { buy: {} },
+        defaultFee,
+        undefined,
+        [coin(convertDenomToMicroDenom(1 * 8000000), 'ujuno')]
+      )
+      return result.transactionHash
+    }
+;
 
     const batchMint = async (
       sender: string,
