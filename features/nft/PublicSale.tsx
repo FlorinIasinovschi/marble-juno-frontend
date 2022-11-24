@@ -5,11 +5,11 @@ export function PublicSale({ price, maxToken }) {
   return (
     <>
       <StyledSaleHeader>
-        <h2>Public sale</h2>
-        <span className="sale-status">Coming soon</span>
+        <Text variant="secondary">Marblenauts</Text>
+        <Text variant="secondary">Minting started</Text>
       </StyledSaleHeader>
       <StyledGroup>
-        <Text>Price {price} Juno</Text>
+        <Text variant="primary">Price 8 Juno</Text>
         {/*<Text className="point" css={{marginLeft: '$4',}}>Max {maxToken} tokens</Text>*/}
       </StyledGroup>
     </>

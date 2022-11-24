@@ -10,7 +10,7 @@ export function NFTStatus({ totalNFTs, royalties, mintedNFTs }) {
           <h3>{totalNFTs}</h3>
         </StyledNFTInfo>
         <StyledNFTInfo>
-          <Text>Royalties</Text>
+          <Text>Fees</Text>
           <h3>{Number((royalties / totalNFTs * 100).toFixed(2))}%</h3>
         </StyledNFTInfo>
         <StyledNFTInfo>
