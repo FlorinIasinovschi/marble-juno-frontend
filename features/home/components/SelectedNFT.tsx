@@ -80,10 +80,11 @@ const SelectedNFT = () => {
           res_collection.logo +
           PINATA_SECONDARY_IMAGE_SIZE,
         collection_name: res_collection.name,
-        nft_uri:
-          process.env.NEXT_PUBLIC_PINATA_URL +
-          res_nft.uri +
-          PINATA_PRIMARY_IMAGE_SIZE,
+        nft_uri: res_nft.uri.includes("https://")
+          ? res_nft.uri + PINATA_PRIMARY_IMAGE_SIZE
+          : process.env.NEXT_PUBLIC_PINATA_URL +
+            res_nft.uri +
+            PINATA_PRIMARY_IMAGE_SIZE,
         price: res_nft.price,
         paymentToken: res_nft.paymentToken,
       };
