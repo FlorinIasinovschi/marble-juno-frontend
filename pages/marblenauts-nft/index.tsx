@@ -43,7 +43,8 @@ interface StakeConfigType {
   total_supply: number;
   end_date: number;
 }
-
+const collection_address =
+  "juno16hjg4c5saxqqa3cwfx7aw9vzapqna7fn2xprttge888lw0zlw5us87nv8x";
 export default function StakePage() {
   const [maxToken, setMaxToken] = useState(0);
   const [soldCnt, setSoldCnt] = useState(0);
@@ -64,59 +65,14 @@ export default function StakePage() {
   const { client } = useSdk();
   const [collection, setCollection] = useState<NftCollection>();
   const { address, client: signingClient } = useRecoilValue(walletState);
-  const [stakeConfig, setStakeConfig] = useState<StakeConfigType>({
-    daily_reward: "0",
-    enabled: false,
-    cw20_address: "",
-    interval: 0,
-    lock_time: 0,
-    collection_address: "",
-    cw721_address: "",
-    total_supply: 0,
-    end_date: 0,
-  });
-  const [rCount, setRCount] = useState(0);
-  const [userStakeInfo, setUserStakeInfo] = useState<UserStakeInfoType>({
-    address: "",
-    claimed_amount: "0",
-    unclaimed_amount: "0",
-    create_unstake_timestamp: 0,
-    token_ids: [],
-    last_timestamp: 0,
-    claimed_timestamp: 0,
-  });
-  const [ownedNfts, setOwnedNfts] = useState([]);
   useEffect(() => {
     (async () => {
       if (!client || !address) {
         return;
       }
-      const stakeContract = Stake(PUBLIC_STAKE_ADDRESS).use(client);
       try {
-        const userStakeInfo = await stakeContract.getStaking(address);
-        console.log("userStakeInfo: ", userStakeInfo);
-        setUserStakeInfo(userStakeInfo);
-      } catch (err) {
-        setUserStakeInfo({
-          address: "",
-          claimed_amount: "0",
-          unclaimed_amount: "0",
-          create_unstake_timestamp: 0,
-          token_ids: [],
-          last_timestamp: 0,
-          claimed_timestamp: 0,
-        });
-      }
-      try {
-        const _stakeConfig = await stakeContract.getConfig();
-        const collectionContract = Collection(
-          _stakeConfig.collection_address
-        ).use(client);
+        const collectionContract = Collection(collection_address).use(client);
         const collectionConfig = await collectionContract.getConfig();
-        setStakeConfig({
-          ..._stakeConfig,
-          cw721_address: collectionConfig.cw721_address,
-        });
         let res_collection: any = {};
         let ipfs_collection = await fetch(
           process.env.NEXT_PUBLIC_PINATA_URL + collectionConfig.uri
@@ -146,23 +102,7 @@ export default function StakePage() {
         console.error(e);
       }
     })();
-  }, [client, address, rCount]);
-  console.log("stakeConfig: ", stakeConfig);
-  useEffect(() => {
-    (async () => {
-      if (!client || !address) {
-        return;
-      }
-      try {
-        const cw721Contract = CW721(stakeConfig.cw721_address).use(client);
-        const tokenIdsInfo = await cw721Contract.tokens(address);
-        const tokenIds = tokenIdsInfo.tokens;
-        setOwnedNfts(tokenIds);
-      } catch (err) {
-        console.log("get ownedToekns Error: ", err);
-      }
-    })();
-  }, [stakeConfig, client, address]);
+  }, [client, address]);
 
   const loadNfts = useCallback(async () => {
     if (!client) return;
@@ -176,7 +116,7 @@ export default function StakePage() {
     const numTokens = await contract.numTokens();
 
     setMintedNFTs(numTokens);
-  }, [client]);
+  }, [client, PUBLIC_NFTSALE_CONTRACT]);
 
   const onBuy = useCallback(async () => {
     const now = new Date();
@@ -195,9 +135,25 @@ export default function StakePage() {
     const contract = Marble(PUBLIC_NFTSALE_CONTRACT).use(client);
     const marbleContract = Marble(PUBLIC_NFTSALE_CONTRACT).useTx(signingClient);
     const result = await marbleContract.buyNative(address, price);
+    toast.success(`Successfully Claimed`, {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
     console.log(result);
     loadNfts();
-  }, [address, signingClient, client, loadNfts, price]);
+  }, [
+    address,
+    signingClient,
+    client,
+    loadNfts,
+    price,
+    PUBLIC_NFTSALE_CONTRACT,
+  ]);
   useEffect(() => {
     loadNfts();
   }, [loadNfts]);

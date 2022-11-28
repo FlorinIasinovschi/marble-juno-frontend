@@ -35,6 +35,7 @@ export interface CollectionInstance {
   getSales: () => Promise<SaleResponse[]>;
   getPrice: (token_id: number[]) => Promise<number>;
   getConfig: () => Promise<CollectionContractConfig>;
+  getSale: (id: number) => Promise<SaleResponse>;
 }
 export interface NftBulkExtension {}
 export interface CollectionTxInstance {
@@ -94,6 +95,14 @@ export const Collection = (contractAddress: string): CollectionContract => {
       });
       return result.list;
     };
+    const getSale = async (id: number): Promise<SaleResponse> => {
+      const result = await client.queryContractSmart(contractAddress, {
+        get_sale: {
+          token_id: id,
+        },
+      });
+      return result;
+    };
     const getPrice = async (token_id: number[]): Promise<number> => {
       const result = await client.queryContractSmart(contractAddress, {
         get_price: { token_id: token_id },
@@ -105,6 +114,7 @@ export const Collection = (contractAddress: string): CollectionContract => {
       getConfig,
       getSales,
       getPrice,
+      getSale,
     };
   };
   const useTx = (

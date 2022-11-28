@@ -124,7 +124,6 @@ export default function StakePage() {
       }
     })();
   }, [client, address, rCount]);
-  console.log("stakeConfig: ", stakeConfig);
   useEffect(() => {
     (async () => {
       if (!client || !address) {
@@ -156,6 +155,15 @@ export default function StakePage() {
         ownedNfts[selectedNum],
         encodedMsg
       );
+      toast.success(`Successfully Staked`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
       setRCount(rCount + 1);
     } catch (err) {}
   };
@@ -174,6 +182,15 @@ export default function StakePage() {
       } else {
         const fetchUnstakeResult = await stakeContract.fetchUnstake(address);
       }
+      toast.success(`Successfully Unstaked`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
       setRCount(rCount + 1);
     } catch (err) {
       console.log("unstakeError: ", err);
@@ -183,8 +200,17 @@ export default function StakePage() {
   const handleClaim = async () => {
     const stakeContract = Stake(PUBLIC_STAKE_ADDRESS).useTx(signingClient);
     try {
-      const handleClaimResult = await stakeContract.claim(address);
+      await stakeContract.claim(address);
       setRCount(rCount + 1);
+      toast.success(`Successfully Claimed`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
     } catch (err) {
       console.log("error: ", err);
       toast.error(`Insufficient funds.`, {
@@ -208,7 +234,6 @@ export default function StakePage() {
       convertMicroDenomToDenom(userStakeInfo.unclaimed_amount, 6)
     );
   };
-  console.log("userStakedInfo: ", userStakeInfo);
   const getDailyRewards = () => {
     if (
       stakeConfig.total_supply === 0 ||
@@ -299,25 +324,23 @@ export default function StakePage() {
     </AppLayout>
   );
 }
-
-const Container = styled.div`
-  max-width: 1000px;
+export const Container = styled.div`
+  max-width: 1200px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
 `;
-const Header = styled.div`
+export const Header = styled.div`
   font-size: 50px;
   font-weight: 700;
   padding-bottom: 20px;
   @media (max-width: 1550px) {
-    font-size: 40px;
     font-weight: 500;
     margin-top: 20px;
   }
 `;
-const StakingCardWrapper = styled(SecondGradientBackground)`
+export const StakingCardWrapper = styled(SecondGradientBackground)`
   &:before {
     border-radius: 20px;
     opacity: 0.5;
@@ -325,7 +348,7 @@ const StakingCardWrapper = styled(SecondGradientBackground)`
   padding: 40px;
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr 3fr;
+  grid-template-columns: 1fr 2.5fr;
   @media (max-width: 1550px) {
     padding: 20px;
   }
@@ -337,9 +360,9 @@ const StakingCardWrapper = styled(SecondGradientBackground)`
     padding: 10px;
   }
 `;
-const CollectionCardWrapper = styled.div``;
+export const CollectionCardWrapper = styled.div``;
 
-const CollectionContent = styled.div`
+export const CollectionContent = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -349,18 +372,14 @@ const CollectionContent = styled.div`
     font-size: 42px;
     font-weight: 500;
   }
-  @media (max-width: 1550px) {
-    h1 {
-      font-size: 36px;
-    }
-  }
+
   @media (max-width: 1024px) {
     text-align: center;
     padding-left: 0;
   }
 `;
 
-const StakingInfoContainer = styled.div`
+export const StakingInfoContainer = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   row-gap: 30px;
@@ -369,7 +388,7 @@ const StakingInfoContainer = styled.div`
     flex-direction: column;
   }
 `;
-const InfoContent = styled.div`
+export const InfoContent = styled.div`
   h2 {
     font-size: 28px;
     font-weight: 500;
@@ -378,14 +397,6 @@ const InfoContent = styled.div`
     font-size: 26px;
     font-weight: 500;
     opacity: 0.5;
-  }
-  @media (max-width: 1550px) {
-    h2 {
-      font-size: 20px;
-    }
-    h3 {
-      font-size: 16px;
-    }
   }
   @media (max-width: 650px) {
     display: flex;
@@ -411,20 +422,20 @@ export const ButtonWrapper = styled.div`
   }
 `;
 
-const OwnedNftsContainer = styled.div`
+export const OwnedNftsContainer = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 20px;
   width: 100%;
   margin-top: 50px;
 `;
-const CountDownWrapper = styled.div`
+export const CountDownWrapper = styled.div`
   display: flex;
   align-items: center;
   font-size: 28px;
   font-weight: 700;
 `;
-const StyledButton = styled(Button)`
+export const StyledButton = styled(Button)`
   background: white;
   color: black;
   stroke: black;

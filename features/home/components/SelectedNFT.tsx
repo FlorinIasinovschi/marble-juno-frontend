@@ -3,7 +3,13 @@ import Link from "next/link";
 import styled from "styled-components";
 import { Stack, Text, HStack } from "@chakra-ui/react";
 import { RoundedIconComponent } from "components/RoundedIcon";
-import { CW721, Market, useSdk } from "services/nft";
+import {
+  CW721,
+  Market,
+  useSdk,
+  Collection,
+  getRealTokenAmount,
+} from "services/nft";
 import { GradientBackground, SecondGradientBackground } from "styles/styles";
 import {
   PINATA_PRIMARY_IMAGE_SIZE,
@@ -19,9 +25,12 @@ const SelectedNFT = () => {
     (async () => {
       if (!client) return;
       const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
-      let collection = await marketContract.collection(5);
+      let collection = await marketContract.collection(9);
       let ipfs_collection = await fetch(
         process.env.NEXT_PUBLIC_PINATA_URL + collection.uri
+      );
+      const collectionContract = Collection(collection.collection_address).use(
+        client
       );
       let res_collection = await ipfs_collection.json();
       const cw721Contract = CW721(collection.cw721_address).use(client);
@@ -30,14 +39,50 @@ const SelectedNFT = () => {
         process.env.NEXT_PUBLIC_PINATA_URL + nftInfo.token_uri
       );
       let res_nft = await ipfs_nft.json();
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_COLLECTION_TOKEN_LIST_URL
+      );
+      let paymentTokensAddress = [];
+      const paymentTokenList = await response.json();
+      for (let i = 0; i < paymentTokenList.tokens.length; i++) {
+        paymentTokensAddress.push(paymentTokenList.tokens[i].address);
+      }
+      try {
+        const sale: any = await collectionContract.getSale(1);
+        console.log("sale: ", sale);
+        let paymentToken: any;
+        if (sale.denom.hasOwnProperty("cw20")) {
+          paymentToken =
+            paymentTokenList.tokens[
+              paymentTokensAddress.indexOf(sale.denom.cw20)
+            ];
+        } else {
+          paymentToken =
+            paymentTokenList.tokens[
+              paymentTokensAddress.indexOf(sale.denom.native)
+            ];
+        }
+        res_nft["paymentToken"] = paymentToken;
+        res_nft["price"] = getRealTokenAmount({
+          amount: sale.initial_price,
+          denom: paymentToken?.denom,
+        });
+        res_nft["owner"] = sale.provider;
+        res_nft["sale"] = sale;
+      } catch (err) {
+        res_nft["price"] = 0;
+        res_nft["sale"] = {};
+      }
       const show_data = {
-        creator: collection.owner,
+        creator: res_nft.owner,
         collection_logo:
           process.env.NEXT_PUBLIC_PINATA_URL +
           res_collection.logo +
           PINATA_SECONDARY_IMAGE_SIZE,
         collection_name: res_collection.name,
         nft_uri: res_nft.uri + PINATA_PRIMARY_IMAGE_SIZE,
+        price: res_nft.price,
+        paymentToken: res_nft.paymentToken,
       };
       setShowData(show_data);
     })();
@@ -66,6 +111,18 @@ const SelectedNFT = () => {
             </Info>
           </MiniInfoCard>
         </HStack>
+        {showData.price ? (
+          <PriceArea>
+            <p>Price</p>
+            <HStack alignItems="center">
+              <h1>
+                {Number(showData.price.toFixed(2))} {showData.paymentToken.name}
+              </h1>
+            </HStack>
+          </PriceArea>
+        ) : (
+          <div />
+        )}
         <Stack>
           <Link href="/nft/9/1" passHref>
             <StyledButton>View Nft</StyledButton>
@@ -90,7 +147,7 @@ const StyledButton = styled.button`
   color: black;
   font-size: 18px;
   font-weight: bold;
-  margin-top: 70px;
+  margin-top: 20px;
   @media (max-width: 800px) {
     width: 100%;
   }

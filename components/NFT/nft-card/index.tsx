@@ -2,14 +2,7 @@ import { Flex, HStack, Stack } from "@chakra-ui/react";
 import { RoundedIconComponent } from "components/RoundedIcon";
 import DateCountdown from "components/DateCountdownMin";
 import { useEffect, useState } from "react";
-import {
-  Collection,
-  CW721,
-  getRealTokenAmount,
-  Market,
-  NftInfo,
-  useSdk,
-} from "services/nft";
+import { getRealTokenAmount } from "services/nft";
 import { GradientBackground } from "styles/styles";
 import styled from "styled-components";
 import {

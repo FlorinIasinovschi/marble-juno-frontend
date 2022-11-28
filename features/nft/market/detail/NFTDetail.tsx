@@ -4,8 +4,6 @@ import { styled } from "components/theme";
 import { Button } from "components/Button";
 import DateCountdown from "components/DateCountdownMin";
 import { IconWrapper } from "components/IconWrapper";
-import { NftPrice, NftDollarPrice } from "components/NFT/nft-card/price";
-import { LoadingProgress } from "components/LoadingProgress";
 import { User, CopyNft, Heart, Clock, Package, Credit } from "icons";
 import { useHistory, useParams } from "react-router-dom";
 import TransferNFTModal from "./components/TransferNFTModal";
@@ -36,13 +34,11 @@ import {
   Grid,
   HStack,
 } from "@chakra-ui/react";
-import { BuyDialog } from "features/nft/market/detail/BuyDialog";
-import { OfferDialog } from "features/nft/market/detail/OfferDialog";
 import { useDispatch, useSelector } from "react-redux";
 import { State } from "store/reducers";
 import { toast } from "react-toastify";
-import { NFTName, MoreTitle } from "./styled";
-import { isMobile } from "util/device";
+import { NFTName, TokenInfoWrapper, NftBuyOfferTag } from "./styled";
+import { isMobile, isPC } from "util/device";
 import SimpleTable from "./table";
 import OnSaleModal from "./components/OnSaleModal";
 import UpdateMarketModal from "./components/UpdateMarketModal";
@@ -100,8 +96,6 @@ export const NFTDetail = ({ collectionId, id }) => {
     created_at: "",
     description: "",
   });
-  const [isBuyShowing, setIsBuyShowing] = useState(false);
-  const [isOfferShowing, setIsOfferShowing] = useState(false);
   const [collectionInfo, setCollectionInfo] = useState<any>();
 
   const loadNft = useCallback(async () => {
@@ -133,15 +127,9 @@ export const NFTDetail = ({ collectionId, id }) => {
     res_nft["type"] = nft_type.fileType;
     res_nft["created"] = res_nft["owner"];
     res_nft["owner"] = nftInfo.access.owner;
-
     const collectionContract = Collection(collection.collection_address).use(
       client
     );
-    let sales: any = await collectionContract.getSales();
-    let saleIds = [];
-    for (let i = 0; i < sales.length; i++) {
-      saleIds.push(sales[i].token_id);
-    }
     const response = await fetch(
       process.env.NEXT_PUBLIC_COLLECTION_TOKEN_LIST_URL
     );
@@ -151,8 +139,8 @@ export const NFTDetail = ({ collectionId, id }) => {
       paymentTokensAddress.push(paymentTokenList.tokens[i].address);
     }
     res_nft["owner"] = await cw721Contract.ownerOf(id);
-    if (saleIds.indexOf(parseInt(id)) != -1) {
-      let sale = sales[saleIds.indexOf(parseInt(id))];
+    try {
+      let sale: any = await collectionContract.getSale(Number(id));
       let paymentToken: any;
       if (sale.denom.hasOwnProperty("cw20")) {
         paymentToken =
@@ -171,10 +159,8 @@ export const NFTDetail = ({ collectionId, id }) => {
         amount: sale.initial_price,
         denom: paymentToken.denom,
       });
-      res_nft["owner"] = sales[saleIds.indexOf(parseInt(id))].provider;
-      res_nft["sale"] = sales[saleIds.indexOf(parseInt(id))];
       res_nft["owner"] = sale.provider;
-
+      res_nft["sale"] = sale;
       // get highest bid
       if (sale.requests.length > 0) {
         let maxBid = 0;
@@ -192,7 +178,7 @@ export const NFTDetail = ({ collectionId, id }) => {
         });
         setHighestBid(maxBid);
       }
-    } else {
+    } catch (err) {
       res_nft["price"] = 0;
       res_nft["sale"] = {};
     }
@@ -218,16 +204,11 @@ export const NFTDetail = ({ collectionId, id }) => {
       created_at: res_nft.createdDate,
       description: res_nft.description,
     });
-  }, [client]);
+  }, [client, address, collectionId, id]);
 
   useEffect(() => {
     loadNft();
-  }, [loadNft, collectionId, id, reloadCount]);
-
-  useEffect(() => {
-    let rCount = reloadCount + 1;
-    setReloadCount(rCount);
-  }, [dispatch, reload_status]);
+  }, [loadNft, collectionId, id, reloadCount, reload_status]);
 
   const cancelSale = async (e) => {
     e.preventDefault();
@@ -239,10 +220,7 @@ export const NFTDetail = ({ collectionId, id }) => {
     const collectionContract = Collection(collection.collection_address).useTx(
       signingClient
     );
-    let cancel = await collectionContract.cancelSale(
-      address,
-      Number(nft.tokenId)
-    );
+    await collectionContract.cancelSale(address, Number(nft.tokenId));
 
     toast.success(`You have cancelled this NFT successfully.`, {
       position: "top-right",
@@ -457,10 +435,7 @@ export const NFTDetail = ({ collectionId, id }) => {
         <NFTInfoWrapper>
           <NftInfoTag>
             <NFTName>{nft.name}</NFTName>
-            <Stack
-              spacing={isMobile() ? 8 : 20}
-              flexDirection={isMobile() ? "column" : "row"}
-            >
+            <TokenInfoWrapper>
               <Stack spacing={3}>
                 <Text fontSize="14px">Collection</Text>
                 <Link href={`/collection/${collectionId}`} passHref>
@@ -473,34 +448,323 @@ export const NFTDetail = ({ collectionId, id }) => {
                 </Link>
               </Stack>
 
-              <HStack
-                spacing={20}
-                justifyContent="flex-start"
-                marginTop={isMobile() ? "auto" : "0 !important"}
-              >
-                <Stack spacing={3}>
-                  <Text fontSize="14px">Created By</Text>
-                  <HStack>
-                    {nft.created && (
-                      <RoundedIconComponent size="26px" address={nft.created} />
+              <Stack spacing={3}>
+                <Text fontSize="14px">Created By</Text>
+                <HStack>
+                  {nft.created && (
+                    <RoundedIconComponent size="26px" address={nft.created} />
+                  )}
+                </HStack>
+              </Stack>
+
+              <Stack spacing={3}>
+                <Text fontSize="14px">Owned By</Text>
+
+                <HStack>
+                  {nft.user && (
+                    <RoundedIconComponent size="26px" address={nft.user} />
+                  )}
+                </HStack>
+              </Stack>
+            </TokenInfoWrapper>
+            {!isPC() && (
+              <NftInfoTag>
+                {Object.keys(nft.sale).length > 0 ? (
+                  <NftBuyOfferTag className="nft-buy-offer">
+                    {nft.sale.sale_type === "Auction" ? (
+                      <>
+                        {nft.sale.duration_type.Time[0] < time ? (
+                          <NftSale>
+                            <IconWrapper icon={<Clock />} />
+                            {nft.sale.duration_type.Time[1] < time
+                              ? "Auction already ended"
+                              : "Auction ends in"}
+                            {!(nft.sale.duration_type.Time[1] < time) && (
+                              <Text>
+                                <DateCountdown
+                                  dateTo={
+                                    nft.sale.duration_type.Time[1] * 1000 ||
+                                    Date.now()
+                                  }
+                                  dateFrom={
+                                    // nft.sale.duration_type.Time[0] * 1000 ||
+                                    Date.now()
+                                  }
+                                  interval={0}
+                                  mostSignificantFigure="none"
+                                  numberOfFigures={3}
+                                  callback={() => undefined}
+                                />
+                              </Text>
+                            )}
+                          </NftSale>
+                        ) : (
+                          <>
+                            <NftSale>
+                              <IconWrapper icon={<Clock />} />
+                              Auction isn&apos;t started. It will start in
+                              <Text>
+                                <DateCountdown
+                                  dateTo={
+                                    nft.sale.duration_type.Time[0] * 1000 ||
+                                    Date.now()
+                                  }
+                                  dateFrom={
+                                    // nft.sale.duration_type.Time[1] * 1000 ||
+                                    Date.now()
+                                  }
+                                  interval={0}
+                                  mostSignificantFigure="none"
+                                  numberOfFigures={3}
+                                  callback={() => undefined}
+                                />
+                              </Text>
+                            </NftSale>
+                          </>
+                        )}
+                      </>
+                    ) : (
+                      <NftSale>For Sale</NftSale>
                     )}
-                  </HStack>
-                </Stack>
-
-                <Stack spacing={3}>
-                  <Text fontSize="14px">Owned By</Text>
-
-                  <HStack>
-                    {nft.user && (
-                      <RoundedIconComponent size="26px" address={nft.user} />
+                    <PriceTag>
+                      <Grid templateColumns="repeat(3, 1fr)" gap={6} margin="0">
+                        <Stack>
+                          <Text color="rgb(112, 122, 131)" fontSize="14px">
+                            {nft.sale.sale_type === "Auction"
+                              ? "Start price"
+                              : "Current price"}
+                          </Text>
+                          <Span className="owner-address">
+                            {nft.price}&nbsp;
+                            {nft.symbol}
+                          </Span>
+                        </Stack>
+                        {nft.sale.sale_type === "Auction" &&
+                          nft.user === address && (
+                            <Stack>
+                              <Text color="rgb(112, 122, 131)" fontSize="14px">
+                                Reserve Price
+                              </Text>
+                              <Span className="owner-address">
+                                {getRealTokenAmount({
+                                  amount: nft.sale.reserve_price,
+                                  denom: nft.paymentToken.denom,
+                                })}
+                                &nbsp;
+                                {nft.symbol}
+                              </Span>
+                            </Stack>
+                          )}
+                        {nft.sale.sale_type === "Auction" && (
+                          <Stack>
+                            <Text color="rgb(112, 122, 131)">Highest Bid</Text>
+                            {highestBid !== 0 && (
+                              <Span className="owner-address">
+                                {highestBid}&nbsp;
+                                {nft.symbol}
+                              </Span>
+                            )}
+                          </Stack>
+                        )}
+                      </Grid>
+                      {nft.sale.sale_type === "Auction" &&
+                        nft.sale.duration_type.Time[1] < time &&
+                        isBidder &&
+                        highestBid &&
+                        Number(highestBid) <
+                          getRealTokenAmount({
+                            amount: nft.sale.reserve_price,
+                            denom: nft.paymentToken.denom,
+                          }) && (
+                          <Text
+                            margin="10px 0"
+                            fontFamily="Mulish"
+                            fontSize="20px"
+                          >
+                            This auction ended but has not meet the reserve
+                            price. The seller can evaluate and accept the
+                            highest offer.
+                          </Text>
+                        )}
+                      {nft.user === address ? (
+                        <>
+                          {((nft.sale.duration_type.Time &&
+                            nft.sale.duration_type.Time[1] < time) ||
+                            !nft.sale.requests.length) && (
+                            <ButtonGroup>
+                              {parseFloat(nft.price) > 0 &&
+                              !nft.sale.requests.length ? (
+                                <Button
+                                  className="btn-buy btn-default"
+                                  css={{
+                                    background: "$white",
+                                    color: "$black",
+                                    stroke: "$black",
+                                    width: "100%",
+                                    padding: "15px auto",
+                                  }}
+                                  size="large"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    cancelSale(e);
+                                    return false;
+                                  }}
+                                >
+                                  Cancel Marketing
+                                </Button>
+                              ) : (
+                                <Button
+                                  className="btn-buy btn-default"
+                                  css={{
+                                    background: "$white",
+                                    color: "$black",
+                                    stroke: "$black",
+                                    width: "100%",
+                                  }}
+                                  variant="primary"
+                                  size="large"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    acceptSale(e);
+                                    return false;
+                                  }}
+                                >
+                                  Accept Bid
+                                </Button>
+                              )}
+                              {Number(nft.sale.reserve_price) >
+                                Number(nft.sale.requests[0]?.price) && (
+                                <Button
+                                  className="btn-buy btn-default"
+                                  css={{
+                                    background: "$white",
+                                    color: "$black",
+                                    stroke: "$black",
+                                    width: "100%",
+                                    padding: "15px auto",
+                                  }}
+                                  size="large"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    cancelSale(e);
+                                    return false;
+                                  }}
+                                >
+                                  Cancel Marketing
+                                </Button>
+                              )}
+                            </ButtonGroup>
+                          )}
+                        </>
+                      ) : nft.sale.sale_type === "Auction" ? (
+                        <Stack
+                          direction={isMobile() ? "column" : "row"}
+                          alignItems="flex-end"
+                        >
+                          {nft.sale.duration_type.Time[0] < time &&
+                            nft.sale.duration_type.Time[1] > time && (
+                              <Stack paddingTop={10} width="100%">
+                                <OfferModal
+                                  collectionId={collectionId}
+                                  id={id}
+                                  highestBid={highestBid}
+                                  callback={() => {
+                                    setReloadCount(reloadCount + 1);
+                                  }}
+                                />
+                              </Stack>
+                            )}
+                          {isBidder && (
+                            <Button
+                              className="btn-buy btn-default"
+                              css={{
+                                background: "$white",
+                                color: "$black",
+                                stroke: "$black",
+                                width: "100%",
+                              }}
+                              size="large"
+                              onClick={handleCancelBid}
+                            >
+                              Cancel Bid
+                            </Button>
+                          )}
+                        </Stack>
+                      ) : (
+                        <Button
+                          className="btn-buy btn-default"
+                          css={{
+                            background: "$white",
+                            color: "$black",
+                            stroke: "$white",
+                            width: "100%",
+                          }}
+                          size="large"
+                          onClick={handleBy}
+                        >
+                          Buy Now
+                        </Button>
+                      )}
+                    </PriceTag>
+                  </NftBuyOfferTag>
+                ) : (
+                  <NftBuyOfferTag className="nft-buy-offer">
+                    <Text
+                      fontSize="25px"
+                      fontWeight="700"
+                      fontFamily="Mulish"
+                      textAlign="center"
+                    >
+                      {nft.user === address
+                        ? "Manage NFT"
+                        : "This is not for a sale"}
+                    </Text>
+                    {nft.user == address && (
+                      <PriceTag>
+                        <Stack direction="row" spacing={4} marginTop="20px">
+                          {/* OnSaleModal */}
+                          <OnSaleModal
+                            collectionId={collectionId}
+                            id={id}
+                            handleEvent={handleEvent}
+                          />
+                          <TransferNFTModal
+                            nftInfo={{
+                              image: nft.image,
+                              name: nft.name,
+                              owner: nft.user,
+                              sale: {},
+                              type: nft.type,
+                            }}
+                            onHandle={handleTransfer}
+                          />
+                        </Stack>
+                        <BurnNFTModal
+                          nftInfo={{
+                            image: nft.image,
+                            name: nft.name,
+                            owner: nft.user,
+                            sale: {},
+                            type: nft.type,
+                          }}
+                          onHandle={handleBurnNFT}
+                        />
+                      </PriceTag>
                     )}
-                  </HStack>
-                </Stack>
-              </HStack>
-            </Stack>
-
-            {/* TODO: mobile version */}
-            {isMobile() && <></>}
+                  </NftBuyOfferTag>
+                )}
+                {Object.keys(nft.sale).length > 0 &&
+                  nft.sale.requests.length > 0 && (
+                    <Card title="Bid History">
+                      <SimpleTable
+                        data={nft.sale.requests}
+                        unit={""}
+                        paymentToken={nft.paymentToken.denom}
+                      />
+                    </Card>
+                  )}
+              </NftInfoTag>
+            )}
 
             <Stack>
               <Text fontSize={isMobile() ? "24px" : "28px"} fontWeight="700">
@@ -542,7 +806,7 @@ export const NFTDetail = ({ collectionId, id }) => {
             </Stack>
           </NftInfoTag>
 
-          {!isMobile() && (
+          {isPC() && (
             <NftInfoTag>
               {Object.keys(nft.sale).length > 0 ? (
                 <NftBuyOfferTag className="nft-buy-offer">
@@ -599,10 +863,7 @@ export const NFTDetail = ({ collectionId, id }) => {
                       )}
                     </>
                   ) : (
-                    <NftSale>
-                      For Sale
-                      {/* {marketStatus.data.ended_at} */}
-                    </NftSale>
+                    <NftSale>For Sale</NftSale>
                   )}
                   <PriceTag>
                     <Grid templateColumns="repeat(3, 1fr)" gap={6} margin="0">
@@ -850,15 +1111,20 @@ export const NFTDetail = ({ collectionId, id }) => {
 
 const Container = styled("div", {
   padding: "50px",
-  "@media (max-width: 480px)": {
+  "@media (max-width: 1024px)": {
     padding: "20px",
   },
+  "@media (max-width: 650px)": {
+    padding: "5px",
+  },
+  maxWidth: "1700px",
+  margin: "0 auto",
 });
 const NFTInfoWrapper = styled("div", {
   display: "flex",
   justifyContent: "space-between",
   columnGap: "40px",
-  "@media (max-width: 480px)": {
+  "@media (max-width: 1024px)": {
     flexDirection: "column",
     rowGap: "40px",
   },
@@ -870,23 +1136,9 @@ const NftInfoTag = styled("div", {
   display: "flex",
   flexDirection: "column",
   rowGap: "40px",
-  "@media (max-width: 480px)": {
+  "@media (max-width: 1024px)": {
     width: "100%",
     rowGap: "20px",
-  },
-});
-const NftBuyOfferTag = styled("div", {
-  border: "1px solid rgba(255,255,255,0.2)",
-  borderRadius: "30px",
-  padding: "20px",
-  background: "rgba(255,255,255,0.06)",
-  height: "100%",
-  marginBottom: "20px",
-  "@media (max-width: 480px)": {
-    padding: "10px 0",
-    background: "rgba(5,6,21,0.2)",
-    boxShadow:
-      "0px 4px 40px rgba(42, 47, 50, 0.09), inset 0px 7px 24px #6D6D78",
   },
 });
 const NftSale = styled("div", {
@@ -898,8 +1150,12 @@ const NftSale = styled("div", {
   "&.disabled": {
     color: "$textColors$disabled",
   },
-  "@media (max-width: 480px)": {
+  "@media (max-width: 1024px)": {
     padding: "$4 $16",
+  },
+  "@media (max-width: 650px)": {
+    padding: "$4 $4",
+    fontSize: "15px",
   },
 });
 const PriceTag = styled("div", {
@@ -909,8 +1165,11 @@ const PriceTag = styled("div", {
   " .price-lbl": {
     color: "$colors$link",
   },
-  "@media (max-width: 480px)": {
+  "@media (max-width: 1024px)": {
     padding: "$4 $16",
+  },
+  "@media (max-width: 650px)": {
+    padding: "$4 $5",
   },
 });
 const ButtonGroup = styled("div", {
@@ -937,7 +1196,7 @@ const ButtonGroup = styled("div", {
       borderRadius: "2px",
     },
   },
-  "@media (max-width: 480px)": {
+  "@media (max-width: 1024px)": {
     flexDirection: "column",
   },
 });
@@ -945,7 +1204,7 @@ const ButtonGroup = styled("div", {
 const Span = styled("span", {
   fontWeight: "600",
   fontSize: "20px",
-  "@media (max-width: 480px)": {
+  "@media (max-width: 1024px)": {
     fontSize: "16px",
   },
 });
@@ -956,7 +1215,11 @@ const Banner = styled("div", {
   width: "100%",
   display: "block",
   paddingTop: "190px",
-  "@media (max-width: 480px)": {
+  "@media (max-width: 1550px)": {
+    paddingTop: "100px",
+    height: "850px",
+  },
+  "@media (max-width: 1024px)": {
     height: "560px",
     paddingTop: "60px",
   },
@@ -983,12 +1246,12 @@ const NFTImageWrapper = styled("div", {
   display: "block",
   borderRadius: "30px",
   margin: "0 auto",
-  " video": {
-    borderRadius: "30px",
-  },
-  "@media (max-width: 480px)": {
+  "@media (max-width: 1024px)": {
     height: "430px",
     width: "350px",
+  },
+  "@media (max-width: 650px)": {
+    width: "100%",
   },
 });
 const NFTImage = styled("img", {
@@ -1003,7 +1266,7 @@ const NFTImage = styled("img", {
   objectPosition: "center",
   zIndex: "-1",
   borderRadius: "20px",
-  "@media (max-width: 480px)": {
+  "@media (max-width: 1024px)": {
     top: "20px",
     left: "20px",
     bottom: "20px",

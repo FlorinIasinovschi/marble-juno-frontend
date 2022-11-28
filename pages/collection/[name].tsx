@@ -9,17 +9,8 @@ import { AppLayout } from "components/Layout/AppLayout";
 import { CollectionPage } from "features/nft/market/collection/collection";
 
 export default function Home() {
-  // const DEFAULT_NFT_COLUMN_COUNT = 3;
-
   const { asPath } = useRouter();
   const collectionId = asPath.replace("/collection/", "");
-
-  // const [fullWidth, setFullWidth] = useState(true);
-
-  // const dispatch = useDispatch()
-
-  // const filterData = useSelector((state: State) => state.filterData)
-  // const { filter_status } = filterData
   return (
     <AppLayout fullWidth={true} hasBanner={true}>
       <CollectionPage id={collectionId} />
