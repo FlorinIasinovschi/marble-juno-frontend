@@ -76,7 +76,7 @@ export const Explore = () => {
           console.log("err", err);
         }
       }
-
+      setHasMore(false);
       setNftCollections(collections);
     })();
   }, [client]);
