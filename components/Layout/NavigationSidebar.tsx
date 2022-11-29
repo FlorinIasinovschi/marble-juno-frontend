@@ -168,9 +168,9 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
                     </a>
                   </StyledLink>
                   <StyledLink>
-                    <Link href="/staking" passHref>
+                    <Link href="/stake" passHref>
                       <a className="dropdown-item">
-                        <span className={isActive("/staking")}>Stake</span>
+                        <span className={isActive("/stake")}>Stake</span>
                       </a>
                     </Link>
                   </StyledLink>

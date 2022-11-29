@@ -16,6 +16,7 @@ import { AppLayout } from "components/Layout/AppLayout";
 import { Button } from "components/Button";
 import { MyCollectedNFTs } from "features/nft/market/profile";
 import CreatedNFTs from "features/nft/market/profile/creatednfts";
+import StakedNFTs from "features/nft/market/profile/stakednfts";
 import { Email, DiscordT } from "icons";
 import {
   getProfileInfo,
@@ -94,6 +95,16 @@ export default function Home() {
         draggable: true,
         progress: undefined,
       });
+    }
+  };
+  const getSelectedComponent = () => {
+    switch (tab) {
+      case "owned":
+        return <MyCollectedNFTs id={id} />;
+      case "created":
+        return <CreatedNFTs id={id} />;
+      case "staked":
+        return <StakedNFTs id={id} />;
     }
   };
   return (
@@ -191,27 +202,28 @@ export default function Home() {
             )}
           </ProfileInfo>
           <ProfileNFTInfo>
-            <Tabs>
-              <StyledTabList>
-                <StyledTab
-                  onClick={() => {
-                    setTab("owned");
-                  }}
-                  isActive={tab === "owned"}
-                >{`Owned`}</StyledTab>
-                <StyledTab
-                  onClick={() => {
-                    setTab("created");
-                  }}
-                  isActive={tab === "created"}
-                >{`Created`}</StyledTab>
-              </StyledTabList>
-              {tab === "owned" ? (
-                <MyCollectedNFTs id={id} />
-              ) : (
-                <CreatedNFTs id={id} />
-              )}
-            </Tabs>
+            <StyledTabList>
+              <StyledTab
+                onClick={() => {
+                  setTab("owned");
+                }}
+                isActive={tab === "owned"}
+              >{`Owned`}</StyledTab>
+              <StyledTab
+                onClick={() => {
+                  setTab("created");
+                }}
+                isActive={tab === "created"}
+              >{`Created`}</StyledTab>
+              <StyledTab
+                onClick={() => {
+                  setTab("staked");
+                }}
+                isActive={tab === "staked"}
+              >{`Staked`}</StyledTab>
+            </StyledTabList>
+
+            {getSelectedComponent()}
           </ProfileNFTInfo>
         </ProfileContainer>
       </Container>

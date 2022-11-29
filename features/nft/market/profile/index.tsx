@@ -77,13 +77,7 @@ export const MyCollectedNFTs = ({ id }) => {
         const cw721Contract = CW721(collection.cw721_address).use(client);
         let tokenIdsInfo: any;
         let tokenIds: any;
-        // if (collection.owner != id) {
         tokenIdsInfo = await cw721Contract.tokens(id);
-        // console.log("tokensInfo: ", tokenIdsInfo);
-        // } else {
-        //   tokenIdsInfo = await cw721Contract.allTokens();
-        // }
-        // console.log("tokenIdsInfo: ", tokenIdsInfo);
         tokenIds = tokenIdsInfo.tokens;
         while (tokenIds.length > 0) {
           for (let i = 0; i < tokenIds.length; i++) {
