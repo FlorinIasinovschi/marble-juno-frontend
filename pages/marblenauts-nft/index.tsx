@@ -14,18 +14,11 @@ import { walletState } from "state/atoms/walletAtoms";
 import { getRandomInt } from "util/numbers";
 import { GradientBackground, SecondGradientBackground } from "styles/styles";
 import { toast } from "react-toastify";
-import { fromBase64, toBase64 } from "@cosmjs/encoding";
-import {
-  convertToFixedDecimalNumber,
-  convertMicroDenomToDenom,
-} from "util/conversion";
 import {
   Collection,
-  Stake,
   Marble,
   NftCollection,
   CW721,
-  UserStakeInfoType,
   useSdk,
   getFileTypeFromURL,
 } from "services/nft";
@@ -67,9 +60,6 @@ export default function StakePage() {
   const { address, client: signingClient } = useRecoilValue(walletState);
   useEffect(() => {
     (async () => {
-      if (!client || !address) {
-        return;
-      }
       try {
         const collectionContract = Collection(collection_address).use(client);
         const collectionConfig = await collectionContract.getConfig();
@@ -102,7 +92,7 @@ export default function StakePage() {
         console.error(e);
       }
     })();
-  }, [client, address]);
+  }, [client]);
 
   const loadNfts = useCallback(async () => {
     if (!client) return;
@@ -129,13 +119,14 @@ export default function StakePage() {
     }
 
     if (!address || !signingClient) {
+      toast.error("Connect your wallet!");
       return;
     }
 
     const contract = Marble(PUBLIC_NFTSALE_CONTRACT).use(client);
     const marbleContract = Marble(PUBLIC_NFTSALE_CONTRACT).useTx(signingClient);
     const result = await marbleContract.buyNative(address, price);
-    toast.success(`Successfully Claimed`, {
+    toast.success(`Successfully Minted`, {
       position: "top-right",
       autoClose: 5000,
       hideProgressBar: true,
@@ -156,7 +147,7 @@ export default function StakePage() {
   ]);
   useEffect(() => {
     loadNfts();
-  }, [loadNfts]);
+  }, [loadNfts, client]);
 
   return (
     <AppLayout fullWidth={false}>

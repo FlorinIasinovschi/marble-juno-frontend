@@ -1,8 +1,8 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
-import { Spinner } from "@chakra-ui/react";
+import { Spinner, ChakraProvider } from "@chakra-ui/react";
 import { styled } from "components/theme";
-
+import InfiniteScroll from "react-infinite-scroll-component";
 import { CategoryTab, NftCollectionTable } from "components/NFT";
 import { NftCategory, NftCollection, getFileTypeFromURL } from "services/nft";
 import { Market, useSdk, Collection } from "services/nft";
@@ -16,7 +16,7 @@ export const Explore = () => {
   const [nftcollections, setNftCollections] = useState<NftCollection[]>([]);
   const [activeCategoryId, setActiveCategoryId] = useState(0);
   const { client } = useSdk();
-  const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -25,7 +25,7 @@ export const Explore = () => {
       }
 
       const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
-      let collectionList = await marketContract.listCollections();
+      let collectionList = await marketContract.listCollections(0, 20);
       let res_categories = await fetch(process.env.NEXT_PUBLIC_CATEGORY_URL);
       let categories = await res_categories.json();
       setNftCategories(categories.categories);
@@ -78,36 +78,35 @@ export const Explore = () => {
       }
 
       setNftCollections(collections);
-      setLoading(false);
     })();
   }, [client]);
+  const getMoreNfts = async () => {};
   return (
     <ExploreWrapper>
-      <CategoryTab
-        categories={nftcategories}
-        activeCategoryId={activeCategoryId}
-        setActiveCategoryId={setActiveCategoryId}
-      />
-
-      {loading ? (
-        <div
-          style={{
-            width: "100%",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100%",
-            padding: "20px",
-          }}
-        >
-          <Spinner size="xl" />
-        </div>
-      ) : (
-        <NftCollectionTable
-          collections={nftcollections}
-          activeCategoryId={activeCategoryId}
-        />
-      )}
+      <InfiniteScroll
+        dataLength={nftcollections.length}
+        next={getMoreNfts}
+        hasMore={hasMore}
+        loader={
+          <ChakraProvider>
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100%",
+                padding: "20px",
+              }}
+            >
+              <Spinner size="xl" />
+            </div>
+          </ChakraProvider>
+        }
+        endMessage={<h4></h4>}
+      >
+        <NftCollectionTable collections={nftcollections} />
+      </InfiniteScroll>
     </ExploreWrapper>
   );
 };

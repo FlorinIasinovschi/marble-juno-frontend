@@ -57,7 +57,11 @@ export default function NFTCreate() {
   });
   useEffect(() => {
     (async () => {
-      if (collection_id === undefined || collection_id == "[collection]")
+      if (
+        collection_id === undefined ||
+        collection_id == "[collection]" ||
+        !client
+      )
         return false;
       const { collectionInfo, collectionSize } = await fetchCollectionInfo();
       const resCollectionInfo = await fetch(
@@ -176,7 +180,6 @@ export default function NFTCreate() {
       </Stack>
     );
   };
-  console.log("collection: ", collection);
   return (
     <AppLayout fullWidth={true}>
       <ChakraProvider>

@@ -36,7 +36,10 @@ export interface CollectonListResponse {
 
 export interface MarketInstance {
   readonly contractAddress: string;
-  listCollections: () => Promise<CollectionResponse[]>;
+  listCollections: (
+    skip: number,
+    limit: number
+  ) => Promise<CollectionResponse[]>;
   ownedCollections: (address: string) => Promise<CollectionResponse[]>;
   config: () => Promise<MarketContractConfig>;
   collection: (id: number) => Promise<CollectionResponse>;
@@ -98,9 +101,15 @@ export const Market = (contractAddress: string): MarketContract => {
       });
       return result;
     };
-    const listCollections = async (): Promise<CollectionResponse[]> => {
+    const listCollections = async (
+      skip: number,
+      limit: number
+    ): Promise<CollectionResponse[]> => {
       const result = await client.queryContractSmart(contractAddress, {
-        list_collections: {},
+        list_collections: {
+          // start_after: skip,
+          // limit: limit,
+        },
       });
       return result.list;
     };

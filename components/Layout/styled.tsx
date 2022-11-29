@@ -48,6 +48,9 @@ export const StyledDivForLogo = styled.div`
       width: 150px;
     }
   }
+  @media (max-width: 850px) {
+    display: none;
+  }
 `;
 
 export const CreateButton = styled.div`

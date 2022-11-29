@@ -48,7 +48,7 @@ export const MyCollectedNFTs = ({ id }) => {
     let counts = { Auction: 0, "Direct Sell": 0, NotSale: 0 };
     try {
       const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
-      let collections = await marketContract.listCollections();
+      let collections = await marketContract.listCollections(0, 40);
       const response = await fetch(
         process.env.NEXT_PUBLIC_COLLECTION_TOKEN_LIST_URL
       );

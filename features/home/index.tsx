@@ -24,7 +24,8 @@ const Home = () => {
     try {
       if (!client) return [];
       const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
-      let collection = await marketContract.listCollections();
+      let collection = await marketContract.listCollections(0, 12);
+      console.log("collection: ", collection);
       return collection;
     } catch (error) {
       return [];

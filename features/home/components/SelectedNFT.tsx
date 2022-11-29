@@ -9,6 +9,7 @@ import {
   useSdk,
   Collection,
   getRealTokenAmount,
+  Marble,
 } from "services/nft";
 import { GradientBackground, SecondGradientBackground } from "styles/styles";
 import {
@@ -17,6 +18,7 @@ import {
 } from "util/constants";
 
 const PUBLIC_MARKETPLACE = process.env.NEXT_PUBLIC_MARKETPLACE || "";
+const PUBLIC_NFTSALE_CONTRACT = process.env.NEXT_PUBLIC_NFTSALE_CONTRACT || "";
 
 const SelectedNFT = () => {
   const { client } = useSdk();
@@ -25,12 +27,11 @@ const SelectedNFT = () => {
     (async () => {
       if (!client) return;
       const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
-      let collection = await marketContract.collection(9);
+      let collection = await marketContract.collection(5);
+      const marbleContract = Marble(PUBLIC_NFTSALE_CONTRACT).use(client);
+      const contractConfig = await marbleContract.getConfig();
       let ipfs_collection = await fetch(
         process.env.NEXT_PUBLIC_PINATA_URL + collection.uri
-      );
-      const collectionContract = Collection(collection.collection_address).use(
-        client
       );
       let res_collection = await ipfs_collection.json();
       const cw721Contract = CW721(collection.cw721_address).use(client);
@@ -39,40 +40,6 @@ const SelectedNFT = () => {
         process.env.NEXT_PUBLIC_PINATA_URL + nftInfo.token_uri
       );
       let res_nft = await ipfs_nft.json();
-      const response = await fetch(
-        process.env.NEXT_PUBLIC_COLLECTION_TOKEN_LIST_URL
-      );
-      let paymentTokensAddress = [];
-      const paymentTokenList = await response.json();
-      for (let i = 0; i < paymentTokenList.tokens.length; i++) {
-        paymentTokensAddress.push(paymentTokenList.tokens[i].address);
-      }
-      try {
-        const sale: any = await collectionContract.getSale(1);
-        console.log("sale: ", sale);
-        let paymentToken: any;
-        if (sale.denom.hasOwnProperty("cw20")) {
-          paymentToken =
-            paymentTokenList.tokens[
-              paymentTokensAddress.indexOf(sale.denom.cw20)
-            ];
-        } else {
-          paymentToken =
-            paymentTokenList.tokens[
-              paymentTokensAddress.indexOf(sale.denom.native)
-            ];
-        }
-        res_nft["paymentToken"] = paymentToken;
-        res_nft["price"] = getRealTokenAmount({
-          amount: sale.initial_price,
-          denom: paymentToken?.denom,
-        });
-        res_nft["owner"] = sale.provider;
-        res_nft["sale"] = sale;
-      } catch (err) {
-        res_nft["price"] = 0;
-        res_nft["sale"] = {};
-      }
       const show_data = {
         creator: res_nft.owner,
         collection_logo:
@@ -85,8 +52,7 @@ const SelectedNFT = () => {
           : process.env.NEXT_PUBLIC_PINATA_URL +
             res_nft.uri +
             PINATA_PRIMARY_IMAGE_SIZE,
-        price: res_nft.price,
-        paymentToken: res_nft.paymentToken,
+        price: (Number(contractConfig.price) / 1000000).toFixed(2),
       };
       setShowData(show_data);
     })();
@@ -119,17 +85,15 @@ const SelectedNFT = () => {
           <PriceArea>
             <p>Price</p>
             <HStack alignItems="center">
-              <h1>
-                {Number(showData.price.toFixed(2))} {showData.paymentToken.name}
-              </h1>
+              <h1>{Number(showData.price)} Juno</h1>
             </HStack>
           </PriceArea>
         ) : (
           <div />
         )}
         <Stack>
-          <Link href="/nft/9/1" passHref>
-            <StyledButton>View Nft</StyledButton>
+          <Link href="/marblenauts-nft" passHref>
+            <StyledButton>Mint Nft</StyledButton>
           </Link>
         </Stack>
       </IntroWrapper>
