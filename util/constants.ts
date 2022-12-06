@@ -43,7 +43,7 @@ export const __TRANSFERS_ENABLED__ = JSON.parse(
   process.env.NEXT_PUBLIC_ENABLE_FEATURE_TRANSFERS
 );
 /* /feature flags */
-export const backend_url = "https://marble-juno-backend.herokuapp.com";
+export const backend_url = "https://juno-api.marbledao.finance";
 // export const backend_url = "http://localhost:3030";
 export const PINATA_PRIMARY_IMAGE_SIZE =
   process.env.NEXT_PUBLIC_PINATA_PRIMARY_IMAGE_SIZE;
