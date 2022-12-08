@@ -41,10 +41,7 @@ export const AppLayout = ({
   );
 };
 const Container = styled.div`
-  background-image: url("/images/background.jpg");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
+  background: rgb(24, 27, 42);
   justify-content: center;
   display: flex;
 `;

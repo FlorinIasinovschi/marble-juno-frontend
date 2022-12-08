@@ -61,7 +61,7 @@ export function NftCard({ nft, type }: any): JSX.Element {
           <Flex justifyContent="space-between">
             <NFTName>{nft.name}</NFTName>
             <HStack>
-              <RoundedIconComponent size="26px" address={nft.owner} />
+              <RoundedIconComponent size="34px" address={nft.owner} />
             </HStack>
           </Flex>
 
