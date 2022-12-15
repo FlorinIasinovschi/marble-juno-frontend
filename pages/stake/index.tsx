@@ -227,10 +227,7 @@ export default function StakePage() {
   };
   const getClaimableReward = () => {
     if (stakeConfig.interval === 0) return 0;
-    if (userStakeInfo.create_unstake_timestamp !== 0)
-      return userStakeInfo.unclaimed_amount;
     if (stakeConfig.total_supply === 0) return 0;
-
     return convertToFixedDecimalNumber(
       convertMicroDenomToDenom(userStakeInfo.unclaimed_amount, 6)
     );

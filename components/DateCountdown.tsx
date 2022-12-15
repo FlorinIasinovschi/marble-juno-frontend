@@ -20,7 +20,6 @@ const calculateStateFromProps = (
   let hour = Math.floor((diff / 3600000) % 24); // time diff's hours (modulated to 24)
   let min = Math.floor((diff / 60000) % 60); // time diff's minutes (modulated to 60)
   let sec = Math.floor((diff / 1000) % 60); // time diff's seconds (modulated to 60)
-
   if (mostSignificantFigure === "none") {
     if (year === 0) {
       significance = significance.slice(1);
@@ -98,6 +97,7 @@ const defaultDateCountdownProps = {
   numberOfFigures: 6,
   noAnimate: false,
 };
+const reducedUnit = ["Y", "M", "D", "h", "m", "s"];
 
 class DateCountdown extends Component<DateCountdownProps, DateCountdownStates> {
   public static defaultProps = defaultDateCountdownProps;
@@ -113,7 +113,6 @@ class DateCountdown extends Component<DateCountdownProps, DateCountdownStates> {
     this.tick = this.tick.bind(this);
     this.dissect = this.dissect.bind(this);
   }
-
   componentDidMount() {
     const state = calculateStateFromProps(this.props);
     const { diff } = state;
@@ -329,7 +328,6 @@ class DateCountdown extends Component<DateCountdownProps, DateCountdownStates> {
       //   </span>
       // )
     }
-
     return (
       <span className="odometer-block">
         {units.map((unit, key) => {
@@ -341,7 +339,7 @@ class DateCountdown extends Component<DateCountdownProps, DateCountdownStates> {
               >
                 <span className="dcd-info">
                   <span ref={unit} className={`${unit} dcd-val`}>
-                    {this.dissect(state[unit])}
+                    {this.dissect(state[unit])} {unit[0]}
                   </span>
                 </span>
                 <span>
