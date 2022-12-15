@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Text } from "@chakra-ui/react";
+import DateCountdown from "components/DateCountdown";
 import styled from "styled-components";
 import { AppLayout } from "components/Layout/AppLayout";
 import { NftCollectionCard } from "components/NFT/collection/nftCollenctionCard";
@@ -288,7 +289,21 @@ export default function StakePage() {
                   <h3>{getLeftDays()}</h3>
                 </InfoContent>
               </StakingInfoContainer>
-
+              {userStakeInfo.create_unstake_timestamp !== 0 && (
+                <CountDownWrapper>
+                  Time Left &nbsp;
+                  <DateCountdown
+                    dateTo={
+                      userStakeInfo.create_unstake_timestamp +
+                      stakeConfig.lock_time
+                    }
+                    numberOfFigures={3}
+                    callback={() => {
+                      setRCount(rCount + 1);
+                    }}
+                  />
+                </CountDownWrapper>
+              )}
               <ButtonWrapper>
                 {userStakeInfo.create_unstake_timestamp === 0 && (
                   <StyledButton
