@@ -1,39 +1,29 @@
-import React, { useEffect, useState } from "react";
-import styled from "styled-components";
-import { useRouter } from "next/router";
-import {
-  HStack,
-  Stack,
-  Text,
-  Tabs,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  ChakraProvider,
-} from "@chakra-ui/react";
-import { AppLayout } from "components/Layout/AppLayout";
+import { HStack, Stack } from "@chakra-ui/react";
+import BannerImageUpload from "components/BannerImageUpload";
 import { Button } from "components/Button";
+import { AppLayout } from "components/Layout/AppLayout";
+import ProfilleLogoImageUpload from "components/ProfileLogoImageUpload";
 import { MyCollectedNFTs } from "features/nft/market/profile";
 import CreatedNFTs from "features/nft/market/profile/creatednfts";
 import StakedNFTs from "features/nft/market/profile/stakednfts";
-import { Email, DiscordT } from "icons";
+import CreatedCollections from "features/nft/market/profile/createdCollections";
+import EditProfileModal from "features/profile/EditProfileModal";
 import {
+  controlFollow,
   getProfileInfo,
   setImage,
   setProfileInfo,
-  controlFollow,
 } from "hooks/useProfile";
-import { default_image } from "util/constants";
+import { DiscordT, Email } from "icons";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { walletState } from "state/atoms/walletAtoms";
 import { useRecoilValue } from "recoil";
-import BannerImageUpload from "components/BannerImageUpload";
-import ProfilleLogoImageUpload from "components/ProfileLogoImageUpload";
-import EditProfileModal from "features/profile/EditProfileModal";
+import { walletState } from "state/atoms/walletAtoms";
+import styled from "styled-components";
+import { GradientBackground } from "styles/styles";
 import { getReducedAddress } from "util/conversion";
 import { isMobile } from "util/device";
-import { GradientBackground } from "styles/styles";
 
 export default function Home() {
   const { asPath } = useRouter();
@@ -105,6 +95,8 @@ export default function Home() {
         return <CreatedNFTs id={id} />;
       case "staked":
         return <StakedNFTs id={id} />;
+      case "collection":
+        return <CreatedCollections id={id} />;
     }
   };
   return (
@@ -221,6 +213,12 @@ export default function Home() {
                 }}
                 isActive={tab === "staked"}
               >{`Staked`}</StyledTab>
+              <StyledTab
+                onClick={() => {
+                  setTab("collection");
+                }}
+                isActive={tab === "collection"}
+              >{`Created Collections`}</StyledTab>
             </StyledTabList>
 
             {getSelectedComponent()}

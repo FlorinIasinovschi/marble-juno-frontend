@@ -2,14 +2,15 @@ import styled from "styled-components";
 import { useState, useEffect } from "react";
 import { HStack, Text, Stack } from "@chakra-ui/react";
 import { getLogoUriFromAddress } from "util/api";
-import { shortenAddress } from "util/shortenAddress";
 import Link from "next/link";
+import Image from "./Img";
 
-export const RoundedIcon = styled.img<{ size: string }>`
+export const RoundedIcon = styled(Image)<{ size: string }>`
   width: ${({ size }) => size};
   height: ${({ size }) => size};
   border-radius: 50%;
-  border: 1px solid #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  object-fit: cover;
 `;
 
 export const Flex = styled.div<{ direction: string }>`

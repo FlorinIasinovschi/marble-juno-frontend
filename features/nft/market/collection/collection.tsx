@@ -25,37 +25,6 @@ import { isMobile } from "util/device";
 import { EditCollectionModal } from "./components/EditCollectionModal";
 
 const PUBLIC_MARKETPLACE = process.env.NEXT_PUBLIC_MARKETPLACE || "";
-let airdroppedCollectionId1 = 3;
-let airdroppedCollectionId2 = 4;
-let marbleCollectionId = 5;
-let nftCurrentIndex = 0;
-
-export const CollectionTab = ({ index }) => {
-  return (
-    <TabWrapper>
-      <Tab>
-        <Button
-          className={`hide tab-link ${index == 0 ? "active" : ""}`}
-          as="a"
-          variant="ghost"
-          iconLeft={<IconWrapper icon={<Grid />} />}
-        >
-          Items
-        </Button>
-      </Tab>
-      <Tab>
-        <Button
-          className={`hide tab-link ${index == 1 ? "active" : ""}`}
-          as="a"
-          variant="ghost"
-          iconLeft={<IconWrapper icon={<Activity />} />}
-        >
-          Activity
-        </Button>
-      </Tab>
-    </TabWrapper>
-  );
-};
 
 interface CollectionProps {
   readonly id: string;
@@ -108,7 +77,6 @@ export const CollectionPage = ({ id }: CollectionProps) => {
         res_nft["type"] = nft_type.fileType;
         try {
           const sale: any = await cwCollectionContract.getSale(Number(tokenId));
-          console.log("sale: ", sale);
           let paymentToken: any;
           if (sale.denom.hasOwnProperty("cw20")) {
             paymentToken =
@@ -295,7 +263,7 @@ export const CollectionPage = ({ id }: CollectionProps) => {
         </Stack>
 
         {address === collectionInfo.creator && (
-          <Link href={`/nft/${id}/create`} passHref>
+          <Link href={`/create`} passHref>
             <Button
               className="btn-buy btn-default"
               css={{

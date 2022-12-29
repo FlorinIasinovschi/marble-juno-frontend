@@ -16,13 +16,7 @@ export function NftCollectionTable({
       <Container>
         {collections.map((collection, idx) => (
           <Link href={`/collection/${collection.id}`} passHref key={idx}>
-            <LinkBox
-              as="picture"
-              transition="transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1) 0s"
-              _hover={{
-                transform: "scale(1.05)",
-              }}
-            >
+            <LinkBox as="picture">
               <NftCollectionCard key={idx} collection={collection} />
             </LinkBox>
           </Link>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import styled from "styled-components";
 import { Stack, Text, HStack } from "@chakra-ui/react";
 import { RoundedIconComponent } from "components/RoundedIcon";
+import Image from "components/Img";
 import {
   CW721,
   Market,
@@ -76,7 +77,7 @@ const SelectedNFT = () => {
           <MiniInfoCard>
             <MiniInfoTitle>Collection</MiniInfoTitle>
             <Info>
-              <Image src={showData.collection_logo} alt="" />
+              <StyledImage src={showData.collection_logo} alt="" />
               <Name>&nbsp;{showData.collection_name}</Name>
             </Info>
           </MiniInfoCard>
@@ -175,7 +176,7 @@ const Name = styled.div`
   font-weight: 600;
   font-family: Mulish;
 `;
-const Image = styled.img`
+const StyledImage = styled(Image)`
   width: 36px;
   height: 36px;
   border-radius: 50%;

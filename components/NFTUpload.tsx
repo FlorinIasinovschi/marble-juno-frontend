@@ -3,7 +3,8 @@ import css from "../styles/DropZone.module.css";
 import axios from "axios";
 import styled from "styled-components";
 import { NFTUploadImage } from "icons";
-import { ChakraProvider, Image } from "@chakra-ui/react";
+import { ChakraProvider } from "@chakra-ui/react";
+import Image from "./Img";
 
 const PUBLIC_PINATA_API_KEY = process.env.NEXT_PUBLIC_PINATA_API_KEY || "";
 const PUBLIC_PINATA_SECRET_API_KEY =
@@ -126,16 +127,36 @@ const NFTUpload = ({ data, dispatch, item }) => {
             <br />
             SVG, GLTF, GLB, MOV, or MP4 file.
           </label>
+          {ipfsHashBIU != "" && (
+            <StyledImage
+              src={`${PUBLIC_PINATA_URL}${ipfsHashBIU}`}
+              defaultImage="/default-featured.png"
+            />
+          )}
         </DropzoneContainer>
       </div>
     </ChakraProvider>
   );
 };
+const StyledImage = styled(Image)`
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 20px;
+  z-index: 10;
+`;
 const DropzoneContainer = styled.div`
-  background: #272734;
+  /* background: #272734; */
+  /* box-sizing: border-box; */
   border: 2px dashed rgba(255, 255, 255, 0.2);
   box-shadow: 0px 4px 40px rgba(42, 47, 50, 0.09);
-  backdrop-filter: blur(40px);
+  /* backdrop-filter: blur(40px); */
   /* Note: backdrop-filter has minimal browser support */
   padding: 30px;
   border-radius: 20px;
@@ -143,16 +164,23 @@ const DropzoneContainer = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  position: relative;
   label {
     display: flex;
     flex-direction: column;
     align-items: center;
   }
+  &:hover ${StyledImage} {
+    opacity: 0.5;
+    z-index: -1;
+  }
 `;
 const ImageWrapper = styled.div`
   padding: 80px;
-  @media (max-width: 480px) {
+  @media (max-width: 650px) {
     padding: 40px;
   }
 `;
+
+const ImageContainer = styled.div``;
 export default NFTUpload;

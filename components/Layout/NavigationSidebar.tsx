@@ -217,15 +217,15 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
             </Link>
 
             <VerticalDivider />
-
-            <StyledLink>
-              <Link href="https://app.marbledao.finance/dashboard" passHref>
-                <a className="dropdown-item">
-                  <span>Feed</span>
-                </a>
-              </Link>
-            </StyledLink>
-
+            {Boolean(key?.name) && (
+              <StyledLink>
+                <Link href="/feed" passHref>
+                  <a className="dropdown-item">
+                    <span>Feed</span>
+                  </a>
+                </Link>
+              </StyledLink>
+            )}
             <StyledLink>
               <Link href="/explore" passHref>
                 <a className="dropdown-item">
@@ -402,9 +402,9 @@ const VerticalDivider = styled("div", {
   width: "1px",
   height: "60%",
   border: "1px solid #363B4E",
-  marginInline: "20px 0px",
-  "@media(max-width: 850px)": {
-    display: "none",
+  marginInline: "20px 20px",
+  "@media(max-width: 1550px)": {
+    marginInline: "40px 20px",
   },
 });
 const HorizontalDivider = styled("div", {
