@@ -13,6 +13,7 @@ import {
   getProfileInfo,
   setImage,
   setProfileInfo,
+  getFollowInfo,
 } from "hooks/useProfile";
 import { DiscordT, Email } from "icons";
 import { useRouter } from "next/router";
@@ -24,16 +25,27 @@ import styled from "styled-components";
 import { GradientBackground } from "styles/styles";
 import { getReducedAddress } from "util/conversion";
 import { isMobile } from "util/device";
-
+interface FollowInfoInterface {
+  followers: number;
+  followings: number;
+  isFollowing: boolean;
+}
 export default function Home() {
   const { asPath } = useRouter();
   const { address, client: signingClient } = useRecoilValue(walletState);
   const [profile, setProfile] = useState<any>({});
+  const [followInfo, setFollowInfo] = useState<FollowInfoInterface>({
+    followers: 0,
+    followings: 0,
+    isFollowing: false,
+  });
   const [tab, setTab] = useState("owned");
   const id = asPath && asPath.split("/")[2].split("?")[0];
   useEffect(() => {
     (async () => {
       const _profile = await getProfileInfo(id);
+      const _followInfo = await getFollowInfo(id, address);
+      setFollowInfo(_followInfo);
       setProfile(_profile);
     })();
   }, [id]);
@@ -69,12 +81,12 @@ export default function Home() {
     }
   };
   const handleFollow = async () => {
-    const new_profile = await controlFollow({
-      id: address,
-      target: id,
+    const new_followInfo = await controlFollow({
+      from: address,
+      to: id,
     });
-    if (new_profile) {
-      setProfile(new_profile);
+    if (new_followInfo) {
+      setFollowInfo(new_followInfo);
     } else {
       toast.warning(`Failed. Please try again.`, {
         position: "top-right",
@@ -124,12 +136,12 @@ export default function Home() {
                 <h1>{profile.name || getReducedAddress(id)}</h1>
                 <HStack justifyContent="space-around">
                   <Stack>
-                    <h1>{profile.followers && profile.followers.length}</h1>
+                    <h1>{followInfo.followings}</h1>
                     <p>Following</p>
                   </Stack>
                   <VerticalDivider />
                   <Stack>
-                    <h1>{profile.following && profile.following.length}</h1>
+                    <h1>{followInfo.followers}</h1>
                     <p>Followers</p>
                   </Stack>
                 </HStack>

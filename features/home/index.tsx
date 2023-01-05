@@ -25,7 +25,6 @@ const Home = () => {
       if (!client) return [];
       const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
       let collection = await marketContract.listCollections(0, 12);
-      console.log("collection: ", collection);
       return collection;
     } catch (error) {
       return [];
@@ -52,7 +51,7 @@ const Home = () => {
             description: res_collection.description,
             creator: _collection.owner,
             slug: `/collection/${_collection.id}`,
-            cat_ids: categories[res_collection.category].name,
+            cat_ids: categories[res_collection.category]?.name,
             collection_address: _collection.collection_address,
             cw721_address: _collection.cw721_address,
           };

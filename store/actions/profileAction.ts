@@ -20,6 +20,7 @@ export const getProfileData = (address, dispatch) => {
   axios
     .get(`${backend_url}/get_user`, { params: { id: address } })
     .then(({ data }) => {
+      console.log("profile-data: ", data);
       dispatch({
         type: PROFILE_STATUS,
         payload: data,

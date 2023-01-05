@@ -12,6 +12,21 @@ export const getProfileInfo = async (address) => {
     return {};
   }
 };
+export const getFollowInfo = async (target, owner) => {
+  try {
+    const { data } = await axios.get(`${backend_url}/follow/get_follow`, {
+      params: {
+        owner,
+        target,
+      },
+    });
+    console.log("data: ", data);
+    return data;
+  } catch (error) {
+    console.log("getProfiledataError: ", error);
+    return {};
+  }
+};
 
 export const setImage = async (imageData) => {
   try {
@@ -22,7 +37,15 @@ export const setImage = async (imageData) => {
     return {};
   }
 };
-
+export const setAgreed = async (id) => {
+  try {
+    const { data } = await axios.post(`${backend_url}/set_agree`, { _id: id });
+    return data;
+  } catch (err) {
+    console.log("set agreed error: ", err);
+    return false;
+  }
+};
 export const setProfileInfo = async (profileData) => {
   try {
     const { data } = await axios.post(
@@ -60,7 +83,10 @@ export const fetchAllProfileCounts = async () => {
 
 export const controlFollow = async (req) => {
   try {
-    const { data } = await axios.post(`${backend_url}/control_follow`, req);
+    const { data } = await axios.post(
+      `${backend_url}/follow/handle_follow`,
+      req
+    );
     return data;
   } catch (err) {
     console.log("handle control follow error: ", err);
