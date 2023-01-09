@@ -99,6 +99,7 @@ export default function StakePage() {
     const marbleContract = Marble(PUBLIC_NFTSALE_CONTRACT).use(client);
     const contractConfig = await marbleContract.getConfig();
     setMaxToken(totalNFTs);
+    console.log("contractConfig: ", contractConfig);
     setSoldCnt(594 + contractConfig.sold_index + 1);
     setPrice(Number(contractConfig.price));
     // setRoyalties(contractConfig.royalty)
@@ -109,6 +110,7 @@ export default function StakePage() {
   }, [client, PUBLIC_NFTSALE_CONTRACT]);
 
   const onBuy = useCallback(async () => {
+    return;
     const now = new Date();
     if (
       now.getTime() < new Date(presaleStart).getTime() ||
@@ -182,9 +184,7 @@ export default function StakePage() {
 
                   <StyledDiv>
                     <StyledSubHeading>Minted(%)</StyledSubHeading>
-                    <StyledText>
-                      {Number(((soldCnt / totalNFTs) * 100).toFixed(2))} %
-                    </StyledText>
+                    <StyledText>100 %</StyledText>
                   </StyledDiv>
 
                   <StyledDiv>
@@ -209,8 +209,10 @@ export default function StakePage() {
                     padding: "15px auto",
                   }}
                   onClick={onBuy}
+                  disabled={true}
                 >
-                  Mint
+                  {/* Mint */}
+                  Sold Out
                 </Button>
               </CollectionContent>
             </ContentWrapper>
