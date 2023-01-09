@@ -75,9 +75,10 @@ export default function StakePage() {
         collection_info.description = res_collection.description;
         collection_info.image =
           process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
-        collection_info.banner_image = res_collection.featuredImage
-          ? process.env.NEXT_PUBLIC_PINATA_URL + res_collection.featuredImage
-          : process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
+        // collection_info.banner_image = res_collection.featuredImage
+        //   ? process.env.NEXT_PUBLIC_PINATA_URL + res_collection.featuredImage
+        //   : process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
+        collection_info.banner_image = "/marblenauts.gif";
         collection_info.slug = res_collection.slug;
         collection_info.creator = collectionConfig.owner ?? "";
         collection_info.cat_ids = res_collection.category;
