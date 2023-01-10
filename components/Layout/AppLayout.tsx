@@ -179,7 +179,7 @@ const ModalContainer = styled(ModalContent)`
 `;
 
 const Container = styled.div`
-  background: rgb(24, 27, 42);
+  background: black;
   justify-content: center;
   display: flex;
 `;
