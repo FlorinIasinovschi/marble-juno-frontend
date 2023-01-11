@@ -11,6 +11,7 @@ import Checkbox from "components/Checkbox";
 import { useDispatch, useSelector } from "react-redux";
 import { setAgreed } from "hooks/useProfile";
 import { StyledCloseIcon } from "components/Dialog";
+import { getProfileData } from "store/actions/profileAction";
 import {
   ChakraProvider,
   Modal,
@@ -36,11 +37,13 @@ export const AppLayout = ({
   hasBanner = false,
 }) => {
   const [openNav, setOpenNav] = useState(false);
+  const dispatch = useDispatch();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [error, setError] = useState(false);
   const [original, setOriginal] = useState(false);
   const [creative, setCreative] = useState(false);
   const profile = useSelector((state: any) => state.profileData.profile_status);
+  console.log("profile: ", profile);
   useEffect(() => {
     TagManager.initialize(tagManagerArgs);
   }, []);
@@ -53,7 +56,10 @@ export const AppLayout = ({
       return;
     }
     const result = await setAgreed(profile._id);
-    if (result) onClose();
+    if (result) {
+      getProfileData(profile.id, dispatch);
+      onClose();
+    }
   };
   return (
     <Container>

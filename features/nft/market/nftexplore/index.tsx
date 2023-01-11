@@ -105,21 +105,8 @@ const Explore = () => {
       collection_info.collection_address = collection.collection_address;
       collection_info.cw721_address = collection.cw721_address;
       collection_info.name = res_collection.name;
-      collection_info.description = res_collection.description;
       collection_info.image =
-        res_collection.logo &&
         process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
-      collection_info.banner_image =
-        res_collection.featuredImage &&
-        process.env.NEXT_PUBLIC_PINATA_URL + res_collection.featuredImage;
-      collection_info.slug = res_collection.slug;
-      collection_info.creator = collection.owner ?? "";
-      collection_info.cat_ids = res_collection.category;
-      collection_info.royalties = res_collection.royalties;
-      let collection_type = await getFileTypeFromURL(
-        process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo
-      );
-      collection_info.type = collection_type.fileType;
 
       setCollectionInfo(collection_info);
       const response = await fetch(
@@ -173,7 +160,12 @@ const Explore = () => {
                 key={index}
               >
                 <LinkBox as="picture">
-                  <NftCard nft={nftInfo} id="" type="" />
+                  <NftCard
+                    nft={nftInfo}
+                    collection={collectionInfo}
+                    id=""
+                    type=""
+                  />
                 </LinkBox>
               </Link>
             ))}

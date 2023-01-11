@@ -13,6 +13,7 @@ import {
 import { NftCard } from "components/NFT/nft-card";
 import { RoundedIconComponent } from "components/RoundedIcon";
 import { isClientMobie, isMobile } from "util/device";
+import Image from "components/Img";
 import {
   CW721,
   Market,
@@ -25,24 +26,35 @@ import {
 } from "services/nft";
 import { SecondGradientBackground } from "styles/styles";
 
+const PUBLIC_MARKETPLACE = process.env.NEXT_PUBLIC_MARKETPLACE || "";
+
 const CollectionInfo = ({ info }) => {
   const [nfts, setNfts] = useState([]);
+  const [collectionInfo, setCollectionInfo] = useState();
   const { client } = useSdk();
   const fetchTokensInfo = useCallback(async () => {
     try {
       const cwCollectionContract = Collection(info.collection_address).use(
         client
       );
+      const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
+      let collection = await marketContract.collection(info.id);
+      let ipfs_collection = await fetch(
+        process.env.NEXT_PUBLIC_PINATA_URL + collection.uri
+      );
+      let res_collection = await ipfs_collection.json();
+      res_collection.image =
+        process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
+      setCollectionInfo(res_collection);
       let sales: any = await cwCollectionContract.getSales();
       const cw721Contract = CW721(info.cw721_address).use(client);
       let tokenIdsInfo = await cw721Contract.allTokens();
-
       let tokenIds = tokenIdsInfo.tokens.slice(0, 3);
       let collectionNFTs = [];
       for (let i = 0; i < tokenIds.length; i++) {
-        let nftInfo = await cw721Contract.nftInfo(tokenIds[i]);
+        let nftInfo = await cw721Contract.allNftInfo(tokenIds[i]);
         let ipfs_nft = await fetch(
-          process.env.NEXT_PUBLIC_PINATA_URL + nftInfo.token_uri
+          process.env.NEXT_PUBLIC_PINATA_URL + nftInfo.info.token_uri
         );
         let res_nft = await ipfs_nft.json();
         let nft_type = await getFileTypeFromURL(
@@ -54,7 +66,7 @@ const CollectionInfo = ({ info }) => {
         res_nft["type"] = nft_type.fileType;
         res_nft["tokenId"] = tokenIds[i];
         res_nft["title"] = info.name;
-        res_nft["owner"] = res_nft.owner;
+        res_nft["owner"] = nftInfo.access.owner;
         res_nft["image"] = res_nft.uri.includes("https://")
           ? res_nft.uri
           : process.env.NEXT_PUBLIC_PINATA_URL + res_nft.uri;
@@ -84,7 +96,7 @@ const CollectionInfo = ({ info }) => {
         >
           <HStack>
             <ImgDiv>
-              <Image src={info.image} alt="collection" />
+              <StyledImage src={info.image} alt="collection" />
             </ImgDiv>
             <Stack>
               <Title>{info.name}</Title>
@@ -121,7 +133,7 @@ const CollectionInfo = ({ info }) => {
                   transform: isMobile() ? "" : "scale(1.05)",
                 }}
               >
-                <NftCard nft={nftInfo} type="" />
+                <NftCard nft={nftInfo} collection={collectionInfo} type="" />
               </LinkBox>
             </Link>
           ))}
@@ -154,7 +166,7 @@ const Container = styled(SecondGradientBackground)`
     padding: 10px 0 10px 0;
   }
 `;
-const Image = styled.img`
+const StyledImage = styled(Image)`
   position: absolute;
   top: 0;
   left: 0;

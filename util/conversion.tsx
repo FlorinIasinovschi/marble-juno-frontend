@@ -40,8 +40,8 @@ export const formatTokenName = (name: string) => {
   return "";
 };
 export const getReducedAddress = (address: string) => {
-  if (address.length > 15)
-    return address.slice(0, 4) + "..." + address.slice(-4);
+  if (address.length > 25)
+    return address.slice(0, 8) + "..." + address.slice(-8);
   else return address;
 };
 export const createBalanceFormatter = ({

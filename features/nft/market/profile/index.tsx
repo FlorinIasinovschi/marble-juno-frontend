@@ -6,6 +6,9 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { useDispatch, useSelector } from "react-redux";
 import { walletState } from "state/atoms/walletAtoms";
 import { useRecoilValue } from "recoil";
+import { LinkBox } from "@chakra-ui/react";
+import { NftCard } from "components/NFT";
+import Link from "next/link";
 import { State } from "store/reducers";
 import { NFT_COLUMN_COUNT } from "store/types";
 import {
@@ -38,6 +41,7 @@ export const MyCollectedNFTs = ({ id }) => {
   const { client } = useSdk();
   const [filtered, setFiltered] = useState([]);
   const [filterTab, setFilterTab] = useState("");
+  const [collectionInfo, setCollectionInfo] = useState();
   const [ownedNFTs, setOwnedNFTs] = useState([]);
   const [reloadCount, setReloadCount] = useState(0);
   const [paymentTokens, setPaymentTokens] = useState<PaymentToken[]>();
@@ -81,9 +85,9 @@ export const MyCollectedNFTs = ({ id }) => {
         tokenIds = tokenIdsInfo.tokens;
         while (tokenIds.length > 0) {
           for (let i = 0; i < tokenIds.length; i++) {
-            let nftInfo = await cw721Contract.nftInfo(tokenIds[i]);
+            let nftInfo = await cw721Contract.allNftInfo(tokenIds[i]);
             let ipfs_nft = await fetch(
-              process.env.NEXT_PUBLIC_PINATA_URL + nftInfo.token_uri
+              process.env.NEXT_PUBLIC_PINATA_URL + nftInfo.info.token_uri
             );
             let res_nft = await ipfs_nft.json();
             res_nft["tokenId"] = tokenIds[i];
@@ -92,7 +96,7 @@ export const MyCollectedNFTs = ({ id }) => {
             res_nft["image"] = res_nft.uri.includes("https://")
               ? res_nft["uri"]
               : process.env.NEXT_PUBLIC_PINATA_URL + res_nft["uri"];
-            res_nft["owner"] = await cw721Contract.ownerOf(res_nft["tokenId"]);
+            res_nft["owner"] = nftInfo.access.owner;
             if (res_nft["created"] != id && res_nft["owner"] != id) {
               continue;
             }
@@ -210,7 +214,19 @@ export const MyCollectedNFTs = ({ id }) => {
             loader={<h3> Loading...</h3>}
             endMessage={<h4></h4>}
           >
-            <NftTable data={filtered} type="sell" nft_column_count={2} />
+            <NftGrid>
+              {filtered.map((nft, index) => (
+                <Link
+                  href={`/nft/${nft.collectionId}/${nft.tokenId}`}
+                  passHref
+                  key={index}
+                >
+                  <LinkBox as="picture">
+                    <NftCard nft={nft} />
+                  </LinkBox>
+                </Link>
+              ))}
+            </NftGrid>
           </InfiniteScroll>
         )}
       </NftList>
@@ -263,4 +279,13 @@ const NumberWrapper = styled.div<{ isActive: boolean }>`
   align-items: center;
   padding: 10px;
   margin-right: 10px;
+`;
+const NftGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-row-gap: 20px;
+  grid-column-gap: 20px;
+  padding: 20px;
+  overflow: hidden;
+  overflow: auto;
 `;

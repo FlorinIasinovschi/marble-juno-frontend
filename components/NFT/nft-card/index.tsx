@@ -25,7 +25,7 @@ const backgroundColor = {
   Fixed: "#FFFFFF",
 };
 
-export function NftCard({ nft, type }: any): JSX.Element {
+export function NftCard({ nft, collection, type }: any): JSX.Element {
   const [hover, setHover] = useState(false);
   const [profile, setProfile] = useState<any>({});
   const handleClick = (e) => {
@@ -197,15 +197,15 @@ export function NftCard({ nft, type }: any): JSX.Element {
             />
             <p>{profile.name || getReducedAddress(nft.owner)}</p>
           </HStack>
-          {nft.collection_logo && (
+          {collection?.image && (
             <HStack>
               <Logo
-                src={nft.collection_logo + PINATA_SECONDARY_IMAGE_SIZE}
+                src={collection.image + PINATA_SECONDARY_IMAGE_SIZE}
                 alt="logo"
                 size="34px"
               />
               <p style={{ fontSize: "25px", fontWeight: "bold" }}>
-                {nft.title}
+                {collection.name}
               </p>
             </HStack>
           )}

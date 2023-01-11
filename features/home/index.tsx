@@ -36,7 +36,7 @@ const Home = () => {
       let res_categories = await fetch(process.env.NEXT_PUBLIC_CATEGORY_URL);
       let { categories } = await res_categories.json();
       const collectionInfos = await Promise.all(
-        collectionList.slice(2, 5).map(async (_collection) => {
+        collectionList.slice(0, 3).map(async (_collection) => {
           const ipfs_collection = await fetch(
             process.env.NEXT_PUBLIC_PINATA_URL + _collection.uri
           );
