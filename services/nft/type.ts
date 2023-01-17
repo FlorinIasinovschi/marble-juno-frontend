@@ -13,7 +13,7 @@ export interface NftInfo {
   sale: any;
   type: string;
   created: string;
-  collectionId: number;
+  collectionId: string;
 }
 export interface NftCategory {
   readonly id: string;

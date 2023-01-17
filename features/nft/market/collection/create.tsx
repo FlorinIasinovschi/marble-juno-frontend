@@ -1,33 +1,24 @@
-import * as React from "react";
-import { useCallback, useState, useReducer, useEffect } from "react";
-import { useRouter } from "next/router";
-import axios from "axios";
-import styled from "styled-components";
-import Select, { components } from "react-select";
-import { createNewCollection } from "hooks/useCollection";
+import { AddIcon, CloseIcon } from "@chakra-ui/icons";
 import {
-  NftInfo,
-  NftCategory,
-  NftCollection,
-  CollectionToken,
-} from "services/nft";
-import { Button } from "components/Button";
-import {
-  Stack,
-  useRadioGroup,
-  useRadio,
   Grid,
-  Box,
-  Text,
   HStack,
   IconButton,
+  Stack,
+  Text,
+  useRadioGroup,
 } from "@chakra-ui/react";
-import { AddIcon, CloseIcon } from "@chakra-ui/icons";
+import { Button } from "components/Button";
+import { useRouter } from "next/router";
+import { useEffect, useReducer, useState } from "react";
+import Select from "react-select";
+import { CollectionToken } from "services/nft";
+import styled from "styled-components";
 
 import { toast } from "react-toastify";
-import { useRecoilValue, useSetRecoilState } from "recoil";
-import { walletState, WalletStatusType } from "state/atoms/walletAtoms";
-import { Market, useSdk } from "services/nft";
+import { useRecoilValue } from "recoil";
+import { Factory, Royalty, useSdk } from "services/nft";
+import { walletState } from "state/atoms/walletAtoms";
+import { FACTORY_ADDRESS } from "util/constants";
 import { isMobile } from "util/device";
 
 const categories = [
@@ -105,37 +96,17 @@ const customStyles = {
   }),
 };
 
-const PUBLIC_CW721_CONTRACT = process.env.NEXT_PUBLIC_CW721_CONTRACT || "";
-const PUBLIC_MARKETPLACE = process.env.NEXT_PUBLIC_MARKETPLACE || "";
-const PUBLIC_CW20_CONTRACT = process.env.NEXT_PUBLIC_CW20_CONTRACT || "";
-const PUBLIC_CW721_BASE_CODE_ID =
-  process.env.NEXT_PUBLIC_CW721_BASE_CODE_ID || 388;
-
 const PUBLIC_PINATA_API_KEY = process.env.NEXT_PUBLIC_PINATA_API_KEY || "";
 const PUBLIC_PINATA_SECRET_API_KEY =
   process.env.NEXT_PUBLIC_PINATA_SECRET_API_KEY || "";
-const PUBLIC_PINATA_URL = process.env.NEXT_PUBLIC_PINATA_URL || "";
 let themeValue = "1";
-
-let collectionTokenArr = [];
-let collectionTokenCount = 0;
 export const CollectionCreate = () => {
   const router = useRouter();
   //const toast = useToast()
-  const [nftcategories, setNftCategories] = useState<NftCategory[]>([]);
   const [isJsonUploading, setJsonUploading] = useState(false);
   const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
-  const [description, setDescription] = useState("");
   const [category, setCategory] = useState("Digital");
-  const [website, setWebsite] = useState("");
-  const [discord, setDiscord] = useState("");
-  const [instagram, setInstagram] = useState("");
-  const [medium, setMedium] = useState("");
-  const [telegram, setTelegram] = useState("");
-  const [maximumRoyaltyFee, setMaximumRoyaltyFee] = useState("10");
-  const [explicit, setExplicit] = useState("");
-  const [collectionIpfsHash, setCollectionIpfsHash] = useState("");
+
   const { client } = useSdk();
   const { address, client: signingClient } = useRecoilValue(walletState);
   const [token, setToken] = useState("");
@@ -257,7 +228,7 @@ export const CollectionCreate = () => {
     }
 
     let total_royalty_rate: number = 0;
-    let royaltiesArr: any = [];
+    let royaltiesArr: Royalty[] = [];
     const royalties = [...inputFields];
 
     for (let i = 0; i < royalties.length; i++) {
@@ -265,83 +236,19 @@ export const CollectionCreate = () => {
       royalties[i]["rate"] = royalties[i]["rate"];
       royaltiesArr.push({
         address: royalties[i]["address"],
-        rate: royalties[i]["rate"] * 10000,
+        royalty_rate: (royalties[i]["rate"] / 100).toString(),
       });
     }
-
-    const jsonData = {};
-    jsonData["logo"] = "";
-    jsonData["featuredImage"] = "";
-    jsonData["banner"] = "";
-    jsonData["name"] = name;
-    jsonData["slug"] = "";
-    jsonData["description"] = description;
-    jsonData["category"] = category;
-    jsonData["website"] = website;
-    jsonData["discord"] = discord;
-    jsonData["instagram"] = instagram;
-    jsonData["medium"] = medium;
-    jsonData["telegram"] = telegram;
-    jsonData["royalties"] = royaltiesArr;
-    jsonData["network"] = "JUNO";
-    jsonData["tokens"] = ["BLOCK"]; //tokenSymbols
-    jsonData["maximumRoyaltyFee"] = parseFloat(maximumRoyaltyFee) * 10000;
-    jsonData["themeValue"] = themeValue;
-    jsonData["explicit"] = explicit;
-    jsonData["owner"] = address;
-    const pinataJson = {
-      pinataMetadata: {
-        name: name,
-        keyvalues: {
-          slug: slug,
-        },
-      },
-      pinataContent: jsonData,
-    };
-    setJsonUploading(true);
-    let url = `https://api.pinata.cloud/pinning/pinJSONToIPFS`;
-    let response = await axios.post(url, pinataJson, {
-      maxBodyLength: Infinity, //this is needed to prevent axios from erroring out with large files
-      headers: {
-        "Content-Type": `application/json`,
-        pinata_api_key: PUBLIC_PINATA_API_KEY,
-        pinata_secret_api_key: PUBLIC_PINATA_SECRET_API_KEY,
-      },
-    });
-    let ipfsHash = "";
-    if (response.status == 200) {
-      setCollectionIpfsHash(response.data.IpfsHash);
-      ipfsHash = response.data.IpfsHash;
-    }
-    setJsonUploading(false);
-
     if (!address || !signingClient) {
       return;
     }
-    const marketContract = Market(PUBLIC_MARKETPLACE).useTx(signingClient);
-    const collection = await marketContract.addCollection(
+    const factoryContract = Factory().useTx(signingClient);
+    const collection = await factoryContract.addCollection(
       address,
-      10000,
       name,
-      "BLOCK",
-      Number(PUBLIC_CW721_BASE_CODE_ID),
-      Number(parseFloat(maximumRoyaltyFee) * 10000),
       royaltiesArr,
-      ipfsHash
+      category
     );
-    createNewCollection({
-      id: collection.logs[0].events[4].attributes[4].value,
-      creator: address,
-      cw721_address: collection.logs[0].events[4].attributes[3].value,
-      collection_address: collection.logs[0].events[4].attributes[2].value,
-      category,
-    })
-      .then((data) => {
-        console.log("backend collection data: ", data);
-      })
-      .catch((err) => {
-        console.log("backend collection data: ", err);
-      });
     toast.success(`You have created your collection successfully.`, {
       position: "top-right",
       autoClose: 5000,
@@ -351,6 +258,7 @@ export const CollectionCreate = () => {
       draggable: true,
       progress: undefined,
     });
+    router.push("/explore/collections");
   };
 
   return (

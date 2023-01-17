@@ -1,6 +1,6 @@
 import React, { useReducer, useState, useEffect, useRef } from "react";
 import { Stack, HStack, ChakraProvider, Textarea } from "@chakra-ui/react";
-import { default_image } from "util/constants";
+import { default_image, FACTORY_ADDRESS } from "util/constants";
 import { useRecoilValue } from "recoil";
 import { walletState } from "state/atoms/walletAtoms";
 import { toast } from "react-toastify";
@@ -15,13 +15,8 @@ import Checkbox from "components/Checkbox";
 import { AppLayout } from "components/Layout/AppLayout";
 import NFTUpload from "components/NFTUpload";
 import { isMobile } from "util/device";
-import { Market, CW721, Collection, useSdk } from "services/nft";
+import { Factory, CW721, Marketplace, useSdk } from "services/nft";
 import { GradientBackground, SecondGradientBackground } from "styles/styles";
-
-const PUBLIC_PINATA_API_KEY = process.env.NEXT_PUBLIC_PINATA_API_KEY || "";
-const PUBLIC_PINATA_SECRET_API_KEY =
-  process.env.NEXT_PUBLIC_PINATA_SECRET_API_KEY || "";
-const PUBLIC_MARKETPLACE = process.env.NEXT_PUBLIC_MARKETPLACE || "";
 
 export default function NFTCreate() {
   const { asPath } = useRouter();
@@ -83,8 +78,8 @@ export default function NFTCreate() {
   const fetchCollections = async () => {
     try {
       if (!client || !address) return [];
-      const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
-      let _collection = await marketContract.ownedCollections(address);
+      const factoryContract = Factory().use(client);
+      let _collection = await factoryContract.ownedCollections(address);
       return _collection;
     } catch (error) {
       return [];
@@ -93,29 +88,30 @@ export default function NFTCreate() {
   useEffect(() => {
     (async () => {
       const collectionList = await fetchCollections();
+      console.log("collectionLIst: ", collectionList);
       const collectionData = await Promise.all(
         collectionList.map(async (_collection) => {
+          let res_collection: any = {};
+          const contract = CW721(_collection.address).use(client);
+          const numTokens = await contract.numTokens();
           try {
-            const contract = CW721(_collection.cw721_address).use(client);
-            const numTokens = await contract.numTokens();
             const ipfs_collection = await fetch(
               process.env.NEXT_PUBLIC_PINATA_URL + _collection.uri
             );
-            const res_collection = await ipfs_collection.json();
-            console.log("res_collection: ", res_collection);
-            return {
-              counts: numTokens,
-              media: res_collection.logo
-                ? process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo
-                : default_image,
-              name: res_collection.name,
-              collection_id: _collection.id,
-            };
-          } catch (err) {
-            return {};
-          }
+            res_collection = await ipfs_collection.json();
+          } catch (err) {}
+          return {
+            counts: numTokens,
+            media: res_collection.logo
+              ? process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo
+              : default_image,
+            name: _collection.name,
+            collection_id: _collection.id,
+            address: _collection.address,
+          };
         })
       );
+      console.log("collectiondATA: ", collectionData);
       setOwnedCollections(collectionData);
     })();
   }, [client]);
@@ -177,46 +173,17 @@ export default function NFTCreate() {
       });
       return;
     }
-    const jsonData: any = {};
-    jsonData["name"] = name;
-    jsonData["description"] = description;
-    jsonData["uri"] = data.nft;
-    jsonData["owner"] = address;
-    jsonData["collectionId"] = collection.collection_id;
-    const pinataJson = {
-      pinataMetadata: {
-        name: name,
-      },
-      pinataContent: jsonData,
-    };
-    setJsonUploading(true);
-    let url = `https://api.pinata.cloud/pinning/pinJSONToIPFS`;
-    let response = await axios.post(url, pinataJson, {
-      maxBodyLength: Infinity, //this is needed to prevent axios from erroring out with large files
-      headers: {
-        "Content-Type": `application/json`,
-        pinata_api_key: PUBLIC_PINATA_API_KEY,
-        pinata_secret_api_key: PUBLIC_PINATA_SECRET_API_KEY,
-      },
-    });
-    let ipfsHash = "";
-    if (response.status == 200) {
-      ipfsHash = response.data.IpfsHash;
-    }
-    const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
-    let _collection = await marketContract.collection(
-      Number(collection.collection_id)
+
+    const cw721Contract = CW721(collection.address).useTx(signingClient);
+
+    const result = await cw721Contract.mint(
+      address,
+      name,
+      data.nft,
+      description
     );
-    // const cw721Contract = CW721(collection.collection_address).useTx(
-    //   signingClient
-    // );
-    const cwCollectionContract = Collection(
-      _collection.collection_address
-    ).useTx(signingClient);
-    let nft = await cwCollectionContract.mint(address, ipfsHash);
-    // const nft = await marketContract.mint(
-    //   address, ipfsHash
-    // )
+    const collectionId = result.logs[0].events[2].attributes[8].value;
+
     setJsonUploading(false);
     toast.success(`You have created your NFT successfully.`, {
       position: "top-right",
@@ -227,7 +194,9 @@ export default function NFTCreate() {
       draggable: true,
       progress: undefined,
     });
+    router.push(`/collection/${collectionId}`);
   };
+  console.log("collection: ", collection);
   // return null;
   return (
     <AppLayout fullWidth={true}>

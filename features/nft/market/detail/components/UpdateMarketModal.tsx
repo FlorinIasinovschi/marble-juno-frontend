@@ -23,8 +23,8 @@ import { fromBase64, toBase64 } from "@cosmjs/encoding";
 import {
   NftInfo,
   CW721,
-  Collection,
-  Market,
+  Marketplace,
+  Factory,
   useSdk,
   toMinDenom,
   DurationType,
@@ -160,7 +160,7 @@ const UpdateMarketModal = ({ collectionId, id }) => {
       id == "[id]"
     )
       return false;
-    const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
+    const marketContract = Factory().use(client);
     let collection = await marketContract.collection(parseInt(collectionId));
     let ipfs_collection = await fetch(
       process.env.NEXT_PUBLIC_PINATA_URL + collection.uri
@@ -180,7 +180,7 @@ const UpdateMarketModal = ({ collectionId, id }) => {
     res_nft["owner"] = await cw721Contract.ownerOf(id);
     if (res_collection.hasOwnProperty("royalties"))
       setRoyalties(res_collection.royalties);
-    const collectionContract = Collection(collection.collection_address).use(
+    const collectionContract = Marketplace(collection.collection_address).use(
       client
     );
     let sales: any = await collectionContract.getSales();
@@ -273,7 +273,7 @@ const UpdateMarketModal = ({ collectionId, id }) => {
       startTime: Math.round(new Date(startDate).getTime() / 1000),
       endTime: Math.round(new Date(endDate).getTime() / 1000),
     };
-    const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
+    const marketContract = Factory().use(client);
     let collection = await marketContract.collection(collectionId);
     const cw721Contract = CW721(collection.cw721_address).useTx(signingClient);
     let msg: any;

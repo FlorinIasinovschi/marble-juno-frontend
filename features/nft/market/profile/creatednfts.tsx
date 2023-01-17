@@ -8,8 +8,8 @@ import { Search, ColumnBig, ColumnSmall, Sidebar, ArrowLeft } from "icons";
 import { NftTable } from "components/NFT";
 import {
   CW721,
-  Market,
-  Collection,
+  Factory,
+  Marketplace,
   useSdk,
   PaymentToken,
   NftInfo,
@@ -66,7 +66,7 @@ const MyCreatedNFTs = ({ id }) => {
   const getCreatedNFTs = async () => {
     try {
       let collectionNFTs = [];
-      const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
+      const marketContract = Factory().use(client);
       let collections = await marketContract.ownedCollections(address);
       const response = await fetch(
         process.env.NEXT_PUBLIC_COLLECTION_TOKEN_LIST_URL
@@ -85,7 +85,7 @@ const MyCreatedNFTs = ({ id }) => {
         );
         const paymentTokenList = await response.json();
         setPaymentTokens(paymentTokenList.tokens);
-        const cwCollectionContract = Collection(
+        const cwCollectionContract = Marketplace(
           collection.collection_address
         ).use(client);
         let sales: any = await cwCollectionContract.getSales();

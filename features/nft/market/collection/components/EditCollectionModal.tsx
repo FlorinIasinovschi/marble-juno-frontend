@@ -1,27 +1,25 @@
-import React, { useReducer, useState, useEffect } from "react";
-import axios from "axios";
 import {
-  Modal,
   ChakraProvider,
+  HStack,
+  Modal,
   ModalContent,
   ModalOverlay,
-  useDisclosure,
-  Textarea,
   Stack,
-  HStack,
+  Textarea,
+  useDisclosure,
 } from "@chakra-ui/react";
-import Select, { components } from "react-select";
-import { EditCollectionDataInstance, Market, useSdk } from "services/nft";
-import { useRecoilValue, useSetRecoilState } from "recoil";
-import { walletState, WalletStatusType } from "state/atoms/walletAtoms";
-import { CheckIcon } from "@chakra-ui/icons";
-import { setCollectionCategory } from "hooks/useCollection";
-import { toast } from "react-toastify";
+import axios from "axios";
+import { Button } from "components/Button";
 import DropZone from "components/DropZone";
 import FeaturedImageUpload from "components/FeaturedImageUpload";
-import { Button } from "components/Button";
-import { Save } from "icons/Save";
+import { useEffect, useReducer, useState } from "react";
+import Select from "react-select";
+import { toast } from "react-toastify";
+import { useRecoilValue } from "recoil";
+import { Factory } from "services/nft";
+import { walletState } from "state/atoms/walletAtoms";
 import styled from "styled-components";
+import { FACTORY_ADDRESS } from "util/constants";
 
 const options = [
   {
@@ -60,11 +58,12 @@ const options = [
 const PUBLIC_PINATA_API_KEY = process.env.NEXT_PUBLIC_PINATA_API_KEY || "";
 const PUBLIC_PINATA_SECRET_API_KEY =
   process.env.NEXT_PUBLIC_PINATA_SECRET_API_KEY || "";
-const PUBLIC_MARKETPLACE = process.env.NEXT_PUBLIC_MARKETPLACE || "";
+
 export const EditCollectionModal = ({
   collectionInfo,
   category,
   setCategory,
+  handleEvent,
 }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [description, setDescription] = useState(
@@ -72,7 +71,6 @@ export const EditCollectionModal = ({
   );
   const { address, client: signingClient } = useRecoilValue(walletState);
   const [isJsonUploading, setJsonUploading] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [logo, setLogo] = useState("");
   const [banner, setBanner] = useState("");
   // reducer function to handle state changes
@@ -190,11 +188,6 @@ export const EditCollectionModal = ({
           data.featuredImage || collectionInfo.banner_image?.split("ipfs/")[1];
         jsonData["name"] = collectionInfo.name;
         jsonData["description"] = description;
-        jsonData["royalties"] = collectionInfo.royalties;
-        jsonData["category"] = options.indexOf({
-          value: category,
-          label: category,
-        });
         const pinataJson = {
           pinataMetadata: {
             name: collectionInfo.name,
@@ -216,10 +209,11 @@ export const EditCollectionModal = ({
           ipfsHash = response.data.IpfsHash;
         }
         setJsonUploading(false);
-        const marketContract = Market(PUBLIC_MARKETPLACE).useTx(signingClient);
-        const collection = await marketContract.editCollectionUri(
+        const factoryContract = Factory().useTx(signingClient);
+        await factoryContract.editUserCollection(
           address,
-          Number(collectionInfo.id),
+          collectionInfo.id,
+          category,
           ipfsHash
         );
         toast.success(`Edit Collection Success`, {
@@ -231,6 +225,7 @@ export const EditCollectionModal = ({
           draggable: true,
           progress: undefined,
         });
+        handleEvent();
         onClose();
       }
     } catch (err) {
@@ -243,16 +238,6 @@ export const EditCollectionModal = ({
         draggable: true,
         progress: undefined,
       });
-    }
-  };
-  const changeCategory = async () => {
-    const changedCategory = await setCollectionCategory({
-      category,
-      id: collectionInfo.id,
-      creator: collectionInfo.creator,
-    });
-    if (changedCategory) {
-      setSaved(true);
     }
   };
   return (
@@ -325,9 +310,6 @@ export const EditCollectionModal = ({
                     }}
                   />
                 </SelectWrapper>
-                <IconWrapper onClick={changeCategory}>
-                  {saved ? <CheckIcon w="70px" color="green" /> : <Save />}
-                </IconWrapper>
               </HStack>
               <Stack padding="0 30px">
                 <Button
@@ -422,7 +404,4 @@ const Footer = styled.div`
 `;
 const SelectWrapper = styled.div`
   width: 100%;
-`;
-const IconWrapper = styled.div`
-  cursor: pointer;
 `;

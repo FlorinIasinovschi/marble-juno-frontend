@@ -16,8 +16,8 @@ import { isClientMobie, isMobile } from "util/device";
 import Image from "components/Img";
 import {
   CW721,
-  Market,
-  Collection,
+  Factory,
+  Marketplace,
   useSdk,
   PaymentToken,
   NftInfo,
@@ -34,10 +34,10 @@ const CollectionInfo = ({ info }) => {
   const { client } = useSdk();
   const fetchTokensInfo = useCallback(async () => {
     try {
-      const cwCollectionContract = Collection(info.collection_address).use(
+      const cwCollectionContract = Marketplace(info.collection_address).use(
         client
       );
-      const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
+      const marketContract = Factory().use(client);
       let collection = await marketContract.collection(info.id);
       let ipfs_collection = await fetch(
         process.env.NEXT_PUBLIC_PINATA_URL + collection.uri
@@ -133,7 +133,7 @@ const CollectionInfo = ({ info }) => {
                   transform: isMobile() ? "" : "scale(1.05)",
                 }}
               >
-                <NftCard nft={nftInfo} collection={collectionInfo} type="" />
+                <NftCard nft={nftInfo} collection={collectionInfo} />
               </LinkBox>
             </Link>
           ))}

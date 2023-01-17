@@ -4,6 +4,7 @@ import {
 } from "@cosmjs/cosmwasm-stargate";
 import { Coin } from "@cosmjs/stargate";
 import { unsafelyGetDefaultExecuteFee } from "util/fees";
+import { FACTORY_ADDRESS } from "util/constants";
 export interface MarketContractConfig {
   owner: string;
   max_collection_id: number;
@@ -23,11 +24,12 @@ export interface OffersResponse {
 }
 
 export interface CollectionResponse {
-  id: number;
-  collection_address: string;
-  cw721_address: string;
+  id: string;
+  address: string;
+  creator: string;
   uri: string;
-  owner: string;
+  category: string;
+  name: string;
 }
 
 export interface CollectonListResponse {
@@ -36,13 +38,10 @@ export interface CollectonListResponse {
 
 export interface MarketInstance {
   readonly contractAddress: string;
-  listCollections: (
-    skip: number,
-    limit: number
-  ) => Promise<CollectionResponse[]>;
+  listCollections: () => Promise<CollectionResponse[]>;
   ownedCollections: (address: string) => Promise<CollectionResponse[]>;
   config: () => Promise<MarketContractConfig>;
-  collection: (id: number) => Promise<CollectionResponse>;
+  collection: (id: string) => Promise<CollectionResponse>;
   //old functions
   numOffers: () => Promise<number>;
   offer: (
@@ -57,25 +56,25 @@ export interface MarketInstance {
   allOffers: (startAfter?: string, limit?: number) => Promise<OffersResponse>;
 }
 
+export interface Royalty {
+  address: string;
+  royalty_rate: string;
+}
 export interface MarketTxInstance {
   readonly contractAddress: string;
   // actions
   addCollection: (
     owner: string,
-    max_tokens: number,
     name: string,
-    symbol: string,
-    token_code_id: number,
-    maximumRoyaltyFee: number,
-    royalties: any,
+    royalties: Royalty[],
+    category: string
+  ) => Promise<any>;
+  editUserCollection: (
+    owner: string,
+    id: string,
+    category: string,
     uri: string
   ) => Promise<any>;
-  mint: (owner: string, uri: string) => Promise<string>;
-  editCollection: (data: EditCollectionDataInstance) => Promise<string>;
-  editCollectionUri: (owner: string, id: number, uri: string) => Promise<any>;
-  //old functions
-  buy: (sender: string, offerId: string, price: Coin) => Promise<string>;
-  withdraw: (sender: string, offerId: string) => Promise<string>;
 }
 
 export interface MarketContract {
@@ -91,7 +90,8 @@ export interface EditCollectionDataInstance {
   uri: string;
 }
 
-export const Market = (contractAddress: string): MarketContract => {
+export const Factory = (): MarketContract => {
+  const contractAddress = FACTORY_ADDRESS;
   const defaultExecuteFee = unsafelyGetDefaultExecuteFee();
 
   const use = (client: CosmWasmClient): MarketInstance => {
@@ -101,21 +101,18 @@ export const Market = (contractAddress: string): MarketContract => {
       });
       return result;
     };
-    const listCollections = async (
-      skip: number,
-      limit: number
-    ): Promise<CollectionResponse[]> => {
+    const listCollections = async (): Promise<CollectionResponse[]> => {
       const result = await client.queryContractSmart(contractAddress, {
         list_collections: {
           // start_after: skip,
           // limit: limit,
         },
       });
-      return result.list;
+      return result;
     };
-    const collection = async (id: any): Promise<CollectionResponse> => {
+    const collection = async (id: string): Promise<CollectionResponse> => {
       const result = await client.queryContractSmart(contractAddress, {
-        collection: { id: parseInt(id) },
+        get_collection: { id },
       });
       return result;
     };
@@ -125,7 +122,7 @@ export const Market = (contractAddress: string): MarketContract => {
           owner: address,
         },
       });
-      return result.list;
+      return result;
     };
     const numOffers = async (): Promise<number> => {
       const result = await client.queryContractSmart(contractAddress, {
@@ -181,27 +178,20 @@ export const Market = (contractAddress: string): MarketContract => {
   const useTx = (client: SigningCosmWasmClient): MarketTxInstance => {
     const addCollection = async (
       owner: string,
-      maxTokens: number,
       name: string,
-      symbol: string,
-      tokenCodeId: number,
-      maximumRoyaltyFee: number,
-      royalties: any,
-      uri: string
+      royalties: Royalty[],
+      category: string
     ): Promise<any> => {
       const result = await client.execute(
         owner,
         contractAddress,
         {
-          add_collection: {
-            owner: owner,
-            max_tokens: maxTokens,
-            name: name,
-            symbol: symbol,
-            token_code_id: tokenCodeId,
-            maximum_royalty_fee: maximumRoyaltyFee,
-            royalties: royalties,
-            uri: uri,
+          add_user_collection: {
+            collection_info: {
+              name: name,
+              royalties: royalties,
+              category: category,
+            },
           },
         },
         defaultExecuteFee
@@ -210,34 +200,22 @@ export const Market = (contractAddress: string): MarketContract => {
       return result;
     };
 
-    const editCollection = async (
-      data: EditCollectionDataInstance
-    ): Promise<string> => {
-      const result = await client.execute(
-        data.owner,
-        contractAddress,
-        {
-          edit_collection: {
-            ...data,
-          },
-        },
-        defaultExecuteFee
-      );
-      return result.transactionHash;
-    };
-
-    const editCollectionUri = async (
+    const editUserCollection = async (
       owner: string,
-      id: number,
+      id: string,
+      category: string,
       uri: string
     ) => {
       const result = await client.execute(
         owner,
         contractAddress,
         {
-          edit_uri: {
+          edit_user_collection: {
             id,
-            uri,
+            edit_collection_info: {
+              category,
+              uri,
+            },
           },
         },
         defaultExecuteFee
@@ -245,54 +223,10 @@ export const Market = (contractAddress: string): MarketContract => {
       return result;
     };
 
-    const mint = async (owner: string, uri: string): Promise<string> => {
-      const result = await client.execute(
-        owner,
-        contractAddress,
-        {
-          mint: {
-            uri: uri,
-          },
-        },
-        defaultExecuteFee
-      );
-
-      return result.transactionHash;
-    };
-    const buy = async (
-      sender: string,
-      offerId: string,
-      price: Coin
-    ): Promise<string> => {
-      const result = await client.execute(
-        sender,
-        contractAddress,
-        { buy: { offering_id: offerId } },
-        undefined
-      );
-      return result.transactionHash;
-    };
-
-    const withdraw = async (
-      sender: string,
-      offerId: string
-    ): Promise<string> => {
-      const result = await client.execute(
-        sender,
-        contractAddress,
-        { withdraw_nft: { offering_id: offerId } },
-        undefined
-      );
-      return result.transactionHash;
-    };
     return {
       contractAddress,
       addCollection,
-      mint,
-      buy,
-      withdraw,
-      editCollection,
-      editCollectionUri,
+      editUserCollection,
     };
   };
 

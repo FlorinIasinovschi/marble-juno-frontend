@@ -20,7 +20,7 @@ import {
   formatPrice,
   NftInfo,
   CW721,
-  Market,
+  Factory,
   NftInfoResponse,
   publicIpfsUrl,
   useSdk,
@@ -45,7 +45,7 @@ export const Account = () => {
 
   const getNftsInfo = async (ids: string[], contract: CW721Instance) => {
     const allNfts: Promise<NftInfoResponse>[] = [];
-    ids.forEach(tokenId => {
+    ids.forEach((tokenId) => {
       allNfts.push(contract.nftInfo(tokenId));
     });
 
@@ -77,9 +77,16 @@ export const Account = () => {
       if (!client || !user) return;
 
       const contract = CW721(config.contract).use(client);
-      const marketcw = Market(config.marketContract).use(client);
-      const result = await marketcw.offersBySeller(user, undefined, maxItemsPerPage);
-      const tokens = await getNftsInfo(result.offers.map(o => o.token_id), contract);
+      const marketcw = Factory().use(client);
+      const result = await marketcw.offersBySeller(
+        user,
+        undefined,
+        maxItemsPerPage
+      );
+      const tokens = await getNftsInfo(
+        result.offers.map((o) => o.token_id),
+        contract
+      );
 
       const items = tokens.map((nft, idx) => {
         const off = result.offers[idx];
@@ -90,32 +97,23 @@ export const Account = () => {
     })();
   }, [client, user]);
 
-  const getNftPath = (nftId: string) => `${address === user ? "/account" : ""}/token/${nftId}`;
+  const getNftPath = (nftId: string) =>
+    `${address === user ? "/account" : ""}/token/${nftId}`;
 
   return (
     <Box m={5}>
-      <VStack
-        spacing={10}
-        align="stretch"
-      >
+      <VStack spacing={10} align="stretch">
         <Flex justifyContent={"center"}>
           <VStack spacing={4}>
             <Box bg="gray.500" borderRadius="xl" py={1} px={3}>
-              <Text
-                color={"white"}
-                fontFamily="mono"
-                fontSize="sm">
+              <Text color={"white"} fontFamily="mono" fontSize="sm">
                 {user}
               </Text>
             </Box>
           </VStack>
         </Flex>
         <Box>
-          <Tabs
-            isManual
-            isLazy
-            defaultIndex={1}
-            colorScheme="cyan">
+          <Tabs isManual isLazy defaultIndex={1} colorScheme="cyan">
             <TabList>
               <Tab>On Sale</Tab>
               <Tab>Owned</Tab>
@@ -123,14 +121,27 @@ export const Account = () => {
 
             <TabPanels>
               <TabPanel>
-                <SimpleGrid spacing={10} gridTemplateColumns={["repeat(1, minmax(0px, 1fr))", "repeat(3, minmax(0px, 1fr))", "repeat(5, minmax(0px, 1fr))"]}>
-                  {nftSale.map(nft => (
-                    <LinkBox as="picture" key={nft.tokenId}
+                <SimpleGrid
+                  spacing={10}
+                  gridTemplateColumns={[
+                    "repeat(1, minmax(0px, 1fr))",
+                    "repeat(3, minmax(0px, 1fr))",
+                    "repeat(5, minmax(0px, 1fr))",
+                  ]}
+                >
+                  {nftSale.map((nft) => (
+                    <LinkBox
+                      as="picture"
+                      key={nft.tokenId}
                       transition="transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1) 0s"
                       _hover={{
-                        transform: "scale(1.05)"
-                      }}>
-                      <LinkOverlay as={ReactRouterLink} to={getNftPath(nft.tokenId)}>
+                        transform: "scale(1.05)",
+                      }}
+                    >
+                      <LinkOverlay
+                        as={ReactRouterLink}
+                        to={getNftPath(nft.tokenId)}
+                      >
                         {/* <NftCard nft={nft} id="0" type="sell"/> */}
                       </LinkOverlay>
                     </LinkBox>
@@ -138,14 +149,27 @@ export const Account = () => {
                 </SimpleGrid>
               </TabPanel>
               <TabPanel>
-                <SimpleGrid spacing={10} gridTemplateColumns={["repeat(1, minmax(0px, 1fr))", "repeat(3, minmax(0px, 1fr))", "repeat(5, minmax(0px, 1fr))"]}>
-                  {nfts.map(nft => (
-                    <LinkBox as="picture" key={nft.tokenId}
+                <SimpleGrid
+                  spacing={10}
+                  gridTemplateColumns={[
+                    "repeat(1, minmax(0px, 1fr))",
+                    "repeat(3, minmax(0px, 1fr))",
+                    "repeat(5, minmax(0px, 1fr))",
+                  ]}
+                >
+                  {nfts.map((nft) => (
+                    <LinkBox
+                      as="picture"
+                      key={nft.tokenId}
                       transition="transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1) 0s"
                       _hover={{
-                        transform: "scale(1.05)"
-                      }}>
-                      <LinkOverlay as={ReactRouterLink} to={getNftPath(nft.tokenId)}>
+                        transform: "scale(1.05)",
+                      }}
+                    >
+                      <LinkOverlay
+                        as={ReactRouterLink}
+                        to={getNftPath(nft.tokenId)}
+                      >
                         {/* <NftCard nft={nft} id="0" type="sell" /> */}
                       </LinkOverlay>
                     </LinkBox>

@@ -1,32 +1,14 @@
-import React from "react";
 import { AppLayout } from "components/Layout/AppLayout";
 import { PageHeader } from "components/Layout/PageHeader";
-import { NFTDetail } from "features/nft/market/detail/NFTDetail";
-import { useState } from "react";
 import { styled } from "components/theme";
+import { NFTDetail } from "features/nft/market/detail/NFTDetail";
 import { useRouter } from "next/router";
+import { useState } from "react";
 
-import { useConnectWallet } from "../../../hooks/useConnectWallet";
-import { useRecoilState } from "recoil";
-import {
-  walletState,
-  WalletStatusType,
-} from "../../../state/atoms/walletAtoms";
-import { SdkProvider } from "services/nft/client/wallet";
 import { config } from "services/config";
+import { SdkProvider } from "services/nft/client/wallet";
 
 export default function Home() {
-  // const { mutate: connectWallet } = useConnectWallet()
-  // const [{ key }, setWalletState] = useRecoilState(walletState)
-  // function resetWalletConnection() {
-  //   setWalletState({
-  //     status: WalletStatusType.idle,
-  //     address: '',
-  //     key: null,
-  //     client: null,
-  //   })
-  // }
-
   const { asPath, pathname } = useRouter();
   const id = asPath.split("/")[3];
   const collectionId = asPath.split("/")[2];

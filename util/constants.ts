@@ -50,3 +50,7 @@ export const PINATA_PRIMARY_IMAGE_SIZE =
 export const PINATA_SECONDARY_IMAGE_SIZE =
   process.env.NEXT_PUBLIC_PINATA_SECONDARY_IMAGE_SIZE;
 export const NUM_PER_PAGE = 12;
+export const FACTORY_ADDRESS =
+  "juno1yy38kftj053myjuznf8x89zhgsu4lse6l2tug0d7wl9efhunldtqn47ej3";
+export const MARKETPLACE_ADDRESS =
+  "juno1k799zl0wt7wkuuxnwgeuvatj4ljsqnk0zm4s8hjmkdvx23eayhlsn3pwc0";

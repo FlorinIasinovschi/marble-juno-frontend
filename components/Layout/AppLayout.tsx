@@ -43,7 +43,6 @@ export const AppLayout = ({
   const [original, setOriginal] = useState(false);
   const [creative, setCreative] = useState(false);
   const profile = useSelector((state: any) => state.profileData.profile_status);
-  console.log("profile: ", profile);
   useEffect(() => {
     TagManager.initialize(tagManagerArgs);
   }, []);
@@ -185,7 +184,7 @@ const ModalContainer = styled(ModalContent)`
 `;
 
 const Container = styled.div`
-  background: black;
+  background: rgb(24, 27, 42);
   justify-content: center;
   display: flex;
 `;

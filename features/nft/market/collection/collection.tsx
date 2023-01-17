@@ -1,4 +1,4 @@
-import { Spinner, Stack, Tab, Text } from "@chakra-ui/react";
+import { Spinner, Stack, Tab, Text, LinkBox } from "@chakra-ui/react";
 import { Button } from "components/Button";
 import { IconWrapper } from "components/IconWrapper";
 import { NftTable } from "components/NFT";
@@ -8,13 +8,14 @@ import { Activity, ArrowDown, Grid, More } from "icons";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { NftCard } from "components/NFT";
 import { useRecoilValue } from "recoil";
 import {
-  Collection,
+  Marketplace,
   CW721,
   getFileTypeFromURL,
   getRealTokenAmount,
-  Market,
+  Factory,
   PaymentToken,
   useSdk,
 } from "services/nft";
@@ -23,15 +24,14 @@ import styled from "styled-components";
 import { SecondGradientBackground } from "styles/styles";
 import { isMobile } from "util/device";
 import { EditCollectionModal } from "./components/EditCollectionModal";
-
-const PUBLIC_MARKETPLACE = process.env.NEXT_PUBLIC_MARKETPLACE || "";
-
+import { FACTORY_ADDRESS, MARKETPLACE_ADDRESS } from "util/constants";
 interface CollectionProps {
   readonly id: string;
 }
 
 export const CollectionPage = ({ id }: CollectionProps) => {
   const { client } = useSdk();
+  const [reloadCount, setReloadCount] = useState(0);
   const { address, client: signingClient } = useRecoilValue(walletState);
   const [category, setCategory] = useState("Digital");
   const [filterTab, setFilterTab] = useState("all");
@@ -47,36 +47,37 @@ export const CollectionPage = ({ id }: CollectionProps) => {
     for (let i = 0; i < paymentTokens.length; i++) {
       paymentTokensAddress.push(paymentTokens[i].address);
     }
-    const cwCollectionContract = Collection(
-      collectionInfo.collection_address
-    ).use(client);
-    const cw721Contract = CW721(collectionInfo.cw721_address).use(client);
-    const tokenIdsInfo = await cw721Contract.allTokens(
+    const marketplaceContract = Marketplace(MARKETPLACE_ADDRESS).use(client);
+    const cw721Contract = CW721(collectionInfo.address).use(client);
+    const tokensInfo = await cw721Contract.allTokens(
       (limit * page).toString(),
       limit
     );
-    if (tokenIdsInfo.tokens.length < limit) setHasMore(false);
+    if (tokensInfo.length < limit) setHasMore(false);
     const nftData = await Promise.all(
-      tokenIdsInfo.tokens.map(async (tokenId) => {
-        let nftInfo = await cw721Contract.allNftInfo(tokenId);
-        let ipfs_nft = await fetch(
-          process.env.NEXT_PUBLIC_PINATA_URL + nftInfo.info.token_uri
-        );
-        let res_nft = await ipfs_nft.json();
-        res_nft["tokenId"] = tokenId;
-        res_nft["created"] = res_nft["owner"];
+      tokensInfo.map(async (token) => {
+        console.log("token: ", token);
+        const nftInfo = token.nft_info.extension;
+        let nftOwner = await cw721Contract.ownerOf(token.token_id);
+        let res_nft: any = {};
+        res_nft["tokenId"] = token.token_id;
+        res_nft["creator"] = nftInfo.minter;
         res_nft.collectionId = id;
-        res_nft["owner"] = nftInfo.access.owner;
-        if (res_nft["uri"].indexOf("https://") == -1) {
-          res_nft["image"] =
-            process.env.NEXT_PUBLIC_PINATA_URL + res_nft["uri"];
-        } else {
-          res_nft["image"] = res_nft["uri"];
-        }
-        let nft_type = await getFileTypeFromURL(res_nft["image"]);
-        res_nft["type"] = nft_type.fileType;
+        res_nft["owner"] = nftOwner;
+        res_nft["image"] =
+          process.env.NEXT_PUBLIC_PINATA_URL + nftInfo.image_url;
+        res_nft.name = nftInfo.name;
+        res_nft.description = nftInfo.description;
+        res_nft.type = "image";
         try {
-          const sale: any = await cwCollectionContract.getSale(Number(tokenId));
+          let nft_type = await getFileTypeFromURL(res_nft["image"]);
+          res_nft["type"] = nft_type.fileType;
+        } catch (err) {}
+        try {
+          const sale: any = await marketplaceContract.getSale(
+            token.token_id,
+            collectionInfo.address
+          );
           let paymentToken: any;
           if (sale.denom.hasOwnProperty("cw20")) {
             paymentToken =
@@ -102,23 +103,30 @@ export const CollectionPage = ({ id }: CollectionProps) => {
     setLoadedNfts(loadedNfts.concat(nftData));
     setPage(page + 1);
   };
+  console.log("loadedNFTS; ", loadedNfts);
   useEffect(() => {
     (async () => {
       if (id === undefined || id == "[name]") return false;
       if (!client) {
         return;
       }
-      const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
-      let collection = await marketContract.collection(parseInt(id));
-      let ipfs_collection = await fetch(
-        process.env.NEXT_PUBLIC_PINATA_URL + collection.uri
-      );
-      let res_collection = await ipfs_collection.json();
+      const marketContract = Factory().use(client);
+      let collection = await marketContract.collection(id);
+
+      let res_collection: any = {};
+      try {
+        let ipfs_collection = await fetch(
+          process.env.NEXT_PUBLIC_PINATA_URL + collection.uri
+        );
+        res_collection = await ipfs_collection.json();
+      } catch (err) {
+        console.log("err: ", err);
+      }
+
       let collection_info: any = {};
       collection_info.id = id;
-      collection_info.collection_address = collection.collection_address;
-      collection_info.cw721_address = collection.cw721_address;
-      collection_info.name = res_collection.name;
+      collection_info.address = collection.address;
+      collection_info.name = collection.name;
       collection_info.description = res_collection.description;
       collection_info.image =
         res_collection.logo &&
@@ -127,14 +135,13 @@ export const CollectionPage = ({ id }: CollectionProps) => {
         res_collection.featuredImage &&
         process.env.NEXT_PUBLIC_PINATA_URL + res_collection.featuredImage;
       collection_info.slug = res_collection.slug;
-      collection_info.creator = collection.owner ?? "";
-      collection_info.cat_ids = res_collection.category;
-      collection_info.royalties = res_collection.royalties;
+      collection_info.creator = collection.creator ?? "";
+      collection_info.category = collection.category;
+      setCategory(collection.category);
       let collection_type = await getFileTypeFromURL(
         process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo
       );
       collection_info.type = collection_type.fileType;
-
       setCollectionInfo(collection_info);
       const response = await fetch(
         process.env.NEXT_PUBLIC_COLLECTION_TOKEN_LIST_URL
@@ -142,32 +149,18 @@ export const CollectionPage = ({ id }: CollectionProps) => {
       const paymentTokenList = await response.json();
       setPaymentTokens(paymentTokenList.tokens);
     })();
-  }, [id, client]);
+  }, [id, client, reloadCount]);
 
   useEffect(() => {
     (async () => {
-      await getNfts();
+      if (collectionInfo.address) await getNfts();
     })();
   }, [collectionInfo, paymentTokens]);
 
   const getMoreNfts = async () => {
-    console.log("getMoreNfts: ", hasMore, page);
     if (id === undefined || id == "[name]" || !hasMore) return false;
     getNfts();
   };
-
-  useEffect(() => {
-    (async () => {
-      if (id === undefined || id == "[name]") return false;
-      try {
-        const _category = await getCollectionCategory(id);
-
-        setCategory(_category);
-      } catch (err) {
-        console.log("nft get counts error: ", err);
-      }
-    })();
-  }, [id]);
   const handleFilter = (id: string) => {
     // const filteredNFTs = nfts.filter((nft) => nft.saleType === id)
     // setFiltered(filteredNFTs)
@@ -221,6 +214,9 @@ export const CollectionPage = ({ id }: CollectionProps) => {
                   setCategory(e);
                 }}
                 category={category}
+                handleEvent={() => {
+                  setReloadCount(reloadCount + 1);
+                }}
               />
             </EditCollectionButtonWrapper>
           )}
@@ -337,7 +333,19 @@ export const CollectionPage = ({ id }: CollectionProps) => {
             }
             endMessage={<h4></h4>}
           >
-            <NftTable data={loadedNfts} type="buy" />
+            <NftGrid>
+              {loadedNfts.map((nft, index) => (
+                <Link
+                  href={`/nft/${nft.collectionId}/${nft.tokenId}`}
+                  passHref
+                  key={index}
+                >
+                  <LinkBox as="picture">
+                    <NftCard nft={nft} collection={collectionInfo} />
+                  </LinkBox>
+                </Link>
+              ))}
+            </NftGrid>
           </InfiniteScroll>
         )}
         {loadedNfts.length === 0 && address === collectionInfo.creator && (
@@ -361,6 +369,9 @@ export const CollectionPage = ({ id }: CollectionProps) => {
                 setCategory(e);
               }}
               category={category}
+              handleEvent={() => {
+                setReloadCount(reloadCount + 1);
+              }}
             />
           </Stack>
         )}
@@ -647,5 +658,17 @@ const Sort = styled.div`
   width: fit-content;
   svg {
     width: 15px;
+  }
+`;
+const NftGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-row-gap: 20px;
+  grid-column-gap: 20px;
+  padding: 20px;
+  overflow: hidden;
+  overflow: auto;
+  @media (max-width: 1550px) {
+    grid-template-columns: repeat(3, 1fr);
   }
 `;

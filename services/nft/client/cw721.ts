@@ -20,7 +20,15 @@ export interface TokensResponse {
   /**
    * Contains all token_ids in lexicographical ordering If there are more than `limit`, use `start_from` in future queries to achieve pagination.
    */
-  tokens: string[];
+  token_id: string;
+  nft_info: {
+    extension: {
+      description: string;
+      image_url: string;
+      minter: string;
+      name: string;
+    };
+  };
 }
 
 export interface NftMsg {
@@ -46,6 +54,35 @@ export interface NftMsg {
   token_id: string;
 }
 
+export interface Royalty {
+  address: string;
+  royalty_rate: string;
+}
+export interface CollectionStateResponse {
+  minter: string;
+  royalty_info: Royalty[];
+}
+
+export interface ContractInfoResponse {
+  name: string;
+  symbol: string;
+  collection_id: string;
+}
+
+export interface AllNFTInfoResponse {
+  access: {
+    approvals: any[];
+    owner: string;
+  };
+  info: {
+    extension: {
+      description: string;
+      image_url: string;
+      minter: string;
+      name: string;
+    };
+  };
+}
 export interface CW721Instance {
   readonly contractAddress: string;
 
@@ -55,18 +92,26 @@ export interface CW721Instance {
   ownerOf: (tokenId: string) => Promise<string>;
   numTokens: () => Promise<number>;
   nftInfo: (tokenId: string) => Promise<NftInfoResponse>;
-  allNftInfo: (tokenId: string) => Promise<any>;
+  allNftInfo: (tokenId: string) => Promise<AllNFTInfoResponse>;
+  getCollectionState: () => Promise<CollectionStateResponse>;
   tokens: (
     owner: string,
     startAfter?: string,
     limit?: number
   ) => Promise<TokensResponse>;
-  allTokens: (startAfter?: string, limit?: number) => Promise<TokensResponse>;
+  allTokens: (startAfter?: string, limit?: number) => Promise<TokensResponse[]>;
   minter: () => Promise<any>;
+  contractInfo: () => Promise<ContractInfoResponse>;
 }
 
 export interface CW721TxInstance {
   readonly contractAddress: string;
+  mint: (
+    owner: string,
+    name: string,
+    image_url: string,
+    description: string
+  ) => Promise<any>;
 
   sendNft: (
     sender: string,
@@ -133,11 +178,11 @@ export const CW721 = (contractAddress: string): CW721Contract => {
     const allTokens = async (
       startAfter?: string,
       limit?: number
-    ): Promise<TokensResponse> => {
+    ): Promise<TokensResponse[]> => {
       const result = await client.queryContractSmart(contractAddress, {
         all_tokens: { start_after: startAfter, limit: limit },
       });
-      return result;
+      return result.tokens;
     };
 
     const minter = async (): Promise<any> => {
@@ -146,9 +191,21 @@ export const CW721 = (contractAddress: string): CW721Contract => {
       });
       return result.minter;
     };
-    const allNftInfo = async (tokenId: string): Promise<NftInfoResponse> => {
+    const allNftInfo = async (tokenId: string): Promise<AllNFTInfoResponse> => {
       const result = await client.queryContractSmart(contractAddress, {
         all_nft_info: { token_id: tokenId },
+      });
+      return result;
+    };
+    const contractInfo = async (): Promise<ContractInfoResponse> => {
+      const result = await client.queryContractSmart(contractAddress, {
+        contract_info: {},
+      });
+      return result;
+    };
+    const getCollectionState = async (): Promise<CollectionStateResponse> => {
+      const result = await client.queryContractSmart(contractAddress, {
+        get_collection_state: {},
       });
       return result;
     };
@@ -161,10 +218,38 @@ export const CW721 = (contractAddress: string): CW721Contract => {
       allTokens,
       minter,
       allNftInfo,
+      contractInfo,
+      getCollectionState,
     };
   };
 
   const useTx = (client: SigningCosmWasmClient): CW721TxInstance => {
+    const mint = async (
+      owner: string,
+      name: string,
+      image_url: string,
+      description: string
+    ): Promise<any> => {
+      const result = await client.execute(
+        owner,
+        contractAddress,
+        {
+          mint: {
+            owner,
+            name,
+            image_url,
+            extension: {
+              image_url,
+              minter: owner,
+              name,
+              description,
+            },
+          },
+        },
+        defaultExecuteFee
+      );
+      return result;
+    };
     const sendNft = async (
       sender: string,
       collectionAddress: string,
@@ -238,6 +323,7 @@ export const CW721 = (contractAddress: string): CW721Contract => {
       transfer,
       send,
       burn,
+      mint,
     };
   };
 

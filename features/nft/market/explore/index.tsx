@@ -5,9 +5,8 @@ import { styled } from "components/theme";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { CategoryTab, NftCollectionTable } from "components/NFT";
 import { NftCategory, NftCollection, getFileTypeFromURL } from "services/nft";
-import { Market, useSdk, Collection } from "services/nft";
-
-const PUBLIC_MARKETPLACE = process.env.NEXT_PUBLIC_MARKETPLACE || "";
+import { Factory, useSdk, Marketplace } from "services/nft";
+import { FACTORY_ADDRESS } from "util/constants";
 
 export const Explore = () => {
   const data = ["marblenauts"];
@@ -24,8 +23,8 @@ export const Explore = () => {
         return;
       }
 
-      const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
-      let collectionList = await marketContract.listCollections(0, 20);
+      const marketContract = Factory().use(client);
+      let collectionList = await marketContract.listCollections();
       let res_categories = await fetch(process.env.NEXT_PUBLIC_CATEGORY_URL);
       let categories = await res_categories.json();
       setNftCategories(categories.categories);
@@ -37,45 +36,44 @@ export const Explore = () => {
             process.env.NEXT_PUBLIC_PINATA_URL + collectionList[i].uri
           );
           res_collection = await ipfs_collection.json();
-          console.log("res_collection: ", collectionList[i], res_collection);
-          let collection_info: any = {};
-          collection_info.id = collectionList[i].id;
-          collection_info.name = res_collection.name;
-          collection_info.description = res_collection.description;
-          collection_info.slug = res_collection.slug;
-          collection_info.creator = collectionList[i].owner ?? "";
-          collection_info.cat_ids = res_collection.category;
-
-          if (res_collection.logo) {
-            let collection_type = await getFileTypeFromURL(
-              process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo
-            );
-            collection_info.type = collection_type.fileType;
-          } else {
-            collection_info.type = "image";
-          }
-
-          if (res_collection.logo) {
-            collection_info.image =
-              process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
-          } else {
-            collection_info.image = "https://via.placeholder.com/70";
-          }
-
-          if (res_collection.logo || res_collection.featuredImage) {
-            collection_info.banner_image = res_collection.featuredImage
-              ? process.env.NEXT_PUBLIC_PINATA_URL +
-                res_collection.featuredImage
-              : process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
-          } else {
-            collection_info.banner_image = "https://via.placeholder.com/300";
-          }
-          if (collectionList[i].id === 5)
-            collection_info.banner_image = "/marblenauts.gif";
-          collections.push(collection_info);
         } catch (err) {
           console.log("err", err);
         }
+        console.log("res_collection: ", collectionList[i], res_collection);
+        let collection_info: any = {};
+        collection_info.id = collectionList[i].id;
+        collection_info.name = collectionList[i].name;
+        collection_info.description = res_collection.description;
+        collection_info.slug = res_collection.slug;
+        collection_info.creator = collectionList[i].creator ?? "";
+        collection_info.cat_ids = res_collection.category;
+
+        if (res_collection.logo) {
+          let collection_type = await getFileTypeFromURL(
+            process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo
+          );
+          collection_info.type = collection_type.fileType;
+        } else {
+          collection_info.type = "image";
+        }
+
+        if (res_collection.logo) {
+          collection_info.image =
+            process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
+        } else {
+          collection_info.image = "https://via.placeholder.com/70";
+        }
+
+        if (res_collection.logo || res_collection.featuredImage) {
+          collection_info.banner_image = res_collection.featuredImage
+            ? process.env.NEXT_PUBLIC_PINATA_URL + res_collection.featuredImage
+            : process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
+        } else {
+          collection_info.banner_image = "https://via.placeholder.com/300";
+        }
+        if (collectionList[i].id === "5")
+          collection_info.banner_image = "/marblenauts.gif";
+        collections.push(collection_info);
       }
       setHasMore(false);
       setNftCollections(collections);

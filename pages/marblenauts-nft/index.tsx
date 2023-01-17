@@ -15,7 +15,7 @@ import { getRandomInt } from "util/numbers";
 import { GradientBackground, SecondGradientBackground } from "styles/styles";
 import { toast } from "react-toastify";
 import {
-  Collection,
+  Marketplace,
   Marble,
   NftCollection,
   CW721,
@@ -61,7 +61,7 @@ export default function StakePage() {
   useEffect(() => {
     (async () => {
       try {
-        const collectionContract = Collection(collection_address).use(client);
+        const collectionContract = Marketplace(collection_address).use(client);
         const collectionConfig = await collectionContract.getConfig();
         let res_collection: any = {};
         let ipfs_collection = await fetch(

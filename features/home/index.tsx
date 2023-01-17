@@ -11,7 +11,7 @@ import {
   Grid,
   Button,
 } from "@chakra-ui/react";
-import { CW721, Market, useSdk, getFileTypeFromURL } from "services/nft";
+import { CW721, Factory, useSdk, getFileTypeFromURL } from "services/nft";
 import { isMobile, isPC } from "util/device";
 import { SecondGradientBackground } from "styles/styles";
 
@@ -23,8 +23,8 @@ const Home = () => {
   const fetchCollections = async () => {
     try {
       if (!client) return [];
-      const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
-      let collection = await marketContract.listCollections(0, 12);
+      const factoryContract = Factory().use(client);
+      let collection = await factoryContract.listCollections();
       return collection;
     } catch (error) {
       return [];

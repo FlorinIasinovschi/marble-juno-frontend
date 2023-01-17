@@ -95,7 +95,7 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
           </Link>
           {Boolean(key?.name) ? (
             <Link href="/create" passHref>
-              <CreateButton>Create</CreateButton>
+              <CreateButton>Mint</CreateButton>
             </Link>
           ) : (
             <ConnectedWalletButton
@@ -338,7 +338,7 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
             )}
             {key?.name && (
               <Link href="/create" passHref>
-                <CreateButton>Create</CreateButton>
+                <CreateButton>Mint</CreateButton>
               </Link>
             )}
           </ButtonField>

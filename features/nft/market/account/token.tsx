@@ -1,9 +1,5 @@
 import * as React from "react";
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link as ReactRouterLink, useParams } from "react-router-dom";
 import {
   Avatar,
@@ -43,7 +39,7 @@ import {
   publicIpfsUrl,
   formatAddress,
   formatPrice,
-  Market,
+  Factory,
   OfferResponse,
   toMinDenom,
   useSdk,
@@ -52,7 +48,7 @@ import { TransactionLink } from "components/NFT";
 import { coins, config } from "services/config";
 
 interface DetailParams {
-  [key: string]: string
+  [key: string]: string;
   readonly id: string;
 }
 
@@ -73,14 +69,14 @@ export const AccountToken = () => {
     if (!client) return;
 
     const contract = CW721(config.contract).use(client);
-    const marketContract = Market(config.marketContract).use(client);
+    const marketContract = Factory().use(client);
 
     const result = await contract.nftInfo(id);
     // result.image = publicIpfsUrl(result.image);
     const offer = await marketContract.offer(config.contract, id);
 
     setOffer(offer);
-    setOwner(offer ? offer.seller : (await contract.ownerOf(id)));
+    setOwner(offer ? offer.seller : await contract.ownerOf(id));
     setNft(result);
   }, [client, id]);
 
@@ -108,12 +104,19 @@ export const AccountToken = () => {
 
     try {
       const contract = CW721(config.contract).useTx(signClient);
-      const price = { list_price: { amount: toMinDenom(amount, denom), denom } };
-      const txHash = await contract.send(address, config.marketContract, price, id);
+      const price = {
+        list_price: { amount: toMinDenom(amount, denom), denom },
+      };
+      const txHash = await contract.send(
+        address,
+        config.marketContract,
+        price,
+        id
+      );
 
       toast({
         title: `Successful Transaction`,
-        description: (<TransactionLink tx={txHash} />),
+        description: <TransactionLink tx={txHash} />,
         status: "success",
         position: "bottom-right",
         isClosable: true,
@@ -127,8 +130,7 @@ export const AccountToken = () => {
         position: "bottom-right",
         isClosable: true,
       });
-    }
-    finally {
+    } finally {
       setLoading.off();
     }
   };
@@ -151,12 +153,12 @@ export const AccountToken = () => {
     setLoading.on();
 
     try {
-      const contract = Market(config.marketContract).useTx(signClient);
+      const contract = Factory().useTx(signClient);
       const txHash = await contract.withdraw(address, offer.id);
 
       toast({
         title: `Successful Transaction`,
-        description: (<TransactionLink tx={txHash} />),
+        description: <TransactionLink tx={txHash} />,
         status: "success",
         position: "bottom-right",
         isClosable: true,
@@ -170,8 +172,7 @@ export const AccountToken = () => {
         position: "bottom-right",
         isClosable: true,
       });
-    }
-    finally {
+    } finally {
       setLoading.off();
     }
   };
@@ -182,29 +183,33 @@ export const AccountToken = () => {
     </Center>
   );
 
-  const borderColor = useColorModeValue('cyan.900', 'white.200');
+  const borderColor = useColorModeValue("cyan.900", "white.200");
   const priceModal = (
-    <Modal
-      closeOnOverlayClick={false}
-      isOpen={isOpen}
-      onClose={onClose}
-    >
+    <Modal closeOnOverlayClick={false} isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Create sell order</ModalHeader>
         <ModalCloseButton />
         <ModalBody pb={6}>
-          <FormLabel fontFamily="mono" fontWeight="semibold">Price</FormLabel>
+          <FormLabel fontFamily="mono" fontWeight="semibold">
+            Price
+          </FormLabel>
           <SimpleGrid columns={6} spacing={3}>
             <FormControl as={GridItem} colSpan={[6, 4]}>
-              <NumberInput
-                onChange={(_, value) => setAmount(value)}>
+              <NumberInput onChange={(_, value) => setAmount(value)}>
                 <NumberInputField />
               </NumberInput>
             </FormControl>
             <FormControl as={GridItem} colSpan={[6, 2]}>
-              <Select placeholder="Select coin" onChange={e => setDenom(e.target.value)}>
-                {coins.map(c => <option key={c.name} value={c.denom}>{c.name}</option>)}
+              <Select
+                placeholder="Select coin"
+                onChange={(e) => setDenom(e.target.value)}
+              >
+                {coins.map((c) => (
+                  <option key={c.name} value={c.denom}>
+                    {c.name}
+                  </option>
+                ))}
               </Select>
             </FormControl>
           </SimpleGrid>
@@ -220,17 +225,18 @@ export const AccountToken = () => {
   );
   return (
     <Box m={5}>
-      {!nft ? loadingSkeleton : (
-        <Grid minH="80vh"
+      {!nft ? (
+        loadingSkeleton
+      ) : (
+        <Grid
+          minH="80vh"
           gridTemplateColumns={{
             sm: "repeat(1, minmax(0px, 1fr))",
-            md: "repeat(8, minmax(0px, 1fr))"
-          }}>
+            md: "repeat(8, minmax(0px, 1fr))",
+          }}
+        >
           <GridItem colSpan={5}>
-            <Flex
-              h="full"
-              justifyContent="center"
-              alignItems="center">
+            <Flex h="full" justifyContent="center" alignItems="center">
               <Image
                 bgGradient="linear(to-r, cyan.200, white.200)"
                 roundedTop="md"
@@ -238,31 +244,21 @@ export const AccountToken = () => {
                 fit="cover"
                 fallbackSrc="assets/cosmverse.jpg"
                 src="{nft.image}"
-                alt="{nft.name}" />
+                alt="{nft.name}"
+              />
             </Flex>
           </GridItem>
           <GridItem colSpan={3}>
             <Flex h="80vh">
               <VStack spacing={6} align="stretch">
                 <Box py={2}>
-                  <chakra.h1
-                    fontWeight="bold"
-                    fontSize="3xl"
-                  >
+                  <chakra.h1 fontWeight="bold" fontSize="3xl">
                     nft.name
                   </chakra.h1>
-                  <chakra.p
-                    mt={1}
-                    fontSize="xs"
-                    color="cyan.500"
-                  >
+                  <chakra.p mt={1} fontSize="xs" color="cyan.500">
                     @unknown
                   </chakra.p>
-                  <chakra.p
-                    mt={1}
-                    maxW="400px"
-                    fontSize="md"
-                  >
+                  <chakra.p mt={1} maxW="400px" fontSize="md">
                     nft.description
                   </chakra.p>
                 </Box>
@@ -286,7 +282,10 @@ export const AccountToken = () => {
                             color: "gray.600",
                           }}
                           as={ReactRouterLink}
-                          to={`/account/${owner}`}>{formatAddress(owner!)}</Link>
+                          to={`/account/${owner}`}
+                        >
+                          {formatAddress(owner!)}
+                        </Link>
                       </HStack>
                     </Box>
                   </VStack>
@@ -303,19 +302,18 @@ export const AccountToken = () => {
                       </chakra.p>
                     </Box>
                     <Box>
-                      <chakra.p
-                        fontWeight="semibold"
-                        fontSize="md"
-                      >
+                      <chakra.p fontWeight="semibold" fontSize="md">
                         {offer ? formatPrice(offer.list_price) : "Not listed"}
                       </chakra.p>
                     </Box>
                   </VStack>
                 </Box>
-                <Box py={6}
+                <Box
+                  py={6}
                   borderTop={1}
-                  borderStyle={'solid'}
-                  borderColor={borderColor}>
+                  borderStyle={"solid"}
+                  borderColor={borderColor}
+                >
                   {offer ? (
                     <Button
                       isLoading={loading}
@@ -323,14 +321,15 @@ export const AccountToken = () => {
                       title="Withdraw NFT"
                       type="button"
                       height="var(--chakra-sizes-10)"
-                      fontSize={'md'}
+                      fontSize={"md"}
                       fontWeight="semibold"
-                      borderRadius={'50px'}
-                      color={'white'}
+                      borderRadius={"50px"}
+                      color={"white"}
                       bg="pink.500"
                       _hover={{
                         bg: "pink.700",
-                      }}>
+                      }}
+                    >
                       Cancel
                     </Button>
                   ) : (
@@ -339,14 +338,15 @@ export const AccountToken = () => {
                       onClick={onOpen}
                       type="button"
                       height="var(--chakra-sizes-10)"
-                      fontSize={'md'}
+                      fontSize={"md"}
                       fontWeight="semibold"
-                      borderRadius={'50px'}
-                      color={'white'}
+                      borderRadius={"50px"}
+                      color={"white"}
                       bg="pink.500"
                       _hover={{
                         bg: "pink.700",
-                      }}>
+                      }}
+                    >
                       Sell
                     </Button>
                   )}
@@ -359,4 +359,4 @@ export const AccountToken = () => {
       {priceModal}
     </Box>
   );
-}
+};

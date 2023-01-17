@@ -16,7 +16,7 @@ import { NftCard } from "components/NFT/nft-card";
 import { isMobile } from "util/device";
 import { StyledCloseIcon } from "components/Dialog";
 
-const BurnNFTModal = ({ nftInfo, onHandle }) => {
+const BurnNFTModal = ({ nft, collection, onHandle }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
@@ -74,7 +74,7 @@ const BurnNFTModal = ({ nftInfo, onHandle }) => {
               </BurnButton>
             </Stack>
             <CardWrapper>
-              <NftCard nft={nftInfo} id="" type="" />
+              <NftCard nft={nft} collection={collection} id="" />
             </CardWrapper>
           </MainWrapper>
         </Container>

@@ -3,18 +3,17 @@ import Link from "next/link";
 import styled from "styled-components";
 import { NftCard } from "../nft-card";
 
-export function NftTable({ data, type, nft_column_count = 3 }) {
+export function NftTable({ data, nft_column_count = 3 }) {
   return (
     <NftGrid columns={nft_column_count}>
       {data.map((nft, index) => (
-        //<Link href="https://app.marbledao.finance/marblenauts-nft" passHref key={nft.tokenId}>
         <Link
           href={`/nft/${nft.collectionId}/${nft.tokenId}`}
           passHref
           key={index}
         >
           <LinkBox as="picture">
-            <NftCard nft={nft} type={type} />
+            <NftCard nft={nft} />
           </LinkBox>
         </Link>
       ))}

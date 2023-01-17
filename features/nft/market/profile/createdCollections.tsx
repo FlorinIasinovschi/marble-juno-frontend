@@ -9,11 +9,11 @@ import { default_image } from "util/constants";
 import { useRecoilValue } from "recoil";
 import { NftCollectionCard } from "components/NFT/collection/nftCollenctionCard";
 import {
-  Collection,
+  Marketplace,
   CW721,
   getFileTypeFromURL,
   getRealTokenAmount,
-  Market,
+  Factory,
   PaymentToken,
   useSdk,
 } from "services/nft";
@@ -27,7 +27,7 @@ const MyCreatedCollections = ({ id }) => {
   const fetchCollections = async () => {
     try {
       if (!client || !id) return [];
-      const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
+      const marketContract = Factory().use(client);
       let _collection = await marketContract.ownedCollections(id);
       return _collection;
     } catch (error) {

@@ -13,8 +13,8 @@ import { State } from "store/reducers";
 import { NFT_COLUMN_COUNT } from "store/types";
 import {
   CW721,
-  Market,
-  Collection,
+  Factory,
+  Marketplace,
   useSdk,
   PaymentToken,
   NftInfo,
@@ -51,7 +51,7 @@ export const MyCollectedNFTs = ({ id }) => {
     let collectionNFTs = [];
     let counts = { Auction: 0, "Direct Sell": 0, NotSale: 0 };
     try {
-      const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
+      const marketContract = Factory().use(client);
       let collections = await marketContract.listCollections(0, 40);
       const response = await fetch(
         process.env.NEXT_PUBLIC_COLLECTION_TOKEN_LIST_URL
@@ -70,7 +70,7 @@ export const MyCollectedNFTs = ({ id }) => {
         );
         const paymentTokenList = await response.json();
         setPaymentTokens(paymentTokenList.tokens);
-        const cwCollectionContract = Collection(
+        const cwCollectionContract = Marketplace(
           collection.collection_address
         ).use(client);
         let sales: any = await cwCollectionContract.getSales();

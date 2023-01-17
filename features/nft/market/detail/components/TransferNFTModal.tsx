@@ -17,7 +17,7 @@ import { NftCard } from "components/NFT/nft-card";
 import { isMobile } from "util/device";
 import { StyledCloseIcon } from "components/Dialog";
 
-const TransferNFTModal = ({ nftInfo, onHandle }) => {
+const TransferNFTModal = ({ nft, collection, onHandle }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [address, setAddress] = useState("");
   return (
@@ -99,7 +99,7 @@ const TransferNFTModal = ({ nftInfo, onHandle }) => {
               </Button>
             </Stack>
             <CardWrapper>
-              <NftCard nft={nftInfo} id="" type="" />
+              <NftCard nft={nft} collection={collection} id="" />
             </CardWrapper>
           </MainWrapper>
         </Container>

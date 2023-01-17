@@ -3,10 +3,10 @@ import BannerImageUpload from "components/BannerImageUpload";
 import { Button } from "components/Button";
 import { AppLayout } from "components/Layout/AppLayout";
 import ProfilleLogoImageUpload from "components/ProfileLogoImageUpload";
-import { MyCollectedNFTs } from "features/nft/market/profile";
-import CreatedNFTs from "features/nft/market/profile/creatednfts";
-import StakedNFTs from "features/nft/market/profile/stakednfts";
-import CreatedCollections from "features/nft/market/profile/createdCollections";
+// import { MyCollectedNFTs } from "features/nft/market/profile";
+// import CreatedNFTs from "features/nft/market/profile/creatednfts";
+// import StakedNFTs from "features/nft/market/profile/stakednfts";
+// import CreatedCollections from "features/nft/market/profile/createdCollections";
 import EditProfileModal from "features/profile/EditProfileModal";
 import {
   controlFollow,
@@ -99,18 +99,18 @@ export default function Home() {
       });
     }
   };
-  const getSelectedComponent = () => {
-    switch (tab) {
-      case "owned":
-        return <MyCollectedNFTs id={id} />;
-      case "created":
-        return <CreatedNFTs id={id} />;
-      case "staked":
-        return <StakedNFTs id={id} />;
-      case "collection":
-        return <CreatedCollections id={id} />;
-    }
-  };
+  // const getSelectedComponent = () => {
+  //   switch (tab) {
+  //     case "owned":
+  //       return <MyCollectedNFTs id={id} />;
+  //     case "created":
+  //       return <CreatedNFTs id={id} />;
+  //     case "staked":
+  //       return <StakedNFTs id={id} />;
+  //     case "collection":
+  //       return <CreatedCollections id={id} />;
+  //   }
+  // };
   return (
     <AppLayout fullWidth={true} hasBanner={true}>
       <Container>
@@ -233,7 +233,7 @@ export default function Home() {
               >{`Created Collections`}</StyledTab>
             </StyledTabList>
 
-            {getSelectedComponent()}
+            {/* {getSelectedComponent()} */}
           </ProfileNFTInfo>
         </ProfileContainer>
       </Container>

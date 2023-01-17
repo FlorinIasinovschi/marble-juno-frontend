@@ -6,7 +6,7 @@ import { RoundedIconComponent } from "components/RoundedIcon";
 import Image from "components/Img";
 import {
   CW721,
-  Market,
+  Factory,
   useSdk,
   Collection,
   getRealTokenAmount,
@@ -27,7 +27,7 @@ const SelectedNFT = () => {
   useEffect(() => {
     (async () => {
       if (!client) return;
-      const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
+      const marketContract = Factory().use(client);
       let collection = await marketContract.collection(5);
       const marbleContract = Marble(PUBLIC_NFTSALE_CONTRACT).use(client);
       const contractConfig = await marbleContract.getConfig();

@@ -15,14 +15,16 @@ import Link from "next/link";
 import {
   NftInfo,
   CW721,
-  Collection,
-  Market,
+  Marketplace,
+  Factory,
   useSdk,
   getRealTokenAmount,
   PaymentToken,
   SALE_TYPE,
   getFileTypeFromURL,
   toMinDenom,
+  Royalty,
+  DurationType,
 } from "services/nft";
 import { walletState } from "state/atoms/walletAtoms";
 import { useRecoilValue } from "recoil";
@@ -45,6 +47,7 @@ import UpdateMarketModal from "./components/UpdateMarketModal";
 import { fromBase64, toBase64 } from "@cosmjs/encoding";
 import { RELOAD_STATUS } from "store/types";
 import { useRouter } from "next/router";
+import { FACTORY_ADDRESS, MARKETPLACE_ADDRESS } from "util/constants";
 interface DetailParams {
   readonly collectionId: string;
   readonly id: string;
@@ -59,6 +62,29 @@ interface MarketStatus {
 
 const PUBLIC_MARKETPLACE = process.env.NEXT_PUBLIC_MARKETPLACE || "";
 
+interface CollectionInfoType {
+  royalties: Royalty[];
+  image: string;
+  name: string;
+  id: string;
+  creatory: string;
+  address: string;
+}
+
+interface NftInfoType {
+  creator: string;
+  description: string;
+  image: string;
+  name: string;
+  owner: string;
+  price: string;
+  sale: any;
+  type: string;
+  paymentToken: any;
+  symbol: string;
+  created_at: string;
+}
+
 export const NFTDetail = ({ collectionId, id }) => {
   const { client } = useSdk();
   const { address, client: signingClient } = useRecoilValue(walletState);
@@ -66,7 +92,7 @@ export const NFTDetail = ({ collectionId, id }) => {
   const reloadData = useSelector((state: State) => state.reloadData);
   const { reload_status } = reloadData;
   const [reloadCount, setReloadCount] = useState(0);
-  const [isDisabled, setIsDisabled] = useState(false);
+  const [paymentTokens, setPaymentTokens] = useState<PaymentToken[]>();
   const [marketStatus, setMarketStatus] = useState<MarketStatus>({
     isOnMarket: false,
     isStarted: false,
@@ -75,28 +101,21 @@ export const NFTDetail = ({ collectionId, id }) => {
   const [time, setTime] = useState(Math.round(new Date().getTime() / 1000));
   const [highestBid, setHighestBid] = useState(0);
   const [isBidder, setIsBidder] = useState(false);
-
-  const [nft, setNft] = useState<
-    NftInfo & { created_at: string; description: string }
-  >({
-    tokenId: id,
-    address: "",
+  const [isTopBidder, setTopBidder] = useState(false);
+  const [nft, setNft] = useState<NftInfoType>({
+    creator: "",
+    description: "",
     image: "",
     name: "",
-    user: "",
-    price: "0",
-    total: 2,
-    collectionName: "",
-    symbol: "Marble",
+    owner: "",
+    price: "",
     sale: {},
+    type: "",
     paymentToken: {},
-    type: "image",
-    created: "",
-    collectionId: 0,
+    symbol: "",
     created_at: "",
-    description: "",
   });
-  const [collectionInfo, setCollectionInfo] = useState<any>();
+  const [collectionInfo, setCollectionInfo] = useState<CollectionInfoType>();
 
   const loadNft = useCallback(async () => {
     if (!client) return;
@@ -108,39 +127,53 @@ export const NFTDetail = ({ collectionId, id }) => {
     )
       return false;
 
-    const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
-    let collection = await marketContract.collection(parseInt(collectionId));
-    let ipfs_collection = await fetch(
-      process.env.NEXT_PUBLIC_PINATA_URL + collection.uri
-    );
-    let res_collection = await ipfs_collection.json();
-    const cw721Contract = CW721(collection.cw721_address).use(client);
+    const factoryContract = Factory().use(client);
+    let collection = await factoryContract.collection(collectionId);
+    let res_collection: any = {};
+    try {
+      let ipfs_collection = await fetch(
+        process.env.NEXT_PUBLIC_PINATA_URL + collection.uri
+      );
+      res_collection = await ipfs_collection.json();
+    } catch (err) {}
+    console.log("collection: ", collection, res_collection);
+
+    const cw721Contract = CW721(collection.address).use(client);
     let nftInfo = await cw721Contract.allNftInfo(id);
-    setCollectionInfo(res_collection);
-    let ipfs_nft = await fetch(
-      process.env.NEXT_PUBLIC_PINATA_URL + nftInfo.info.token_uri
-    );
-    let res_nft = await ipfs_nft.json();
+    const nftMetadata = nftInfo.info.extension;
+    const collectionState = await cw721Contract.getCollectionState();
+    setCollectionInfo({
+      royalties: collectionState.royalty_info,
+      image: process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo,
+      name: collection.name,
+      id: collection.id,
+      creatory: collection.creator,
+      address: collection.address,
+    });
+    let res_nft: any = {};
     let nft_type = await getFileTypeFromURL(
-      process.env.NEXT_PUBLIC_PINATA_URL + res_nft["uri"]
+      process.env.NEXT_PUBLIC_PINATA_URL + nftMetadata.image_url
     );
     res_nft["type"] = nft_type.fileType;
-    res_nft["created"] = res_nft["owner"];
+    res_nft["creator"] = nftMetadata.minter;
     res_nft["owner"] = nftInfo.access.owner;
-    const collectionContract = Collection(collection.collection_address).use(
-      client
-    );
+    res_nft.image = process.env.NEXT_PUBLIC_PINATA_URL + nftMetadata.image_url;
+    res_nft.name = nftMetadata.name;
+    res_nft.description = nftMetadata.description;
+    const marketplaceContract = Marketplace(MARKETPLACE_ADDRESS).use(client);
     const response = await fetch(
       process.env.NEXT_PUBLIC_COLLECTION_TOKEN_LIST_URL
     );
     const paymentTokenList = await response.json();
+    setPaymentTokens(paymentTokenList.tokens);
     let paymentTokensAddress = [];
     for (let i = 0; i < paymentTokenList.tokens.length; i++) {
       paymentTokensAddress.push(paymentTokenList.tokens[i].address);
     }
-    res_nft["owner"] = await cw721Contract.ownerOf(id);
+    console.log("paymenttoken: ", paymentTokenList);
     try {
-      let sale: any = await collectionContract.getSale(Number(id));
+      let sale: any = await marketplaceContract.getSale(id, collection.address);
+      console.log("sale: ", sale);
       let paymentToken: any;
       if (sale.denom.hasOwnProperty("cw20")) {
         paymentToken =
@@ -161,15 +194,17 @@ export const NFTDetail = ({ collectionId, id }) => {
       });
       res_nft["owner"] = sale.provider;
       res_nft["sale"] = sale;
-      // get highest bid
+      // get highest bid and bidder
       if (sale.requests.length > 0) {
         let maxBid = 0;
+        let bidder = "";
         sale.requests.forEach((request) => {
           if (request.price > maxBid) {
             maxBid = getRealTokenAmount({
               amount: request.price,
               denom: paymentToken.denom,
             });
+            bidder = request.address;
           }
 
           if (request.address == address) {
@@ -177,33 +212,13 @@ export const NFTDetail = ({ collectionId, id }) => {
           }
         });
         setHighestBid(maxBid);
+        setTopBidder(bidder == address);
       }
     } catch (err) {
       res_nft["price"] = 0;
       res_nft["sale"] = {};
     }
-    let uri = res_nft.uri;
-    if (uri.indexOf("https://") == -1) {
-      uri = process.env.NEXT_PUBLIC_PINATA_URL + res_nft.uri;
-    }
-    setNft({
-      tokenId: id,
-      address: "",
-      image: uri,
-      name: res_nft.name,
-      user: res_nft.owner,
-      price: res_nft.price,
-      total: 1,
-      collectionName: res_collection.name,
-      symbol: res_nft["symbol"],
-      sale: res_nft.sale,
-      paymentToken: res_nft.paymentToken,
-      type: res_nft.type,
-      created: res_nft.created,
-      collectionId: parseInt(collectionId),
-      created_at: res_nft.createdDate,
-      description: res_nft.description,
-    });
+    setNft(res_nft);
   }, [client, address, collectionId, id]);
 
   useEffect(() => {
@@ -212,16 +227,9 @@ export const NFTDetail = ({ collectionId, id }) => {
 
   const cancelSale = async (e) => {
     e.preventDefault();
-    setIsDisabled(true);
-    const marketContract = Market(process.env.NEXT_PUBLIC_MARKETPLACE).use(
-      client
-    );
-    let collection = await marketContract.collection(Number(collectionId));
-    const collectionContract = Collection(collection.collection_address).useTx(
-      signingClient
-    );
-    await collectionContract.cancelSale(address, Number(nft.tokenId));
-
+    const marketplaceContract =
+      Marketplace(MARKETPLACE_ADDRESS).useTx(signingClient);
+    await marketplaceContract.cancelSale(address, id, collectionInfo.address);
     toast.success(`You have cancelled this NFT successfully.`, {
       position: "top-right",
       autoClose: 5000,
@@ -231,45 +239,35 @@ export const NFTDetail = ({ collectionId, id }) => {
       draggable: true,
       progress: undefined,
     });
-    setIsDisabled(false);
-    nft.paymentToken = {};
-    nft.price = "0";
-    nft.sale = {};
     let rCount = reloadCount + 1;
     setReloadCount(rCount);
     return false;
   };
   const acceptSale = async (e) => {
-    e.preventDefault();
-    setIsDisabled(true);
-    const marketContract = Market(process.env.NEXT_PUBLIC_MARKETPLACE).use(
-      client
-    );
-    let collection = await marketContract.collection(Number(collectionId));
-    const collectionContract = Collection(collection.collection_address).useTx(
-      signingClient
-    );
-    let accept = await collectionContract.acceptSale(
-      address,
-      Number(nft.tokenId)
-    );
-
-    toast.success(`You have accepted this NFT Auction successfully.`, {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
-    setIsDisabled(false);
-    nft.paymentToken = {};
-    nft.price = "0";
-    nft.sale = {};
-    let rCount = reloadCount + 1;
-    setReloadCount(rCount);
-    return false;
+    try {
+      const marketplaceContract =
+        Marketplace(MARKETPLACE_ADDRESS).useTx(signingClient);
+      let accept = await marketplaceContract.acceptSale(
+        address,
+        id,
+        collectionInfo.address
+      );
+      console.log("result: ", accept);
+      toast.success(`You have accepted this NFT Auction successfully.`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      let rCount = reloadCount + 1;
+      setReloadCount(rCount);
+      return false;
+    } catch (err) {
+      console.error("acceptsaleError: ", err);
+    }
   };
   const handleBy = async (e) => {
     if (!address) {
@@ -284,18 +282,15 @@ export const NFTDetail = ({ collectionId, id }) => {
       });
       return;
     }
-    const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
-    let collection = await marketContract.collection(Number(collectionId));
-    const collectionContract = Collection(collection.collection_address).useTx(
-      signingClient
-    );
+    const marketplaceContract =
+      Marketplace(MARKETPLACE_ADDRESS).useTx(signingClient);
     let msg: any;
     if (nft.paymentToken.type == "cw20") {
-      msg = { propose: { token_id: Number(id) } };
+      msg = { propose: { token_id: id, nft_address: collectionInfo.address } };
       let encodedMsg: string = toBase64(
         new TextEncoder().encode(JSON.stringify(msg))
       );
-      let buy = await collectionContract.buy(
+      let buy = await marketplaceContract.buy(
         address,
         nft.paymentToken.address,
         parseInt(
@@ -303,24 +298,18 @@ export const NFTDetail = ({ collectionId, id }) => {
         ).toString(),
         encodedMsg
       );
+      console.log("buy: ", buy);
     } else {
-      msg = {
-        propose: { token_id: Number(id), denom: nft.paymentToken.denom },
-      };
-      let buy = await collectionContract.propose(
+      let buy = await marketplaceContract.propose(
         address,
-        Number(id),
+        id,
+        collectionInfo.address,
         parseInt(
           toMinDenom(parseFloat(nft.price), nft.paymentToken.denom)
         ).toString(),
         nft.paymentToken.denom
       );
     }
-
-    dispatch({
-      type: RELOAD_STATUS,
-      payload: nft.tokenId,
-    });
     setReloadCount(reloadCount + 1);
     toast.success(`You have buyed this NFT successfully.`, {
       position: "top-right",
@@ -346,16 +335,12 @@ export const NFTDetail = ({ collectionId, id }) => {
       return;
     }
     try {
-      const marketContract = Market(process.env.NEXT_PUBLIC_MARKETPLACE).use(
-        client
-      );
-      let collection = await marketContract.collection(Number(collectionId));
-      const collectionContract = Collection(
-        collection.collection_address
-      ).useTx(signingClient);
-      let cancelpropose = await collectionContract.cancelPropose(
+      const marketplaceContract =
+        Marketplace(MARKETPLACE_ADDRESS).useTx(signingClient);
+      let cancelpropose = await marketplaceContract.cancelPropose(
         address,
-        Number(id)
+        id,
+        collectionInfo.address
       );
       toast.success(`Transaction Success.`, {
         position: "top-right",
@@ -366,7 +351,7 @@ export const NFTDetail = ({ collectionId, id }) => {
         draggable: true,
         progress: undefined,
       });
-      handleEvent();
+      setReloadCount(reloadCount + 1);
     } catch (err) {
       toast.error(`Transaction Failed`, {
         position: "top-right",
@@ -379,16 +364,146 @@ export const NFTDetail = ({ collectionId, id }) => {
       });
     }
   };
-  const handleEvent = () => {
-    setReloadCount(reloadCount + 1);
+  const handleManualReceipt = async () => {
+    try {
+      if (!address) {
+        toast.warning(`Please connect your wallet first`, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+        return;
+      }
+      const marketplaceContract =
+        Marketplace(MARKETPLACE_ADDRESS).useTx(signingClient);
+      const result = await marketplaceContract.manualReceiveNft(
+        address,
+        id,
+        collectionInfo.address
+      );
+      toast.success(`You have buyed this NFT successfully.`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      setReloadCount(reloadCount + 1);
+    } catch (err) {
+      console.error("manual send nft error: ", err);
+    }
+  };
+  const handleSale = async ({
+    sellType,
+    price,
+    reserverPrice,
+    startDate,
+    endDate,
+    paymentToken,
+  }) => {
+    try {
+      if (!address || !signingClient) {
+        toast.warning(`Please connect your wallet.`, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+        return false;
+      }
+      let duration_type: DurationType = {
+        startTime: Math.round(new Date(startDate).getTime() / 1000),
+        endTime: Math.round(new Date(endDate).getTime() / 1000),
+      };
+      // const marketContract = Factory().use(client);
+      // let collection = await marketContract.collection(collectionId);
+      const marketplaceContract =
+        Marketplace(MARKETPLACE_ADDRESS).useTx(signingClient);
+      const cw721Contract = CW721(collectionInfo.address).useTx(signingClient);
+      let msg: any;
+      let denom: any;
+      if (sellType == SALE_TYPE[0]) {
+        if (paymentToken.type == "cw20") {
+          denom = { cw20: paymentToken.address };
+        } else {
+          denom = { native: paymentToken.address };
+        }
+        msg = {
+          sale_type: sellType,
+          duration_type: SALE_TYPE[0],
+          initial_price: parseInt(
+            toMinDenom(parseFloat(price), paymentToken.denom)
+          ).toString(),
+          reserve_price: parseInt(
+            toMinDenom(parseFloat(price), paymentToken.denom)
+          ).toString(),
+          denom,
+        };
+        let encodedMsg: string = toBase64(
+          new TextEncoder().encode(JSON.stringify(msg))
+        );
+        let nft = await cw721Contract.sendNft(
+          address,
+          MARKETPLACE_ADDRESS,
+          id,
+          encodedMsg
+        );
+      } else if (sellType == SALE_TYPE[1]) {
+        if (paymentToken.type == "cw20") {
+          denom = { cw20: paymentToken.address };
+        } else {
+          denom = { native: paymentToken.address };
+        }
+        msg = {
+          sale_type: sellType,
+          duration_type: {
+            Time: [duration_type.startTime, duration_type.endTime],
+          },
+          initial_price: parseInt(
+            toMinDenom(parseFloat(price), paymentToken.denom)
+          ).toString(),
+          reserve_price: parseInt(
+            toMinDenom(parseFloat(reserverPrice), paymentToken.denom)
+          ).toString(),
+          denom,
+        };
+        let encodedMsg: string = toBase64(
+          new TextEncoder().encode(JSON.stringify(msg))
+        );
+        let nft = await cw721Contract.sendNft(
+          address,
+          MARKETPLACE_ADDRESS,
+          id,
+          encodedMsg
+        );
+      }
+      toast.success(`You have completed List Items for Sale.`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      setReloadCount(reloadCount + 1);
+      return true;
+    } catch (err) {
+      return false;
+    }
   };
   const handleBurnNFT = async () => {
     try {
-      const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
-      let collection = await marketContract.collection(collectionId);
-      const cw721Contract = CW721(collection.cw721_address).useTx(
-        signingClient
-      );
+      const cw721Contract = CW721(collectionInfo.address).useTx(signingClient);
       const data = await cw721Contract.burn(address, id);
       router.push("/explore");
       return data;
@@ -397,13 +512,81 @@ export const NFTDetail = ({ collectionId, id }) => {
       return false;
     }
   };
+  const handleOffer = async (amount) => {
+    try {
+      let minAmount = nft.sale.initial_price;
+      let isFisrtBidder = true;
+      if (nft.sale.requests.length > 0) {
+        minAmount = nft.sale.requests[nft.sale.requests.length - 1].price;
+        isFisrtBidder = false;
+      }
+      console.log("amountCheck: ", minAmount, amount);
+      const minAmountInReal = getRealTokenAmount({
+        amount: minAmount,
+        denom: nft.paymentToken.denom,
+      });
+
+      if (amount <= minAmountInReal) {
+        if (!isFisrtBidder) {
+          toast.warning(
+            `The offer price should be greater than ${minAmountInReal}.`,
+            {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: true,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+            }
+          );
+          return false;
+        }
+      }
+      const marketplaceContract =
+        Marketplace(MARKETPLACE_ADDRESS).useTx(signingClient);
+      let msg: any;
+      if (nft.paymentToken.type == "cw20") {
+        msg = {
+          propose: { token_id: id, nft_address: collectionInfo.address },
+        };
+        let encodedMsg: string = toBase64(
+          new TextEncoder().encode(JSON.stringify(msg))
+        );
+        let buy = await marketplaceContract.buy(
+          address,
+          nft.paymentToken.address,
+          parseInt(toMinDenom(amount, nft.paymentToken.denom)).toString(),
+          encodedMsg
+        );
+      } else {
+        let buy = await marketplaceContract.propose(
+          address,
+          id,
+          collectionInfo.address,
+          parseInt(toMinDenom(amount, nft.paymentToken.denom)).toString(),
+          nft.paymentToken.denom
+        );
+      }
+      toast.success(`You have offered this NFT successfully.`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      setReloadCount(reloadCount + 1);
+      return true;
+    } catch (err) {
+      console.log("offerError: ", err);
+      return false;
+    }
+  };
   const handleTransfer = async (_address) => {
     try {
-      const marketContract = Market(PUBLIC_MARKETPLACE).use(client);
-      let collection = await marketContract.collection(collectionId);
-      const cw721Contract = CW721(collection.cw721_address).useTx(
-        signingClient
-      );
+      const cw721Contract = CW721(collectionInfo.address).useTx(signingClient);
       const data = await cw721Contract.transfer(address, _address, id);
       setReloadCount(reloadCount + 1);
       return data;
@@ -416,7 +599,7 @@ export const NFTDetail = ({ collectionId, id }) => {
     <ChakraProvider>
       <Stack>
         <Banner>
-          <BannerImage src={nft.image} alt="banner" />
+          <BannerImage src={collectionInfo?.image} alt="banner" />
           {nft.type === "video" ? (
             <NFTImageWrapper>
               <video controls>
@@ -430,7 +613,6 @@ export const NFTDetail = ({ collectionId, id }) => {
           )}
         </Banner>
       </Stack>
-
       <Container>
         <NFTInfoWrapper>
           <NftInfoTag>
@@ -440,9 +622,9 @@ export const NFTDetail = ({ collectionId, id }) => {
                 <Text fontSize="14px">Collection</Text>
                 <Link href={`/collection/${collectionId}`} passHref>
                   <HStack style={{ cursor: "pointer" }}>
-                    <RoundedIcon size="26px" src={nft.image} />
+                    <RoundedIcon size="26px" src={collectionInfo?.image} />
                     <Text fontSize="14px" fontWeight="800" fontFamily="Mulish">
-                      {nft.collectionName}
+                      {collectionInfo?.name}
                     </Text>
                   </HStack>
                 </Link>
@@ -451,8 +633,8 @@ export const NFTDetail = ({ collectionId, id }) => {
               <Stack spacing={3}>
                 <Text fontSize="14px">Created By</Text>
                 <HStack>
-                  {nft.created && (
-                    <RoundedIconComponent size="26px" address={nft.created} />
+                  {nft.creator && (
+                    <RoundedIconComponent size="26px" address={nft.creator} />
                   )}
                 </HStack>
               </Stack>
@@ -461,8 +643,8 @@ export const NFTDetail = ({ collectionId, id }) => {
                 <Text fontSize="14px">Owned By</Text>
 
                 <HStack>
-                  {nft.user && (
-                    <RoundedIconComponent size="26px" address={nft.user} />
+                  {nft.owner && (
+                    <RoundedIconComponent size="26px" address={nft.owner} />
                   )}
                 </HStack>
               </Stack>
@@ -540,7 +722,7 @@ export const NFTDetail = ({ collectionId, id }) => {
                           </Span>
                         </Stack>
                         {nft.sale.sale_type === "Auction" &&
-                          nft.user === address && (
+                          nft.owner === address && (
                             <Stack>
                               <Text color="rgb(112, 122, 131)" fontSize="14px">
                                 Reserve Price
@@ -586,7 +768,7 @@ export const NFTDetail = ({ collectionId, id }) => {
                             highest offer.
                           </Text>
                         )}
-                      {nft.user === address ? (
+                      {nft.owner === address ? (
                         <>
                           {((nft.sale.duration_type.Time &&
                             nft.sale.duration_type.Time[1] < time) ||
@@ -662,17 +844,31 @@ export const NFTDetail = ({ collectionId, id }) => {
                           alignItems="flex-end"
                         >
                           {nft.sale.duration_type.Time[0] < time &&
-                            nft.sale.duration_type.Time[1] > time && (
+                            nft.sale.duration_type.Time[1] > time &&
+                            !isBidder && (
                               <Stack paddingTop={10} width="100%">
                                 <OfferModal
-                                  collectionId={collectionId}
-                                  id={id}
-                                  highestBid={highestBid}
-                                  callback={() => {
-                                    setReloadCount(reloadCount + 1);
-                                  }}
+                                  nft={nft}
+                                  handleOffer={handleOffer}
+                                  collection={collectionInfo}
                                 />
                               </Stack>
+                            )}
+                          {nft.sale.duration_type.Time[1] < time &&
+                            isTopBidder && (
+                              <Button
+                                className="btn-buy btn-default"
+                                css={{
+                                  background: "$white",
+                                  color: "$black",
+                                  stroke: "$black",
+                                  width: "100%",
+                                }}
+                                size="large"
+                                onClick={handleManualReceipt}
+                              >
+                                Receive NFT
+                              </Button>
                             )}
                           {isBidder && (
                             <Button
@@ -715,38 +911,28 @@ export const NFTDetail = ({ collectionId, id }) => {
                       fontFamily="Mulish"
                       textAlign="center"
                     >
-                      {nft.user === address
+                      {nft.owner === address
                         ? "Manage NFT"
                         : "This is not for a sale"}
                     </Text>
-                    {nft.user == address && (
+                    {nft.owner == address && (
                       <PriceTag>
                         <Stack direction="row" spacing={4} marginTop="20px">
-                          {/* OnSaleModal */}
                           <OnSaleModal
-                            collectionId={collectionId}
-                            id={id}
-                            handleEvent={handleEvent}
+                            nft={nft}
+                            collection={collectionInfo}
+                            handleSale={handleSale}
+                            paymentTokens={paymentTokens}
                           />
                           <TransferNFTModal
-                            nftInfo={{
-                              image: nft.image,
-                              name: nft.name,
-                              owner: nft.user,
-                              sale: {},
-                              type: nft.type,
-                            }}
+                            nft={nft}
+                            collection={collectionInfo}
                             onHandle={handleTransfer}
                           />
                         </Stack>
                         <BurnNFTModal
-                          nftInfo={{
-                            image: nft.image,
-                            name: nft.name,
-                            owner: nft.user,
-                            sale: {},
-                            type: nft.type,
-                          }}
+                          nft={nft}
+                          collection={collectionInfo}
                           onHandle={handleBurnNFT}
                         />
                       </PriceTag>
@@ -765,7 +951,6 @@ export const NFTDetail = ({ collectionId, id }) => {
                   )}
               </NftInfoTag>
             )}
-
             <Stack>
               <Text fontSize={isMobile() ? "24px" : "28px"} fontWeight="700">
                 Royalty
@@ -785,7 +970,7 @@ export const NFTDetail = ({ collectionId, id }) => {
                       />
                     </HStack>
                     <Text width="40%" textAlign="right">
-                      {royalty.rate / 10000} %
+                      {Number(royalty.royalty_rate) * 100} %
                     </Text>
                   </Flex>
                 ))}
@@ -805,7 +990,6 @@ export const NFTDetail = ({ collectionId, id }) => {
               </Card>
             </Stack>
           </NftInfoTag>
-
           {isPC() && (
             <NftInfoTag>
               {Object.keys(nft.sale).length > 0 ? (
@@ -879,7 +1063,7 @@ export const NFTDetail = ({ collectionId, id }) => {
                         </Span>
                       </Stack>
                       {nft.sale.sale_type === "Auction" &&
-                        nft.user === address && (
+                        nft.owner === address && (
                           <Stack>
                             <Text color="rgb(112, 122, 131)" fontSize="14px">
                               Reserve Price
@@ -924,7 +1108,7 @@ export const NFTDetail = ({ collectionId, id }) => {
                           The seller can evaluate and accept the highest offer.
                         </Text>
                       )}
-                    {nft.user === address ? (
+                    {nft.owner === address ? (
                       <>
                         {((nft.sale.duration_type.Time &&
                           nft.sale.duration_type.Time[1] < time) ||
@@ -1000,18 +1184,31 @@ export const NFTDetail = ({ collectionId, id }) => {
                         alignItems="flex-end"
                       >
                         {nft.sale.duration_type.Time[0] < time &&
-                          nft.sale.duration_type.Time[1] > time && (
+                          nft.sale.duration_type.Time[1] > time &&
+                          !isBidder && (
                             <Stack paddingTop={10} width="100%">
                               <OfferModal
-                                collectionId={collectionId}
-                                id={id}
-                                highestBid={highestBid}
-                                callback={() => {
-                                  setReloadCount(reloadCount + 1);
-                                }}
+                                nft={nft}
+                                handleOffer={handleOffer}
+                                collection={collectionInfo}
                               />
                             </Stack>
                           )}
+                        {nft.sale.duration_type.Time[1] < time && isTopBidder && (
+                          <Button
+                            className="btn-buy btn-default"
+                            css={{
+                              background: "$white",
+                              color: "$black",
+                              stroke: "$black",
+                              width: "100%",
+                            }}
+                            size="large"
+                            onClick={handleManualReceipt}
+                          >
+                            Receive NFT
+                          </Button>
+                        )}
                         {isBidder && (
                           <Button
                             className="btn-buy btn-default"
@@ -1053,38 +1250,28 @@ export const NFTDetail = ({ collectionId, id }) => {
                     fontFamily="Mulish"
                     textAlign="center"
                   >
-                    {nft.user === address
+                    {nft.owner === address
                       ? "Manage NFT"
                       : "This is not for a sale"}
                   </Text>
-                  {nft.user == address && (
+                  {nft.owner == address && (
                     <PriceTag>
                       <Stack direction="row" spacing={4} marginTop="20px">
-                        {/* OnSaleModal */}
                         <OnSaleModal
-                          collectionId={collectionId}
-                          id={id}
-                          handleEvent={handleEvent}
+                          collection={collectionInfo}
+                          nft={nft}
+                          handleSale={handleSale}
+                          paymentTokens={paymentTokens}
                         />
                         <TransferNFTModal
-                          nftInfo={{
-                            image: nft.image,
-                            name: nft.name,
-                            owner: nft.user,
-                            sale: {},
-                            type: nft.type,
-                          }}
+                          nft={nft}
+                          collection={collectionInfo}
                           onHandle={handleTransfer}
                         />
                       </Stack>
                       <BurnNFTModal
-                        nftInfo={{
-                          image: nft.image,
-                          name: nft.name,
-                          owner: nft.user,
-                          sale: {},
-                          type: nft.type,
-                        }}
+                        nft={nft}
+                        collection={collectionInfo}
                         onHandle={handleBurnNFT}
                       />
                     </PriceTag>
@@ -1165,6 +1352,7 @@ const PriceTag = styled("div", {
   " .price-lbl": {
     color: "$colors$link",
   },
+  rowGap: "20px",
   "@media (max-width: 1024px)": {
     padding: "$4 $16",
   },

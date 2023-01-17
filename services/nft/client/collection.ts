@@ -35,22 +35,16 @@ export interface CollectionInstance {
   getSales: () => Promise<SaleResponse[]>;
   getPrice: (token_id: number[]) => Promise<number>;
   getConfig: () => Promise<CollectionContractConfig>;
-  getSale: (id: number) => Promise<SaleResponse>;
+  getSale: (token_id: string, nft_address: string) => Promise<SaleResponse>;
 }
 export interface NftBulkExtension {}
 export interface CollectionTxInstance {
   readonly contractAddress: string;
   // actions
-  mint: (sender: string, uri: string) => Promise<string>;
-  batchMint: (
-    sender: string,
-    owners: string[],
-    uri: string[],
-    extension: NftBulkExtension[]
-  ) => Promise<string>;
   propose: (
     sender: string,
-    tokenId: number,
+    tokenId: string,
+    nft_address: string,
     price: string,
     denom: string
   ) => Promise<string>;
@@ -67,12 +61,29 @@ export interface CollectionTxInstance {
     duration_type: DurationType,
     initial_price: number
   ) => Promise<string>;
-  cancelSale: (sender: string, token_id: number) => Promise<string>;
-  acceptSale: (sender: string, token_id: number) => Promise<string>;
-  cancelPropose: (sender: string, tokenId: number) => Promise<string>;
+  cancelSale: (
+    sender: string,
+    token_id: string,
+    nft_address: string
+  ) => Promise<string>;
+  acceptSale: (
+    sender: string,
+    token_id: string,
+    nft_address: string
+  ) => Promise<string>;
+  cancelPropose: (
+    sender: string,
+    tokenId: string,
+    nft_address: string
+  ) => Promise<string>;
   changeContract: (sender: string, cw721_address: string) => Promise<string>;
   changeOwner: (sender: string, owner: string) => Promise<string>;
   changeCw721Owner: (sender: string, owner: string) => Promise<string>;
+  manualReceiveNft: (
+    sender: string,
+    token_id: string,
+    nft_address: string
+  ) => Promise<string>;
 }
 
 export interface CollectionContract {
@@ -80,7 +91,7 @@ export interface CollectionContract {
   useTx: (client: SigningCosmWasmClient) => Partial<CollectionTxInstance>;
 }
 
-export const Collection = (contractAddress: string): CollectionContract => {
+export const Marketplace = (contractAddress: string): CollectionContract => {
   const defaultExecuteFee = unsafelyGetDefaultExecuteFee();
   const use = (client: CosmWasmClient): CollectionInstance => {
     const getConfig = async (): Promise<CollectionContractConfig> => {
@@ -95,10 +106,14 @@ export const Collection = (contractAddress: string): CollectionContract => {
       });
       return result.list;
     };
-    const getSale = async (id: number): Promise<SaleResponse> => {
+    const getSale = async (
+      token_id: string,
+      nft_address: string
+    ): Promise<SaleResponse> => {
       const result = await client.queryContractSmart(contractAddress, {
         get_sale: {
-          token_id: id,
+          token_id,
+          nft_address,
         },
       });
       return result;
@@ -124,54 +139,36 @@ export const Collection = (contractAddress: string): CollectionContract => {
       amount: [],
       gas: "400000",
     };
-    const mint = async (sender: string, uri: string): Promise<string> => {
-      const result = await client.execute(
-        sender,
-        contractAddress,
-        { mint: { uri: uri } },
-        defaultExecuteFee
-      );
-      return result.transactionHash;
-    };
-
-    const batchMint = async (
-      sender: string,
-      owners: string[],
-      uriArr: string[],
-      extension: NftBulkExtension[]
-    ): Promise<string> => {
-      const result = await client.execute(
-        sender,
-        contractAddress,
-        { batch_mint: { owner: owners, uri: uriArr, extension: extension } },
-        defaultExecuteFee
-      );
-      return result.transactionHash;
-    };
 
     const propose = async (
       sender: string,
-      tokenId: number,
+      tokenId: string,
+      nft_address: string,
       price: string,
       denom: string
     ): Promise<string> => {
       const result = await client.execute(
         sender,
         contractAddress,
-        { propose: { token_id: tokenId, denom: denom } },
+        { propose: { token_id: tokenId, nft_address, denom: denom } },
         defaultExecuteFee,
         "",
         [coin(price, denom)]
       );
       return result.transactionHash;
     };
-    const cancelPropose = async (sender: string, tokenId: number) => {
+    const cancelPropose = async (
+      sender: string,
+      tokenId: string,
+      nft_address: string
+    ) => {
       const result = await client.execute(
         sender,
         contractAddress,
         {
           cancel_propose: {
             token_id: tokenId,
+            nft_address,
           },
         },
         defaultExecuteFee
@@ -253,12 +250,13 @@ export const Collection = (contractAddress: string): CollectionContract => {
     // };
     const cancelSale = async (
       sender: string,
-      token_id: number
+      token_id: string,
+      nft_address: string
     ): Promise<string> => {
       const result = await client.execute(
         sender,
         contractAddress,
-        { cancel_sale: { token_id: token_id } },
+        { cancel_sale: { token_id, nft_address } },
         defaultExecuteFee
       );
       return result.transactionHash;
@@ -266,12 +264,32 @@ export const Collection = (contractAddress: string): CollectionContract => {
 
     const acceptSale = async (
       sender: string,
-      token_id: number
+      token_id: string,
+      nft_address: string
     ): Promise<string> => {
       const result = await client.execute(
         sender,
         contractAddress,
-        { accept_sale: { token_id: token_id } },
+        { accept_sale: { token_id, nft_address } },
+        defaultExecuteFee
+      );
+      return result.transactionHash;
+    };
+
+    const manualReceiveNft = async (
+      sender: string,
+      token_id: string,
+      nft_address: string
+    ): Promise<string> => {
+      const result = await client.execute(
+        sender,
+        contractAddress,
+        {
+          manual_send_nft: {
+            token_id,
+            nft_address,
+          },
+        },
         defaultExecuteFee
       );
       return result.transactionHash;
@@ -316,8 +334,6 @@ export const Collection = (contractAddress: string): CollectionContract => {
 
     return {
       contractAddress,
-      batchMint,
-      mint,
       propose,
       buy,
       startSale,
@@ -327,6 +343,7 @@ export const Collection = (contractAddress: string): CollectionContract => {
       changeOwner,
       changeCw721Owner,
       cancelPropose,
+      manualReceiveNft,
     };
   };
   return { use, useTx };

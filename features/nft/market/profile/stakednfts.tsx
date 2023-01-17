@@ -1,7 +1,7 @@
 import { NftCard } from "components/NFT";
 import { useEffect, useState } from "react";
 import { useRecoilValue } from "recoil";
-import { Collection, CW721, Stake, useSdk } from "services/nft";
+import { Marketplace, CW721, Stake, useSdk } from "services/nft";
 import { walletState } from "state/atoms/walletAtoms";
 import styled from "styled-components";
 
@@ -21,7 +21,7 @@ const MyStakedNFTs = ({ id }) => {
         const stakeContract = Stake(PUBLIC_STAKE_ADDRESS).use(client);
         const _stakeConfig = await stakeContract.getConfig();
         const userStakeInfo = await stakeContract.getStaking(address);
-        const collectionContract = Collection(
+        const collectionContract = Marketplace(
           _stakeConfig.collection_address
         ).use(client);
         const collectionConfig = await collectionContract.getConfig();
