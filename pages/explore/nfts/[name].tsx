@@ -1,27 +1,29 @@
 import { AppLayout } from "components/Layout/AppLayout";
-import Profiles from "features/nft/market/profile/allProfiles";
+import NFTExplorer from "features/nft/market/nftexplore";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 
 export default function Explores() {
   const { countInfo } = useSelector((state: any) => state.uiData);
+  const { asPath } = useRouter();
+  const filter = asPath.split("/explore/nfts/")[1];
   return (
     <AppLayout fullWidth={true}>
       <StyledTabList>
         <Link href="/explore/nfts" passHref>
-          <StyledTab>{`NFTs(${countInfo.nft})`}</StyledTab>
+          <StyledTab isActive={true}>{`NFTs(${countInfo.nft})`}</StyledTab>
         </Link>
         <Link href="/explore/collections" passHref>
           <StyledTab>{`Collections(${countInfo.collection})`}</StyledTab>
         </Link>
         <Link href="/explore/profiles" passHref>
-          <StyledTab
-            isActive={true}
-          >{`Profiles(${countInfo.profile.profiles})`}</StyledTab>
+          <StyledTab>{`Profiles(${countInfo.profile.profiles})`}</StyledTab>
         </Link>
       </StyledTabList>
-      <Profiles profileCounts={countInfo.profile} />
+
+      <NFTExplorer filter={filter} />
     </AppLayout>
   );
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import styled from "styled-components";
 import SelectedNFT from "./components/SelectedNFT";
-import Collection from "./components/Collection";
+// import Collection from "./components/Collection";
 import {
   ChakraProvider,
   Flex,
@@ -14,8 +14,6 @@ import {
 import { CW721, Factory, useSdk, getFileTypeFromURL } from "services/nft";
 import { isMobile, isPC } from "util/device";
 import { SecondGradientBackground } from "styles/styles";
-
-const PUBLIC_MARKETPLACE = process.env.NEXT_PUBLIC_MARKETPLACE || "";
 
 const Home = () => {
   const { client } = useSdk();
@@ -30,37 +28,37 @@ const Home = () => {
       return [];
     }
   };
-  useEffect(() => {
-    (async () => {
-      const collectionList = await fetchCollections();
-      let res_categories = await fetch(process.env.NEXT_PUBLIC_CATEGORY_URL);
-      let { categories } = await res_categories.json();
-      const collectionInfos = await Promise.all(
-        collectionList.slice(0, 3).map(async (_collection) => {
-          const ipfs_collection = await fetch(
-            process.env.NEXT_PUBLIC_PINATA_URL + _collection.uri
-          );
-          const res_collection = await ipfs_collection.json();
-          const nftCollection = {
-            id: _collection.id,
-            image: process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo,
-            name: res_collection.name,
-            banner_image:
-              process.env.NEXT_PUBLIC_PINATA_URL +
-                res_collection.featuredImage || res_collection.logo,
-            description: res_collection.description,
-            creator: _collection.owner,
-            slug: `/collection/${_collection.id}`,
-            cat_ids: categories[res_collection.category]?.name,
-            collection_address: _collection.collection_address,
-            cw721_address: _collection.cw721_address,
-          };
-          return nftCollection;
-        })
-      );
-      setNftCollections(collectionInfos);
-    })();
-  }, [client]);
+  // useEffect(() => {
+  //   (async () => {
+  //     const collectionList = await fetchCollections();
+  //     let res_categories = await fetch(process.env.NEXT_PUBLIC_CATEGORY_URL);
+  //     let { categories } = await res_categories.json();
+  //     const collectionInfos = await Promise.all(
+  //       collectionList.slice(0, 3).map(async (_collection) => {
+  //         const ipfs_collection = await fetch(
+  //           process.env.NEXT_PUBLIC_PINATA_URL + _collection.uri
+  //         );
+  //         const res_collection = await ipfs_collection.json();
+  //         const nftCollection = {
+  //           id: _collection.id,
+  //           image: process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo,
+  //           name: res_collection.name,
+  //           banner_image:
+  //             process.env.NEXT_PUBLIC_PINATA_URL +
+  //               res_collection.featuredImage || res_collection.logo,
+  //           description: res_collection.description,
+  //           creator: _collection.owner,
+  //           slug: `/collection/${_collection.id}`,
+  //           cat_ids: categories[res_collection.category]?.name,
+  //           collection_address: _collection.collection_address,
+  //           cw721_address: _collection.cw721_address,
+  //         };
+  //         return nftCollection;
+  //       })
+  //     );
+  //     setNftCollections(collectionInfos);
+  //   })();
+  // }, [client]);
   return (
     <Container>
       <ChakraProvider>
@@ -69,11 +67,11 @@ const Home = () => {
         <Collections>
           <TextTitle>Curated Collections</TextTitle>
 
-          <Stack spacing="50px">
+          {/* <Stack spacing="50px">
             {nftcollections.map((nftInfo, index) => (
               <Collection info={nftInfo} key={index} />
             ))}
-          </Stack>
+          </Stack> */}
         </Collections>
         <Flex justifyContent="center">
           <Paper>

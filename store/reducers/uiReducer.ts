@@ -1,20 +1,30 @@
-import { NFT_COLUMN_COUNT, UI_ERROR } from "../types";
+import { COUNT_INFO, UI_ERROR } from "../types";
 
 const initialState = {
-  nft_column_count: 3
+  countInfo: {
+    nft: 0,
+    collection: 0,
+    fixed: 0,
+    auction: 0,
+    offer: 0,
+    profile: {
+      creators: 0,
+      profiles: 0,
+    },
+  },
 };
 
 const uiReducer = (state = initialState, action) => {
   switch (action.type) {
-    case NFT_COLUMN_COUNT:
+    case COUNT_INFO:
       return {
         ...state,
-        nft_column_count: action.payload,
+        countInfo: action.payload,
       };
 
     case UI_ERROR:
       return {
-        nft_column_count: 3,
+        countInfo: {},
         error: action.payload,
       };
 

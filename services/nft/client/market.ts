@@ -56,7 +56,7 @@ export interface MarketInstance {
   allOffers: (startAfter?: string, limit?: number) => Promise<OffersResponse>;
 }
 
-export interface Royalty {
+interface Royalty {
   address: string;
   royalty_rate: string;
 }

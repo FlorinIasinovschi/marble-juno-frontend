@@ -18,25 +18,21 @@ import {
   useSdk,
 } from "services/nft";
 import { walletState } from "state/atoms/walletAtoms";
+import useSubquery from "hooks/useSubquery";
 
 const PUBLIC_MARKETPLACE = process.env.NEXT_PUBLIC_MARKETPLACE || "";
 
 const MyCreatedCollections = ({ id }) => {
+  const { fetchOwnedCollections } = useSubquery();
   const { client } = useSdk();
   const [ownedCollections, setOwnedCollections] = useState([]);
-  const fetchCollections = async () => {
-    try {
-      if (!client || !id) return [];
-      const marketContract = Factory().use(client);
-      let _collection = await marketContract.ownedCollections(id);
-      return _collection;
-    } catch (error) {
-      return [];
-    }
-  };
   useEffect(() => {
     (async () => {
-      const collectionList = await fetchCollections();
+      const collectionList = await fetchOwnedCollections({
+        creator: id,
+        skip: 0,
+        limit: 12,
+      });
       const collectionData = await Promise.all(
         collectionList.map(async (_collection) => {
           try {
@@ -45,12 +41,12 @@ const MyCreatedCollections = ({ id }) => {
               process.env.NEXT_PUBLIC_PINATA_URL + _collection.uri
             );
             const res_collection = await ipfs_collection.json();
-            collection_info.id = _collection.id;
-            collection_info.name = res_collection.name;
+            collection_info.id = _collection.collectionId;
+            collection_info.name = _collection.name;
             collection_info.description = res_collection.description;
             collection_info.slug = res_collection.slug;
-            collection_info.creator = _collection.owner ?? "";
-            collection_info.cat_ids = res_collection.category;
+            collection_info.creator = _collection.creator;
+            collection_info.cat_ids = _collection.category;
 
             if (res_collection.logo) {
               let collection_type = await getFileTypeFromURL(
@@ -60,21 +56,18 @@ const MyCreatedCollections = ({ id }) => {
             } else {
               collection_info.type = "image";
             }
-
             if (res_collection.logo) {
               collection_info.image =
                 process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
             } else {
               collection_info.image = "https://via.placeholder.com/70";
             }
-
-            if (res_collection.logo || res_collection.featuredImage) {
-              collection_info.banner_image = res_collection.featuredImage
-                ? process.env.NEXT_PUBLIC_PINATA_URL +
-                  res_collection.featuredImage
-                : process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
+            if (res_collection.featuredImage) {
+              collection_info.banner_image =
+                process.env.NEXT_PUBLIC_PINATA_URL +
+                res_collection.featuredImage;
             } else {
-              collection_info.banner_image = "https://via.placeholder.com/300";
+              collection_info.banner_image = "https://via.placeholder.com/70";
             }
             return collection_info;
           } catch (err) {
@@ -85,6 +78,7 @@ const MyCreatedCollections = ({ id }) => {
       setOwnedCollections(collectionData);
     })();
   }, [client]);
+  console.log("ownedCollectios: ", ownedCollections);
   return (
     <CollectionWrapper>
       <CollectionList>

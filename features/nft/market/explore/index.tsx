@@ -6,28 +6,26 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { CategoryTab, NftCollectionTable } from "components/NFT";
 import { NftCategory, NftCollection, getFileTypeFromURL } from "services/nft";
 import { Factory, useSdk, Marketplace } from "services/nft";
-import { FACTORY_ADDRESS } from "util/constants";
+import { FACTORY_ADDRESS, categories } from "util/constants";
+import useSubquery from "hooks/useSubquery";
 
 export const Explore = () => {
-  const data = ["marblenauts"];
-
-  const [nftcategories, setNftCategories] = useState<NftCategory[]>([]);
   const [nftcollections, setNftCollections] = useState<NftCollection[]>([]);
-  const [activeCategoryId, setActiveCategoryId] = useState(0);
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [page, setPage] = useState(0);
   const { client } = useSdk();
   const [hasMore, setHasMore] = useState(true);
-
+  const { getAllCollections } = useSubquery();
   useEffect(() => {
     (async () => {
       if (!client) {
         return;
       }
-
-      const marketContract = Factory().use(client);
-      let collectionList = await marketContract.listCollections();
-      let res_categories = await fetch(process.env.NEXT_PUBLIC_CATEGORY_URL);
-      let categories = await res_categories.json();
-      setNftCategories(categories.categories);
+      let collectionList = await getAllCollections({
+        filter: activeCategory,
+        skip: 0,
+        limit: 12,
+      });
       let collections = [];
       for (let i = 0; i < collectionList.length; i++) {
         let res_collection: any = {};
@@ -39,9 +37,8 @@ export const Explore = () => {
         } catch (err) {
           console.log("err", err);
         }
-        console.log("res_collection: ", collectionList[i], res_collection);
         let collection_info: any = {};
-        collection_info.id = collectionList[i].id;
+        collection_info.id = collectionList[i].collectionId;
         collection_info.name = collectionList[i].name;
         collection_info.description = res_collection.description;
         collection_info.slug = res_collection.slug;
@@ -75,13 +72,65 @@ export const Explore = () => {
           collection_info.banner_image = "/marblenauts.gif";
         collections.push(collection_info);
       }
-      setHasMore(false);
+      setPage(1);
+      setHasMore(collectionList.length == 12);
       setNftCollections(collections);
     })();
-  }, [client]);
-  const getMoreNfts = async () => {};
+  }, [client, activeCategory]);
+  const getMoreNfts = async () => {
+    let collectionList = await getAllCollections({
+      filter: activeCategory,
+      skip: page * 12,
+      limit: 12,
+    });
+    let collections = [];
+    for (let i = 0; i < collectionList.length; i++) {
+      let res_collection: any = {};
+      try {
+        let ipfs_collection = await fetch(
+          process.env.NEXT_PUBLIC_PINATA_URL + collectionList[i].uri
+        );
+        res_collection = await ipfs_collection.json();
+      } catch (err) {
+        console.log("err", err);
+      }
+      let collection_info: any = {};
+      collection_info.id = collectionList[i].collectionId;
+      collection_info.name = collectionList[i].name;
+      collection_info.description = res_collection.description;
+      collection_info.slug = res_collection.slug;
+      collection_info.creator = collectionList[i].creator ?? "";
+      collection_info.cat_ids = res_collection.category;
+
+      if (res_collection.logo) {
+        let collection_type = await getFileTypeFromURL(
+          process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo
+        );
+        collection_info.type = collection_type.fileType;
+      } else {
+        collection_info.type = "image";
+      }
+
+      if (res_collection.logo) {
+        collection_info.image =
+          process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
+      } else {
+        collection_info.image = "https://via.placeholder.com/70";
+      }
+
+      collections.push(collection_info);
+    }
+    setPage(1);
+    setHasMore(collectionList.length == 12);
+    setNftCollections(nftcollections.concat(collections));
+  };
   return (
     <ExploreWrapper>
+      <CategoryTab
+        categories={categories}
+        activeCategory={activeCategory}
+        setActiveCategory={setActiveCategory}
+      />
       <InfiniteScroll
         dataLength={nftcollections.length}
         next={getMoreNfts}

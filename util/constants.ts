@@ -54,3 +54,88 @@ export const FACTORY_ADDRESS =
   "juno1yy38kftj053myjuznf8x89zhgsu4lse6l2tug0d7wl9efhunldtqn47ej3";
 export const MARKETPLACE_ADDRESS =
   "juno1k799zl0wt7wkuuxnwgeuvatj4ljsqnk0zm4s8hjmkdvx23eayhlsn3pwc0";
+export const SUBQUERY_URL = "https://api.subquery.network/sq/kdbvier/test";
+export const categories = [
+  {
+    value: "Digital",
+    label: "Digital",
+  },
+  {
+    value: "Physical",
+    label: "Physical",
+  },
+  {
+    value: "Music",
+    label: "Music",
+  },
+  {
+    value: "Painting",
+    label: "Painting",
+  },
+  {
+    value: "Videos",
+    label: "Videos",
+  },
+  {
+    value: "Photography",
+    label: "Photography",
+  },
+  {
+    value: "Sports",
+    label: "Sports",
+  },
+  {
+    value: "Utility",
+    label: "Utility",
+  },
+];
+export const SORT_INFO = {
+  all: [
+    {
+      key: "Newest",
+      value: "CREATED_TIME_DESC",
+    },
+    {
+      key: "Oldest",
+      value: "CREATED_TIME_ASC",
+    },
+    {
+      key: "Name A-Z",
+      value: "NAME_ASC",
+    },
+    {
+      key: "Name Z-A",
+      value: "NAME_DESC",
+    },
+  ],
+  fixed: [
+    {
+      key: "Most Expensive",
+      value: "PRICE_ASC",
+    },
+    {
+      key: "Cheapest",
+      value: "PRICE_DESC",
+    },
+  ],
+  auction: [
+    {
+      key: "Most Expensive",
+      value: "PRICE_ASC",
+    },
+    {
+      key: "Cheapest",
+      value: "PRICE_DESC",
+    },
+  ],
+  offer: [
+    {
+      key: "Most Expensive",
+      value: "PRICE_ASC",
+    },
+    {
+      key: "Cheapest",
+      value: "PRICE_DESC",
+    },
+  ],
+};

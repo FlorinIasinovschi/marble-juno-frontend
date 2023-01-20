@@ -18,43 +18,8 @@ import { toast } from "react-toastify";
 import { useRecoilValue } from "recoil";
 import { Factory, Royalty, useSdk } from "services/nft";
 import { walletState } from "state/atoms/walletAtoms";
-import { FACTORY_ADDRESS } from "util/constants";
+import { FACTORY_ADDRESS, categories } from "util/constants";
 import { isMobile } from "util/device";
-
-const categories = [
-  {
-    value: "Digital",
-    label: "Digital",
-  },
-  {
-    value: "Physical",
-    label: "Physical",
-  },
-  {
-    value: "Music",
-    label: "Music",
-  },
-  {
-    value: "Painting",
-    label: "Painting",
-  },
-  {
-    value: "Videos",
-    label: "Videos",
-  },
-  {
-    value: "Photography",
-    label: "Photography",
-  },
-  {
-    value: "Sports",
-    label: "Sports",
-  },
-  {
-    value: "Utility",
-    label: "Utility",
-  },
-];
 
 const customStyles = {
   control: (base, state) => ({

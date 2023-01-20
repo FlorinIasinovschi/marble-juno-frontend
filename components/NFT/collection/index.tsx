@@ -1,28 +1,27 @@
 import * as React from "react";
 import styled from "styled-components";
 
-export function CategoryTab({
-  categories,
-  activeCategoryId,
-  setActiveCategoryId,
-}) {
+export function CategoryTab({ categories, activeCategory, setActiveCategory }) {
   const getActiveTabIfActive = (tabId) =>
-    activeCategoryId === tabId ? true : false;
+    activeCategory === tabId ? true : false;
   return (
     <Container>
+      <CategoryItem
+        onClick={() => setActiveCategory("All")}
+        isActive={getActiveTabIfActive("All")}
+      >
+        All
+      </CategoryItem>
       {categories.length > 0 &&
-        categories.map(
-          (category, idx) =>
-            idx < 11 && (
-              <CategoryItem
-                key={category.id}
-                onClick={() => setActiveCategoryId(category.id)}
-                isActive={getActiveTabIfActive(category.id)}
-              >
-                {category.name}
-              </CategoryItem>
-            )
-        )}
+        categories.map((category) => (
+          <CategoryItem
+            key={category.id}
+            onClick={() => setActiveCategory(category.value)}
+            isActive={getActiveTabIfActive(category.value)}
+          >
+            {category.value}
+          </CategoryItem>
+        ))}
     </Container>
   );
 }
@@ -32,6 +31,7 @@ const Container = styled.div`
   display: flex;
   column-gap: 5px;
   overflow: auto;
+  justify-content: space-around;
 `;
 
 const CategoryItem = styled.div<{ isActive: boolean }>`

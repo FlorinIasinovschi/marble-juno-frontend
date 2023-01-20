@@ -8,7 +8,7 @@ import {
   CW721,
   Factory,
   useSdk,
-  Collection,
+  Marketplace,
   getRealTokenAmount,
   Marble,
 } from "services/nft";
@@ -27,33 +27,31 @@ const SelectedNFT = () => {
   useEffect(() => {
     (async () => {
       if (!client) return;
-      const marketContract = Factory().use(client);
-      let collection = await marketContract.collection(5);
+      const factoryContract = Factory().use(client);
+      let collection = await factoryContract.collection("3");
+      console.log("collecti9on: ", collection);
       const marbleContract = Marble(PUBLIC_NFTSALE_CONTRACT).use(client);
-      const contractConfig = await marbleContract.getConfig();
+      // const contractConfig = await marbleContract.getConfig();
       let ipfs_collection = await fetch(
         process.env.NEXT_PUBLIC_PINATA_URL + collection.uri
       );
       let res_collection = await ipfs_collection.json();
-      const cw721Contract = CW721(collection.cw721_address).use(client);
-      let nftInfo = await cw721Contract.nftInfo("1");
-      const ipfs_nft = await fetch(
-        process.env.NEXT_PUBLIC_PINATA_URL + nftInfo.token_uri
-      );
-      let res_nft = await ipfs_nft.json();
+      console.log("rescollection: ", res_collection);
+      const cw721Contract = CW721(collection.address).use(client);
+      let nftInfo = await cw721Contract.allNftInfo("4");
+      console.log("nftInfo: ", nftInfo);
       const show_data = {
-        creator: res_nft.owner,
+        creator: nftInfo.access.owner,
         collection_logo:
           process.env.NEXT_PUBLIC_PINATA_URL +
           res_collection.logo +
           PINATA_SECONDARY_IMAGE_SIZE,
-        collection_name: res_collection.name,
-        nft_uri: res_nft.uri.includes("https://")
-          ? res_nft.uri + PINATA_PRIMARY_IMAGE_SIZE
-          : process.env.NEXT_PUBLIC_PINATA_URL +
-            res_nft.uri +
-            PINATA_PRIMARY_IMAGE_SIZE,
-        price: (Number(contractConfig.price) / 1000000).toFixed(2),
+        collection_name: collection.name,
+        nft_uri:
+          process.env.NEXT_PUBLIC_PINATA_URL +
+          nftInfo.info.extension.image_url +
+          PINATA_PRIMARY_IMAGE_SIZE,
+        // price: (Number(contractConfig.price) / 1000000).toFixed(2),
       };
       setShowData(show_data);
     })();

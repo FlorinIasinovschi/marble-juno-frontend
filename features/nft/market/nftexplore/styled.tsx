@@ -1,8 +1,8 @@
-import styled from 'styled-components'
+import styled from "styled-components";
 
 export const ExploreWrapper = styled.div`
   width: 100%;
-`
+`;
 export const Container = styled.div`
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -15,12 +15,12 @@ export const Container = styled.div`
   @media (max-width: 1024px) {
     grid-template-columns: 1fr 1fr 1fr;
   }
-`
+`;
 export const Filter = styled.div`
   display: flex;
   column-gap: 20px;
   overflow: auto;
-`
+`;
 export const FilterCard = styled.div<{ isActive: boolean }>`
   border-radius: 30px;
   display: flex;
@@ -42,12 +42,12 @@ export const FilterCard = styled.div<{ isActive: boolean }>`
   cursor: pointer;
   text-align: center;
   font-family: Mulish;
-  color: ${({ isActive }) => (isActive ? 'white' : 'rgba(255,255,255,0.5)')};
+  color: ${({ isActive }) => (isActive ? "white" : "rgba(255,255,255,0.5)")};
   @media (max-width: 650px) {
     width: 114px;
     font-size: 12px;
   }
-`
+`;
 export const CountWrapper = styled.div`
   border-radius: 30px;
   background: rgba(255, 255, 255, 0.1);
@@ -58,4 +58,8 @@ export const CountWrapper = styled.div`
   justify-content: center;
   font-size: 14px;
   min-width: 30px;
-`
+`;
+export const FilterSortWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;

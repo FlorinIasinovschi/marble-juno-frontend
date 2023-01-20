@@ -19,42 +19,8 @@ import { useRecoilValue } from "recoil";
 import { Factory } from "services/nft";
 import { walletState } from "state/atoms/walletAtoms";
 import styled from "styled-components";
-import { FACTORY_ADDRESS } from "util/constants";
+import { FACTORY_ADDRESS, categories } from "util/constants";
 
-const options = [
-  {
-    value: "Digital",
-    label: "Digital",
-  },
-  {
-    value: "Physical",
-    label: "Physical",
-  },
-  {
-    value: "Music",
-    label: "Music",
-  },
-  {
-    value: "Painting",
-    label: "Painting",
-  },
-  {
-    value: "Videos",
-    label: "Videos",
-  },
-  {
-    value: "Photography",
-    label: "Photography",
-  },
-  {
-    value: "Sports",
-    label: "Sports",
-  },
-  {
-    value: "Utility",
-    label: "Utility",
-  },
-];
 const PUBLIC_PINATA_API_KEY = process.env.NEXT_PUBLIC_PINATA_API_KEY || "";
 const PUBLIC_PINATA_SECRET_API_KEY =
   process.env.NEXT_PUBLIC_PINATA_SECRET_API_KEY || "";
@@ -300,7 +266,7 @@ export const EditCollectionModal = ({
                 <SelectWrapper>
                   <Select
                     defaultValue={{ label: category, value: category }}
-                    options={options}
+                    options={categories}
                     components={{
                       IndicatorSeparator: () => null,
                     }}

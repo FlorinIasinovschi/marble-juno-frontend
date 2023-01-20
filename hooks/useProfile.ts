@@ -20,7 +20,6 @@ export const getFollowInfo = async (target, owner) => {
         target,
       },
     });
-    console.log("data: ", data);
     return data;
   } catch (error) {
     console.log("getProfiledataError: ", error);

@@ -43,7 +43,6 @@ import { NFTName, TokenInfoWrapper, NftBuyOfferTag } from "./styled";
 import { isMobile, isPC } from "util/device";
 import SimpleTable from "./table";
 import OnSaleModal from "./components/OnSaleModal";
-import UpdateMarketModal from "./components/UpdateMarketModal";
 import { fromBase64, toBase64 } from "@cosmjs/encoding";
 import { RELOAD_STATUS } from "store/types";
 import { useRouter } from "next/router";

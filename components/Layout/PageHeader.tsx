@@ -17,40 +17,40 @@ export const PageHeader = ({
   align = "center",
   className = "",
 }) => {
-  const { mutate: connectWallet } = useConnectWallet();
-  const [{ key }, setWalletState] = useRecoilState(walletState);
-  function resetWalletConnection() {
-    setWalletState({
-      status: WalletStatusType.idle,
-      address: "",
-      key: null,
-      client: null,
-    });
-  }
-  const { client } = useSdk();
-  const { address, client: signingClient } = useRecoilValue(walletState);
-  const [collectionName, setCollectionName] = useState("");
-  const [collectionDescription, setCollectionDescription] = useState("");
-  useEffect(() => {
-    (async () => {
-      if (title == "collectionName") {
-        if (!client) {
-          return;
-        }
-        const marketContract = Factory().use(client);
-        let collection = await marketContract.collection(parseInt(subtitle));
-        let ipfs_collection = await fetch(
-          process.env.NEXT_PUBLIC_PINATA_URL + collection.uri
-        );
-        let res_collection = await ipfs_collection.json();
-        setCollectionName(res_collection.name);
-        setCollectionDescription(res_collection.description);
-      }
-    })();
-  }, [client]);
+  // const { mutate: connectWallet } = useConnectWallet();
+  // const [{ key }, setWalletState] = useRecoilState(walletState);
+  // function resetWalletConnection() {
+  //   setWalletState({
+  //     status: WalletStatusType.idle,
+  //     address: "",
+  //     key: null,
+  //     client: null,
+  //   });
+  // }
+  // const { client } = useSdk();
+  // const { address, client: signingClient } = useRecoilValue(walletState);
+  // const [collectionName, setCollectionName] = useState("");
+  // const [collectionDescription, setCollectionDescription] = useState("");
+  // useEffect(() => {
+  //   (async () => {
+  //     if (title == "collectionName") {
+  //       if (!client) {
+  //         return;
+  //       }
+  //       const marketContract = Factory().use(client);
+  //       let collection = await marketContract.collection(parseInt(subtitle));
+  //       let ipfs_collection = await fetch(
+  //         process.env.NEXT_PUBLIC_PINATA_URL + collection.uri
+  //       );
+  //       let res_collection = await ipfs_collection.json();
+  //       setCollectionName(res_collection.name);
+  //       setCollectionDescription(res_collection.description);
+  //     }
+  //   })();
+  // }, [client]);
   return (
     <>
-      <Head>
+      {/* <Head>
         <title>
           {APP_NAME} — {title}
         </title>
@@ -80,7 +80,7 @@ export const PageHeader = ({
             {title == "collectionName" ? collectionDescription : subtitle}
           </Text>
         )}
-      </HeaderContainer>
+      </HeaderContainer> */}
     </>
   );
 };

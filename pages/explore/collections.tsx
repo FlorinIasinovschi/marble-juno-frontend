@@ -1,40 +1,25 @@
-import { useEffect, useState } from "react";
-import {
-  ChakraProvider,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-} from "@chakra-ui/react";
-import Link from "next/link";
-import styled from "styled-components";
 import { AppLayout } from "components/Layout/AppLayout";
 import { Explore } from "features/nft/market/explore";
-import NFTExplorer from "features/nft/market/nftexplore";
-import Profiles from "features/nft/market/profile/allProfiles";
-import { fetchAllProfileCounts } from "hooks/useProfile";
+import Link from "next/link";
+import { useSelector } from "react-redux";
+import styled from "styled-components";
 
 export default function Explores() {
-  const [profiles, setProfiles] = useState<any>({});
+  const { countInfo } = useSelector((state: any) => state.uiData);
 
-  useEffect(() => {
-    (async () => {
-      const totalProfiles = await fetchAllProfileCounts();
-      setProfiles(totalProfiles);
-    })();
-  }, []);
   return (
     <AppLayout fullWidth={true}>
       <StyledTabList>
         <Link href="/explore/nfts" passHref>
-          <StyledTab>{`NFTs`}</StyledTab>
+          <StyledTab>{`NFTs(${countInfo.nft})`}</StyledTab>
         </Link>
         <Link href="/explore/collections" passHref>
-          <StyledTab isActive={true}>{`Collections`}</StyledTab>
+          <StyledTab
+            isActive={true}
+          >{`Collections(${countInfo.collection})`}</StyledTab>
         </Link>
         <Link href="/explore/profiles" passHref>
-          <StyledTab>{`Profiles`}</StyledTab>
+          <StyledTab>{`Profiles(${countInfo.profile.profiles})`}</StyledTab>
         </Link>
       </StyledTabList>
       <Explore />

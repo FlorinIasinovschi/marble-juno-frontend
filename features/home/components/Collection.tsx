@@ -33,57 +33,56 @@ const CollectionInfo = ({ info }) => {
   const [collectionInfo, setCollectionInfo] = useState();
   const { client } = useSdk();
   const fetchTokensInfo = useCallback(async () => {
-    try {
-      const cwCollectionContract = Marketplace(info.collection_address).use(
-        client
-      );
-      const marketContract = Factory().use(client);
-      let collection = await marketContract.collection(info.id);
-      let ipfs_collection = await fetch(
-        process.env.NEXT_PUBLIC_PINATA_URL + collection.uri
-      );
-      let res_collection = await ipfs_collection.json();
-      res_collection.image =
-        process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
-      setCollectionInfo(res_collection);
-      let sales: any = await cwCollectionContract.getSales();
-      const cw721Contract = CW721(info.cw721_address).use(client);
-      let tokenIdsInfo = await cw721Contract.allTokens();
-      let tokenIds = tokenIdsInfo.tokens.slice(0, 3);
-      let collectionNFTs = [];
-      for (let i = 0; i < tokenIds.length; i++) {
-        let nftInfo = await cw721Contract.allNftInfo(tokenIds[i]);
-        let ipfs_nft = await fetch(
-          process.env.NEXT_PUBLIC_PINATA_URL + nftInfo.info.token_uri
-        );
-        let res_nft = await ipfs_nft.json();
-        let nft_type = await getFileTypeFromURL(
-          res_nft.uri.includes("https://")
-            ? res_nft["uri"]
-            : process.env.NEXT_PUBLIC_PINATA_URL + res_nft["uri"]
-        );
-        res_nft["collectionId"] = info.id;
-        res_nft["type"] = nft_type.fileType;
-        res_nft["tokenId"] = tokenIds[i];
-        res_nft["title"] = info.name;
-        res_nft["owner"] = nftInfo.access.owner;
-        res_nft["image"] = res_nft.uri.includes("https://")
-          ? res_nft.uri
-          : process.env.NEXT_PUBLIC_PINATA_URL + res_nft.uri;
-        res_nft["sale"] =
-          sales.find((_sale) => _sale.token_id == res_nft.token_id) || {};
-
-        collectionNFTs.push(res_nft);
-      }
-      return collectionNFTs;
-    } catch (err) {
-      return [];
-    }
+    // try {
+    //   const cwCollectionContract = Marketplace(info.collection_address).use(
+    //     client
+    //   );
+    //   const marketContract = Factory().use(client);
+    //   let collection = await marketContract.collection(info.id);
+    //   let ipfs_collection = await fetch(
+    //     process.env.NEXT_PUBLIC_PINATA_URL + collection.uri
+    //   );
+    //   let res_collection = await ipfs_collection.json();
+    //   res_collection.image =
+    //     process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
+    //   setCollectionInfo(res_collection);
+    //   let sales: any = await cwCollectionContract.getSales();
+    //   const cw721Contract = CW721(info.cw721_address).use(client);
+    //   let tokenIdsInfo = await cw721Contract.allTokens();
+    //   let tokenIds = tokenIdsInfo.tokens.slice(0, 3);
+    //   let collectionNFTs = [];
+    //   for (let i = 0; i < tokenIds.length; i++) {
+    //     let nftInfo = await cw721Contract.allNftInfo(tokenIds[i]);
+    //     let ipfs_nft = await fetch(
+    //       process.env.NEXT_PUBLIC_PINATA_URL + nftInfo.info.token_uri
+    //     );
+    //     let res_nft = await ipfs_nft.json();
+    //     let nft_type = await getFileTypeFromURL(
+    //       res_nft.uri.includes("https://")
+    //         ? res_nft["uri"]
+    //         : process.env.NEXT_PUBLIC_PINATA_URL + res_nft["uri"]
+    //     );
+    //     res_nft["collectionId"] = info.id;
+    //     res_nft["type"] = nft_type.fileType;
+    //     res_nft["tokenId"] = tokenIds[i];
+    //     res_nft["title"] = info.name;
+    //     res_nft["owner"] = nftInfo.access.owner;
+    //     res_nft["image"] = res_nft.uri.includes("https://")
+    //       ? res_nft.uri
+    //       : process.env.NEXT_PUBLIC_PINATA_URL + res_nft.uri;
+    //     res_nft["sale"] =
+    //       sales.find((_sale) => _sale.token_id == res_nft.token_id) || {};
+    //     collectionNFTs.push(res_nft);
+    //   }
+    //   return collectionNFTs;
+    // } catch (err) {
+    //   return [];
+    // }
   }, [client]);
   useEffect(() => {
     (async () => {
       const tokensInfo = await fetchTokensInfo();
-      setNfts(tokensInfo);
+      // setNfts(tokensInfo);
     })();
   }, [client]);
   return (

@@ -1,11 +1,17 @@
-import * as React from "react";
-import { useCallback, useState, useEffect } from "react";
-import { Button } from "components/Button";
-import styled from "styled-components";
-import { IconWrapper } from "components/IconWrapper";
-import { Search, ColumnBig, ColumnSmall, Sidebar, ArrowLeft } from "icons";
-// import { CollectionFilter } from './filter'
+import { ChakraProvider, Spinner } from "@chakra-ui/react";
 import { NftTable } from "components/NFT";
+import styled from "styled-components";
+import { useCallback, useEffect, useState } from "react";
+import InfiniteScroll from "react-infinite-scroll-component";
+import { useDispatch, useSelector } from "react-redux";
+import { walletState } from "state/atoms/walletAtoms";
+import { useRecoilValue } from "recoil";
+import DropDownButton from "components/DrowdownButton";
+import { LinkBox } from "@chakra-ui/react";
+import { NftCard } from "components/NFT";
+import Link from "next/link";
+import { State } from "store/reducers";
+import { NFT_COLUMN_COUNT } from "store/types";
 import {
   CW721,
   Factory,
@@ -18,199 +24,177 @@ import {
   getRealTokenAmount,
   getFileTypeFromURL,
 } from "services/nft";
-import InfiniteScroll from "react-infinite-scroll-component";
-import {
-  ChakraProvider,
-  Tab,
-  Input,
-  InputGroup,
-  InputRightElement,
-  Select,
-  IconButton,
-  Tag,
-  TagLabel,
-  TagCloseButton,
-  Spinner,
-} from "@chakra-ui/react";
-import { walletState } from "state/atoms/walletAtoms";
-import { useRecoilValue } from "recoil";
-import { useDispatch, useSelector } from "react-redux";
-import { State } from "store/reducers";
-import {
-  NFT_COLUMN_COUNT,
-  UI_ERROR,
-  PROFILE_STATUS,
-  FILTER_STATUS_TXT,
-} from "store/types";
+import { MARKETPLACE_ADDRESS, SORT_INFO } from "util/constants";
+import useSubquery from "hooks/useSubquery";
 
-const PUBLIC_MARKETPLACE = process.env.NEXT_PUBLIC_MARKETPLACE || "";
-
-let nftCurrentIndex;
 const MyCreatedNFTs = ({ id }) => {
-  const [loading, setLoading] = useState(true);
-  const [nfts, setNfts] = useState([]);
-  const { address } = useRecoilValue(walletState);
   const { client } = useSdk();
-  const [hasMore, setHasMore] = useState(false);
-  const [filtered, setFiltered] = useState([]);
-  const [filterTab, setFilterTab] = useState("");
+  const { getCreatedNfts, getCreatedNftCounts } = useSubquery();
   const [paymentTokens, setPaymentTokens] = useState<PaymentToken[]>();
-  const [reloadCount, setReloadCount] = useState(0);
-  // const profileData = useSelector((state: State) => state.profileData)
-  // const { profile_status } = profileData
-  const [nftCounts, setNftCounts] = useState({
-    Auction: 0,
-    "Direct Sell": 0,
-    NotSale: 0,
+  const [loading, setLoading] = useState(true);
+  const [loadedNfts, setLoadedNfts] = useState<any[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(0);
+  const [sort, setSort] = useState(0);
+  const [countInfo, setCountInfo] = useState({
+    nft: 0,
+    auction: 0,
+    fixed: 0,
+    offer: 0,
   });
-  const getCreatedNFTs = async () => {
-    try {
-      let collectionNFTs = [];
-      const marketContract = Factory().use(client);
-      let collections = await marketContract.ownedCollections(address);
+  const [reloadCount, setReloadCount] = useState(0);
+  const [filter, setFilter] = useState("all");
+  const getNfts = async (limit = 12) => {
+    setLoading(true);
+    let paymentTokensAddress = [];
+    if (!paymentTokens) return;
+    for (let i = 0; i < paymentTokens.length; i++) {
+      paymentTokensAddress.push(paymentTokens[i].address);
+    }
+    const marketplaceContract = Marketplace(MARKETPLACE_ADDRESS).use(client);
+    const allNfts = await getCreatedNfts({
+      creator: id,
+      filter,
+      skip: limit * page,
+      limit,
+      sort: SORT_INFO[filter][sort].value,
+    });
+    if (allNfts.length < limit) setHasMore(false);
+    const nftData = await Promise.all(
+      allNfts.map(async (_nft) => {
+        let res_collection: any = {};
+        let res_nft: any = {};
+        const token_id = _nft.id.split(":")[1];
+        const nft_address = _nft.id.split(":")[0];
+        try {
+          const ipfs_collection = await fetch(
+            process.env.NEXT_PUBLIC_PINATA_URL + _nft.collection.uri
+          );
+          res_collection = await ipfs_collection.json();
+        } catch (err) {}
+        res_nft.image = process.env.NEXT_PUBLIC_PINATA_URL + _nft.imageUrl;
+        res_nft.tokenId = token_id;
+        res_nft.type = "image";
+        res_nft.owner = _nft.owner;
+        res_nft.name = _nft.name;
+        try {
+          const nft_type = await getFileTypeFromURL(
+            process.env.NEXT_PUBLIC_PINATA_URL + _nft.imageUrl
+          );
+          res_nft.type = nft_type.fileType;
+        } catch {}
+        try {
+          const sale: any = await marketplaceContract.getSale(
+            token_id,
+            nft_address
+          );
+          let paymentToken: any;
+          if (sale.denom.hasOwnProperty("cw20")) {
+            paymentToken =
+              paymentTokens[paymentTokensAddress.indexOf(sale.denom.cw20)];
+          } else {
+            paymentToken =
+              paymentTokens[paymentTokensAddress.indexOf(sale.denom.native)];
+          }
+          res_nft["paymentToken"] = paymentToken;
+          res_nft["price"] = getRealTokenAmount({
+            amount: sale.initial_price,
+            denom: paymentToken?.denom,
+          });
+          res_nft["owner"] = sale.provider;
+          res_nft["sale"] = sale;
+        } catch (err) {
+          res_nft["price"] = 0;
+          res_nft["sale"] = {};
+        }
+        return {
+          nftInfo: res_nft,
+          collectionInfo: {
+            name: res_collection.name,
+            image: process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo,
+            collectionId: _nft.collection.collectionId,
+          },
+        };
+      })
+    );
+    setLoading(false);
+    setLoadedNfts(loadedNfts.concat(nftData));
+    setPage(page + 1);
+  };
+  useEffect(() => {
+    (async () => {
+      if (!client) {
+        return;
+      }
       const response = await fetch(
         process.env.NEXT_PUBLIC_COLLECTION_TOKEN_LIST_URL
       );
       const paymentTokenList = await response.json();
       setPaymentTokens(paymentTokenList.tokens);
-      let paymentTokensAddress = [];
-      for (let i = 0; i < paymentTokenList.tokens.length; i++) {
-        paymentTokensAddress.push(paymentTokenList.tokens[i].address);
-      }
-      let rCount = 0;
-      for (let k = 0; k < collections.length; k++) {
-        let collection = await marketContract.collection(collections[k].id);
-        const response = await fetch(
-          process.env.NEXT_PUBLIC_COLLECTION_TOKEN_LIST_URL
-        );
-        const paymentTokenList = await response.json();
-        setPaymentTokens(paymentTokenList.tokens);
-        const cwCollectionContract = Marketplace(
-          collection.collection_address
-        ).use(client);
-        let sales: any = await cwCollectionContract.getSales();
-        let saleIds = [];
-        for (let i = 0; i < sales.length; i++) {
-          saleIds.push(sales[i].token_id);
-        }
-        const cw721Contract = CW721(collection.cw721_address).use(client);
-        let tokenIdsInfo: any;
-        let tokenIds: any;
-
-        tokenIdsInfo = await cw721Contract.allTokens();
-        tokenIds = tokenIdsInfo.tokens;
-        while (tokenIds.length > 0) {
-          for (let i = 0; i < tokenIds.length; i++) {
-            let nftInfo = await cw721Contract.nftInfo(tokenIds[i]);
-            let ipfs_nft = await fetch(
-              process.env.NEXT_PUBLIC_PINATA_URL + nftInfo.token_uri
-            );
-            let res_nft = await ipfs_nft.json();
-            res_nft["tokenId"] = tokenIds[i];
-            res_nft["created"] = res_nft["owner"];
-            res_nft["collectionId"] = collections[k].id;
-            res_nft["image"] =
-              process.env.NEXT_PUBLIC_PINATA_URL + res_nft["uri"];
-            res_nft["owner"] = await cw721Contract.ownerOf(res_nft["tokenId"]);
-            if (res_nft["created"] != id && res_nft["owner"] != id) {
-              continue;
-            }
-            let res_uri = res_nft["uri"];
-            if (res_uri.indexOf("https://") == -1) {
-              res_uri = process.env.NEXT_PUBLIC_PINATA_URL + res_uri;
-            }
-            let nft_type = await getFileTypeFromURL(res_uri);
-            res_nft["type"] = nft_type.fileType;
-            if (saleIds.indexOf(parseInt(tokenIds[i])) != -1) {
-              let sale = sales[saleIds.indexOf(parseInt(tokenIds[i]))];
-              let paymentToken: any;
-              if (sale.denom.hasOwnProperty("cw20")) {
-                paymentToken =
-                  paymentTokenList.tokens[
-                    paymentTokensAddress.indexOf(sale.denom.cw20)
-                  ];
-              } else {
-                paymentToken =
-                  paymentTokenList.tokens[
-                    paymentTokensAddress.indexOf(sale.denom.native)
-                  ];
-              }
-              res_nft["symbol"] = paymentToken?.symbol;
-              res_nft["paymentToken"] = paymentToken;
-              res_nft["price"] = getRealTokenAmount({
-                amount: sale.initial_price,
-                denom: paymentToken?.denom,
-              });
-              // res_nft.price = {};
-              res_nft["owner"] = sale.provider;
-              res_nft["sale"] = sale;
-            } else {
-              res_nft["price"] = 0;
-              res_nft["sale"] = {};
-            }
-            collectionNFTs.push(res_nft);
-          }
-          let start_after = tokenIds[tokenIds.length - 1];
-          tokenIds.splice(0, tokenIds.length);
-          tokenIds.length = 0;
-          tokenIds = [];
-          if (collection.owner != id) {
-            tokenIdsInfo = await cw721Contract.tokens(id, start_after);
-          } else {
-            tokenIdsInfo = await cw721Contract.allTokens(start_after);
-          }
-          tokenIds = tokenIdsInfo.tokens;
-          rCount++;
-          setReloadCount(rCount);
-        }
-      }
-      return collectionNFTs;
-    } catch (err) {
-      return [];
-    }
-  };
+      const createdNftCountInfo = await getCreatedNftCounts(id);
+      setCountInfo(createdNftCountInfo);
+    })();
+  }, [client]);
 
   useEffect(() => {
     (async () => {
-      const nftList = await getCreatedNFTs();
-      setNfts(nftList);
-      setFiltered(nftList);
-      let hasMoreFlag = false;
-      setHasMore(hasMoreFlag);
-      setLoading(false);
+      await getNfts();
     })();
-  }, [id, client]);
-  const getMoreNfts = async () => {
-    return false;
+  }, [paymentTokens, sort, reloadCount]);
+  useEffect(() => {
+    setPage(0);
+    setLoadedNfts([]);
+    setReloadCount(reloadCount + 1);
+  }, [filter]);
+  const handleSortChange = async (e) => {
+    setSort(e);
+    setPage(0);
+    setLoadedNfts([]);
   };
-  const handleFilter = (id: string) => {
-    const filteredNFTs = nfts.filter((nft) => nft.saleType === id);
-    setFiltered(filteredNFTs);
-    setFilterTab(id);
+  const getMoreNfts = async () => {
+    if (!hasMore) return false;
+    getNfts();
   };
   return (
     <CollectionWrapper>
       <NftList>
-        {/* <Filter>
-          <FilterCard onClick={() => handleFilter("Direct Sell")}>
-            <NumberWrapper isActive={filterTab === "Direct Sell"}>
-              {nftCounts["Direct Sell"]}
-            </NumberWrapper>
-            Buy Now
-          </FilterCard>
-          <FilterCard onClick={() => handleFilter("Auction")}>
-            <NumberWrapper isActive={filterTab === "Auction"}>
-              {nftCounts["Auction"]}
-            </NumberWrapper>
-            Live Auction
-          </FilterCard>
-          <FilterCard onClick={() => handleFilter("NotSale")}>
-            <NumberWrapper isActive={filterTab === "NotSale"}>
-              {nftCounts["NotSale"]}
-            </NumberWrapper>
-            Active Offers
-          </FilterCard>
-        </Filter> */}
+        <FilterSortWrapper>
+          <Filter>
+            <FilterCard
+              isActive={filter == "all"}
+              onClick={() => setFilter("all")}
+            >
+              <CountWrapper>{countInfo.nft}</CountWrapper>
+              All
+            </FilterCard>
+            <FilterCard
+              isActive={filter == "fixed"}
+              onClick={() => setFilter("fixed")}
+            >
+              <CountWrapper>{countInfo.fixed}</CountWrapper>
+              Buy Now
+            </FilterCard>
+            <FilterCard
+              isActive={filter == "auction"}
+              onClick={() => setFilter("auction")}
+            >
+              <CountWrapper>{countInfo.auction}</CountWrapper>
+              Live Auction
+            </FilterCard>
+            <FilterCard
+              isActive={filter == "offer"}
+              onClick={() => setFilter("offer")}
+            >
+              <CountWrapper>{countInfo.offer}</CountWrapper>
+              Active Offers
+            </FilterCard>
+          </Filter>
+          <DropDownButton
+            menuList={SORT_INFO[filter]}
+            onChange={handleSortChange}
+            current={SORT_INFO[filter][sort]}
+          />
+        </FilterSortWrapper>
         {loading ? (
           <ChakraProvider>
             <div
@@ -227,13 +211,29 @@ const MyCreatedNFTs = ({ id }) => {
           </ChakraProvider>
         ) : (
           <InfiniteScroll
-            dataLength={nfts.length}
+            dataLength={loadedNfts.length}
             next={getMoreNfts}
             hasMore={false}
             loader={<h3> Loading...</h3>}
             endMessage={<h4></h4>}
           >
-            <NftTable data={filtered} type="sell" nft_column_count={2} />
+            <NftGrid>
+              {loadedNfts.map((nft, index) => (
+                <Link
+                  href={`/nft/${nft.collectionInfo.collectionId}/${nft.nftInfo.tokenId}`}
+                  passHref
+                  key={index}
+                >
+                  <LinkBox as="picture">
+                    <NftCard
+                      nft={nft.nftInfo}
+                      collection={nft.collectionInfo}
+                      id=""
+                    />
+                  </LinkBox>
+                </Link>
+              ))}
+            </NftGrid>
           </InfiniteScroll>
         )}
       </NftList>
@@ -253,25 +253,30 @@ const Filter = styled.div`
   column-gap: 20px;
   margin-top: 20px;
 `;
-const FilterCard = styled.div`
+const FilterCard = styled.div<{ isActive: boolean }>`
   border-radius: 30px;
-  backdrop-filter: blur(30px);
-  box-shadow: 0px 7px 14px rgba(0, 0, 0, 0.1),
-    inset 0px 14px 24px rgba(17, 20, 29, 0.4);
+  display: flex;
+  align-items: center;
+  border: 1px solid;
+
+  border-image-source: linear-gradient(
+    106.01deg,
+    rgba(255, 255, 255, 0.2) 1.02%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  box-shadow: 0px 7px 14px 0px #0000001a, 0px 14px 24px 0px #11141d66 inset;
   background: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.06) 0%,
     rgba(255, 255, 255, 0.06) 100%
   );
-  display: flex;
-  font-size: 16px;
-  font-weight: 700;
+  padding: 10px 30px 10px 10px;
   cursor: pointer;
+  text-align: center;
   font-family: Mulish;
-  align-items: center;
-  width: fit-content;
-  padding: 10px;
-  @media (max-width: 480px) {
+  color: ${({ isActive }) => (isActive ? "white" : "rgba(255,255,255,0.5)")};
+  @media (max-width: 650px) {
+    width: 114px;
     font-size: 12px;
   }
 `;
@@ -287,5 +292,28 @@ const NumberWrapper = styled.div<{ isActive: boolean }>`
   padding: 10px;
   margin-right: 10px;
 `;
-
+const NftGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-row-gap: 20px;
+  grid-column-gap: 20px;
+  padding: 20px 0;
+  overflow: hidden;
+  overflow: auto;
+`;
+const FilterSortWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
+const CountWrapper = styled.div`
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  margin-right: 5px;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  min-width: 30px;
+`;
 export default MyCreatedNFTs;

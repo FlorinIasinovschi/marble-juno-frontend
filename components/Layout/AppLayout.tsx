@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setAgreed } from "hooks/useProfile";
 import { StyledCloseIcon } from "components/Dialog";
 import { getProfileData } from "store/actions/profileAction";
+import useExplorer from "hooks/useExplorer";
 import {
   ChakraProvider,
   Modal,
@@ -42,7 +43,9 @@ export const AppLayout = ({
   const [error, setError] = useState(false);
   const [original, setOriginal] = useState(false);
   const [creative, setCreative] = useState(false);
+
   const profile = useSelector((state: any) => state.profileData.profile_status);
+  useExplorer();
   useEffect(() => {
     TagManager.initialize(tagManagerArgs);
   }, []);
