@@ -232,21 +232,10 @@ export const CollectionPage = ({ id }: CollectionProps) => {
                 address={collectionInfo.creator}
               />
             </ProfileInfoItem>
-            {!isMobile() && (
-              <ProfileInfoItem>
-                <ProfileInfoTitle>Symbol</ProfileInfoTitle>
-                <ProfileInfoContent>Juno</ProfileInfoContent>
-              </ProfileInfoItem>
-            )}
-            {!isMobile() && (
-              <ProfileInfoItem>
-                <ProfileInfoTitle>Collection Of</ProfileInfoTitle>
-                <ProfileInfoContent>{num} NFTs</ProfileInfoContent>
-              </ProfileInfoItem>
-            )}
+
             <ProfileInfoItem>
-              <ProfileInfoTitle>Total Sales</ProfileInfoTitle>
-              <ProfileInfoContent>10 Juno</ProfileInfoContent>
+              <ProfileInfoTitle>Collection Of</ProfileInfoTitle>
+              <ProfileInfoContent>{num} NFTs</ProfileInfoContent>
             </ProfileInfoItem>
           </ProfileInfo>
         </Stack>

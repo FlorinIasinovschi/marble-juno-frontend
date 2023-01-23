@@ -113,18 +113,6 @@ const OnSaleModal = ({ nft, collection, handleSale, paymentTokens }) => {
       return;
     }
     if (sellType === SALE_TYPE[1]) {
-      if (reserverPrice === "") {
-        toast.warning(`Please input a reserve.`, {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-        return;
-      }
       if (startDate === "") {
         toast.warning(`Please input a start date.`, {
           position: "top-right",
@@ -139,18 +127,6 @@ const OnSaleModal = ({ nft, collection, handleSale, paymentTokens }) => {
       }
       if (endDate === "") {
         toast.warning(`Please input a end date.`, {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-        return;
-      }
-      if (Number(reserverPrice) < Number(price)) {
-        toast.warning(`Reserve price should be higher than the price.`, {
           position: "top-right",
           autoClose: 5000,
           hideProgressBar: true,
@@ -178,10 +154,12 @@ const OnSaleModal = ({ nft, collection, handleSale, paymentTokens }) => {
         return;
       }
     }
+    const _reserve_price =
+      Number(reserverPrice) < Number(price) ? price : reserverPrice;
     const result = await handleSale({
       sellType,
       price,
-      reserverPrice,
+      _reserve_price,
       startDate,
       endDate,
       paymentToken: paymentTokens[priceSelectedOption],
