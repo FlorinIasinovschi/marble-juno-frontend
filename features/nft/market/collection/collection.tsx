@@ -40,6 +40,7 @@ export const CollectionPage = ({ id }: CollectionProps) => {
   const [loadedNfts, setLoadedNfts] = useState<any[]>([]);
   const [hasMore, setHasMore] = useState(true);
   const [collectionInfo, setCollectionInfo] = useState<any>({});
+  const [num, setNum] = useState(0);
 
   const getNfts = async (limit = 12) => {
     let paymentTokensAddress = [];
@@ -53,10 +54,13 @@ export const CollectionPage = ({ id }: CollectionProps) => {
       (limit * page).toString(),
       limit
     );
+    const numTokens = await cw721Contract.numTokens();
+    console.log("numTokens: ", numTokens);
+    setNum(numTokens);
+
     if (tokensInfo.length < limit) setHasMore(false);
     const nftData = await Promise.all(
       tokensInfo.map(async (token) => {
-        console.log("token: ", token);
         const nftInfo = token.nft_info.extension;
         let nftOwner = await cw721Contract.ownerOf(token.token_id);
         let res_nft: any = {};
@@ -237,7 +241,7 @@ export const CollectionPage = ({ id }: CollectionProps) => {
             {!isMobile() && (
               <ProfileInfoItem>
                 <ProfileInfoTitle>Collection Of</ProfileInfoTitle>
-                <ProfileInfoContent>{id}</ProfileInfoContent>
+                <ProfileInfoContent>{num} NFTs</ProfileInfoContent>
               </ProfileInfoItem>
             )}
             <ProfileInfoItem>
