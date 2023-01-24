@@ -31,6 +31,8 @@ export const StyledLink = styled.div`
   margin: 0 40px;
   display: flex;
   align-items: center;
+  color: white;
+  text-decoration: none;
   @media (max-width: 1550px) {
     margin: 0 20px;
   }

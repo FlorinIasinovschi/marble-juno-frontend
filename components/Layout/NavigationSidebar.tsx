@@ -146,16 +146,12 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
                       href="https://app.marbledao.finance/dashboard"
                       passHref
                     >
-                      <a className="dropdown-item">
-                        <span>Feed</span>
-                      </a>
+                      Feed
                     </Link>
                   </StyledLink>
                   <StyledLink>
                     <Link href="/explore" passHref>
-                      <a className="dropdown-item">
-                        <span className={isActive("/explore")}>Browse</span>
-                      </a>
+                      Browse
                     </Link>
                   </StyledLink>
                   <StyledLink>
@@ -164,23 +160,17 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
                       href="https://juno.marbledao.finance/"
                       target="__blank"
                     >
-                      <span className={isActive("/defi")}>DeFi</span>
+                      DeFi
                     </a>
                   </StyledLink>
                   <StyledLink>
                     <Link href="/stake" passHref>
-                      <a className="dropdown-item">
-                        <span className={isActive("/stake")}>Stake</span>
-                      </a>
+                      Stake
                     </Link>
                   </StyledLink>
                   <StyledLink>
                     <Link href="/metaverse" passHref>
-                      <a className="dropdown-item">
-                        <span className={isActive("/metaverse")}>
-                          Metaverse
-                        </span>
-                      </a>
+                      Metaverse
                     </Link>
                   </StyledLink>
                   <HorizontalDivider />
@@ -220,17 +210,13 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
             {Boolean(key?.name) && (
               <StyledLink>
                 <Link href="/feed" passHref>
-                  <a className="dropdown-item">
-                    <span>Feed</span>
-                  </a>
+                  Feed
                 </Link>
               </StyledLink>
             )}
             <StyledLink>
               <Link href="/explore" passHref>
-                <a className="dropdown-item">
-                  <span className={isActive("/explore")}>Browse</span>
-                </a>
+                Browse
               </Link>
             </StyledLink>
 
@@ -240,24 +226,20 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
                 href="https://juno.marbledao.finance/"
                 target="__blank"
               >
-                <span className={isActive("/defi")}>DeFi</span>
+                DeFi
               </a>
             </StyledLink>
 
             {Boolean(key?.name) && (
               <StyledLink>
                 <Link href="/stake" passHref>
-                  <a className="dropdown-item">
-                    <span className={isActive("/stake")}>Stake</span>
-                  </a>
+                  Stake
                 </Link>
               </StyledLink>
             )}
             <StyledLink>
               <Link href="/metaverse" passHref>
-                <a className="dropdown-item">
-                  <span className={isActive("/metaverse")}>Metaverse</span>
-                </a>
+                Metaverse
               </Link>
             </StyledLink>
           </StyledListForLinks>

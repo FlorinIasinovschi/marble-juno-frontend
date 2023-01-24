@@ -126,13 +126,7 @@ const CollectionInfo = ({ info }) => {
               passHref
               key={index}
             >
-              <LinkBox
-                as="picture"
-                transition="transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1) 0s"
-                _hover={{
-                  transform: isMobile() ? "" : "scale(1.05)",
-                }}
-              >
+              <LinkBox as="picture">
                 <NftCard nft={nftInfo} collection={collectionInfo} type="" />
               </LinkBox>
             </Link>
