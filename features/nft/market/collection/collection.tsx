@@ -40,6 +40,7 @@ export const CollectionPage = ({ id }: CollectionProps) => {
   const [loadedNfts, setLoadedNfts] = useState<any[]>([]);
   const [hasMore, setHasMore] = useState(true);
   const [collectionInfo, setCollectionInfo] = useState<any>({});
+  const [num, setNum] = useState(0);
 
   const getNfts = async (limit = 12) => {
     let paymentTokensAddress = [];
@@ -55,6 +56,8 @@ export const CollectionPage = ({ id }: CollectionProps) => {
       (limit * page).toString(),
       limit
     );
+    const _num_nfts = await cw721Contract.numTokens();
+    setNum(_num_nfts);
     if (tokenIdsInfo.tokens.length < limit) setHasMore(false);
     const nftData = await Promise.all(
       tokenIdsInfo.tokens.map(async (tokenId) => {
@@ -232,21 +235,9 @@ export const CollectionPage = ({ id }: CollectionProps) => {
                 address={collectionInfo.creator}
               />
             </ProfileInfoItem>
-            {!isMobile() && (
-              <ProfileInfoItem>
-                <ProfileInfoTitle>Symbol</ProfileInfoTitle>
-                <ProfileInfoContent>Juno</ProfileInfoContent>
-              </ProfileInfoItem>
-            )}
-            {!isMobile() && (
-              <ProfileInfoItem>
-                <ProfileInfoTitle>Collection Of</ProfileInfoTitle>
-                <ProfileInfoContent>{id}</ProfileInfoContent>
-              </ProfileInfoItem>
-            )}
             <ProfileInfoItem>
-              <ProfileInfoTitle>Total Sales</ProfileInfoTitle>
-              <ProfileInfoContent>10 Juno</ProfileInfoContent>
+              <ProfileInfoTitle>Collection Of</ProfileInfoTitle>
+              <ProfileInfoContent>{num} NFTs</ProfileInfoContent>
             </ProfileInfoItem>
           </ProfileInfo>
         </Stack>

@@ -47,7 +47,7 @@ const OnSaleModal = ({ collectionId, id, handleEvent }) => {
   const IconOption = (props) => (
     <Option {...props}>
       <HStack>
-        <img src={props.data.logoUri} style={{ width: "30px" }} />
+        <img src={props.data.logoUri} style={{ width: "30px" }} alt="img" />
         <Text>{props.data.symbol}</Text>
       </HStack>
     </Option>
@@ -122,9 +122,6 @@ const OnSaleModal = ({ collectionId, id, handleEvent }) => {
   const [maximumRoyaltyFee, setMaximumRoyaltyFee] = useState(1);
   const [supply, setSupply] = useState("1");
   const [sellType, setSellType] = useState(SALE_TYPE[0]);
-  const [method, setMethod] = useState("");
-  const [quantity, setQuantity] = useState(1);
-  const [errorMsg, setErrorMsg] = useState("");
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(today);
 

@@ -330,7 +330,7 @@ export const OfferModal = ({
                 <Title>Place a Bid</Title>
                 <p>
                   Once your bid is placed, you will be the highest bidder in the
-                  auction.Learn more</a>
+                  auction.Learn more
                 </p>
               </Stack>
 
