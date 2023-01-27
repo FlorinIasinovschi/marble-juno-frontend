@@ -17,10 +17,10 @@ export const setProfileData = (action: string, data) => async (dispatch) => {
   }
 };
 export const getProfileData = (address, dispatch) => {
+  if (address == "[id]") return;
   axios
     .get(`${backend_url}/get_user`, { params: { id: address } })
     .then(({ data }) => {
-      console.log("profile-data: ", data);
       dispatch({
         type: PROFILE_STATUS,
         payload: data,

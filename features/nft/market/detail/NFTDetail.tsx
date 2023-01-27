@@ -87,7 +87,6 @@ interface NftInfoType {
 export const NFTDetail = ({ collectionId, id }) => {
   const { client } = useSdk();
   const { address, client: signingClient } = useRecoilValue(walletState);
-  const dispatch = useDispatch();
   const reloadData = useSelector((state: State) => state.reloadData);
   const { reload_status } = reloadData;
   const [reloadCount, setReloadCount] = useState(0);
