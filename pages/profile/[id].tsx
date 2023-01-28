@@ -31,7 +31,7 @@ interface FollowInfoInterface {
   isFollowing: boolean;
 }
 export default function Home() {
-  const { asPath } = useRouter();
+  const { asPath, push } = useRouter();
   const { address, client: signingClient } = useRecoilValue(walletState);
   const [profile, setProfile] = useState<any>({});
   const [followInfo, setFollowInfo] = useState<FollowInfoInterface>({
@@ -44,6 +44,7 @@ export default function Home() {
   useEffect(() => {
     (async () => {
       const _profile = await getProfileInfo(id);
+      if (!_profile) push("/404");
       const _followInfo = await getFollowInfo(id, address);
       setFollowInfo(_followInfo);
       setProfile(_profile);
