@@ -9,7 +9,7 @@ export const getProfileInfo = async (address) => {
     return data;
   } catch (err) {
     console.log("get profile info: ", err);
-    return {};
+    return false;
   }
 };
 export const getFollowInfo = async (target, owner) => {
