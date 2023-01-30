@@ -183,6 +183,22 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
                       </a>
                     </Link>
                   </StyledLink>
+                  <StyledLink>
+                    <Link href="/loyalty" passHref>
+                      <a className="dropdown-item">
+                        <span>Loyalty</span>
+                      </a>
+                    </Link>
+                  </StyledLink>
+                  {Boolean(key?.name) && (
+                    <StyledLink>
+                      <Link href="/quest" passHref>
+                        <a className="dropdown-item">
+                          <span>Quests</span>
+                        </a>
+                      </Link>
+                    </StyledLink>
+                  )}
                   <HorizontalDivider />
                   <StyledLink>
                     <Setting />
@@ -263,6 +279,22 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
           </StyledListForLinks>
 
           <ButtonField>
+            <StyledLink>
+              <Link href="/loyalty" passHref>
+                <a className="dropdown-item">
+                  <span>Loyalty</span>
+                </a>
+              </Link>
+            </StyledLink>
+            {Boolean(key?.name) && (
+              <StyledLink>
+                <Link href="/quest" passHref>
+                  <a className="dropdown-item">
+                    <span>Quests</span>
+                  </a>
+                </Link>
+              </StyledLink>
+            )}
             {Boolean(key?.name) ? (
               <Menu>
                 <MenuButton
