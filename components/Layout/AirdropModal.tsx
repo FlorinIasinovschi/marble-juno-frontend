@@ -62,6 +62,7 @@ const AirdropModal = () => {
               <StyledInput
                 onChange={(e) => setNearAddress(e.target.value)}
                 value={nearAddress}
+                placeholder="Your wallet has to hold some $NEAR"
               />
               <Error show={error}>Input valid address.</Error>
             </Stack>
