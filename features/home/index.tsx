@@ -36,27 +36,30 @@ const Home = () => {
       let res_categories = await fetch(process.env.NEXT_PUBLIC_CATEGORY_URL);
       let { categories } = await res_categories.json();
       const collectionInfos = await Promise.all(
-        collectionList.slice(0, 3).map(async (_collection) => {
-          const ipfs_collection = await fetch(
-            process.env.NEXT_PUBLIC_PINATA_URL + _collection.uri
-          );
-          const res_collection = await ipfs_collection.json();
-          const nftCollection = {
-            id: _collection.id,
-            image: process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo,
-            name: res_collection.name,
-            banner_image:
-              process.env.NEXT_PUBLIC_PINATA_URL +
-                res_collection.featuredImage || res_collection.logo,
-            description: res_collection.description,
-            creator: _collection.owner,
-            slug: `/collection/${_collection.id}`,
-            cat_ids: categories[res_collection.category]?.name,
-            collection_address: _collection.collection_address,
-            cw721_address: _collection.cw721_address,
-          };
-          return nftCollection;
-        })
+        collectionList
+          .slice(0, 3)
+          .reverse()
+          .map(async (_collection) => {
+            const ipfs_collection = await fetch(
+              process.env.NEXT_PUBLIC_PINATA_URL + _collection.uri
+            );
+            const res_collection = await ipfs_collection.json();
+            const nftCollection = {
+              id: _collection.id,
+              image: process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo,
+              name: res_collection.name,
+              banner_image:
+                process.env.NEXT_PUBLIC_PINATA_URL +
+                  res_collection.featuredImage || res_collection.logo,
+              description: res_collection.description,
+              creator: _collection.owner,
+              slug: `/collection/${_collection.id}`,
+              cat_ids: categories[res_collection.category]?.name,
+              collection_address: _collection.collection_address,
+              cw721_address: _collection.cw721_address,
+            };
+            return nftCollection;
+          })
       );
       setNftCollections(collectionInfos);
     })();
