@@ -43,6 +43,7 @@ export default function Home() {
   const id = asPath && asPath.split("/")[2].split("?")[0];
   useEffect(() => {
     (async () => {
+      if (id == "[id]") return;
       const _profile = await getProfileInfo(id);
       if (!_profile) push("/404");
       const _followInfo = await getFollowInfo(id, address);

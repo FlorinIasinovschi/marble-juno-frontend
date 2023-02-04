@@ -16,6 +16,7 @@ import { walletState, WalletStatusType } from "../../state/atoms/walletAtoms";
 import { default_image } from "../../util/constants";
 import { ConnectedWalletButton } from "../ConnectedWalletButton";
 import { IconWrapper } from "../IconWrapper";
+import AirdropModal from "./AirdropModal";
 import { styled } from "../theme";
 import {
   StyledWrapper,
@@ -26,6 +27,7 @@ import {
   StyledMenuItem,
   MobileProfileInfo,
   AddressWrapper,
+  BadgeWrapper,
 } from "./styled";
 
 export function NavigationSidebar({ openNav, setOpenNav }) {
@@ -75,8 +77,32 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
     }, [ref]);
   }
   useOutsideClick(ref);
+  const getBadgeInfo = () => {
+    if (!key?.name)
+      return (
+        <>
+          <span>AIRDROP</span>: Please connect your wallet to evaluate your
+          status.{" "}
+        </>
+      );
+    if (profile.isAirdropper) {
+      return (
+        <>
+          <span>AIRDROP</span>: You are eligible! &nbsp;
+          <span>Provide your &quot; .near &quot; wallet</span>
+          <AirdropModal />
+        </>
+      );
+    }
+    return (
+      <>
+        <span>AIRDROP</span>: You are not eligible!{" "}
+      </>
+    );
+  };
   return (
     <>
+      <BadgeWrapper>{getBadgeInfo()}</BadgeWrapper>
       {isMobile() ? (
         <MobileWrapper>
           <IconWrapper
