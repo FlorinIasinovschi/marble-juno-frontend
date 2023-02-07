@@ -1,5 +1,6 @@
-import { Menu, MenuButton, MenuList } from "@chakra-ui/react";
+import { Menu, MenuButton, MenuList, ModalOverlay } from "@chakra-ui/react";
 import { RoundedIcon, RoundedIconComponent } from "components/RoundedIcon";
+import MessageCounter from "features/chatapp/components/MessageCounter/MessageCounter";
 import { useTokenBalance } from "hooks/useTokenBalance";
 import { useBaseTokenInfo } from "hooks/useTokenInfo";
 import Link from "next/link";
@@ -63,8 +64,10 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
       /**
        * Alert if clicked on outside of element
        */
-      function handleClickOutside(event) {
-        if (ref.current && !ref.current.contains(event.target)) {
+      function handleClickOutside(event) {   
+        console.log(event);  
+        console.log(ref.current);        
+        if (ref.current && !ref.current.contains(event.target) && event.target.id=='MobileOverlay' ) {
           setOpenNav(false);
         }
       }
@@ -104,6 +107,7 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
     <>
       <BadgeWrapper>{getBadgeInfo()}</BadgeWrapper>
       {isMobile() ? (
+        <>
         <MobileWrapper>
           <IconWrapper
             className="mobile-nav"
@@ -112,60 +116,73 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
             icon={<Nav />}
             onClick={() => {
               setOpenNav(!openNav);
-            }}
-          />
+            } } />
           <Link href="/" passHref>
             <StyledDivForLogo as="a">
               <img className="logo-img" src="/images/logotext.svg" alt="logo" />
             </StyledDivForLogo>
           </Link>
           {Boolean(key?.name) ? (
-            <Link href="/create" passHref>
-              <CreateButton>Create</CreateButton>
-            </Link>
+            <>
+              <Link href="/create" passHref>
+                <CreateButton>Create</CreateButton>
+              </Link>
+            </>
+
           ) : (
             <ConnectedWalletButton
               connected={!!key?.name}
               walletName={key?.name}
               onConnect={() => connectWallet(null)}
-              onDisconnect={() => resetWalletConnection}
-            />
+              onDisconnect={() => resetWalletConnection} />
           )}
           {openNav && (
+            <>            
+            <MobileOverlay id="MobileOverlay"></MobileOverlay>
             <MobileMenu ref={ref}>
               <MobileMenuWrapper>
+                {
+                  /*
                 <Link href="/" passHref>
-                  <StyledDivForLogo as="a">
-                    <img
-                      className="logo-img"
-                      src="/images/logotext.svg"
-                      alt="logo"
-                    />
-                  </StyledDivForLogo>
+                <StyledDivForLogo as="a">
+                  <img
+                    className="logo-img"
+                    src="/images/logotext.svg"
+                    alt="logo"
+                  />
+                </StyledDivForLogo>
                 </Link>
+                  */
+                }
                 {Boolean(key?.name) && (
-                  <MobileProfileInfo>
+                  <>
                     <RoundedIconComponent
                       size="48px"
                       address={key?.bech32Address}
-                      direction="column"
-                      font="16px"
-                    />
-                    <MobileWalletInfo>
-                      <p>Wallet Balance</p>
-                      <h2>
-                        {formatTokenBalance(balance, {
-                          includeCommaSeparation: true,
-                        })}{" "}
-                        {baseToken?.symbol}
-                      </h2>
-                      <AddressWrapper>
-                        <p>{getReducedAddress(key?.bech32Address)}</p>&nbsp;
-                        <GreenRound />
-                      </AddressWrapper>
-                    </MobileWalletInfo>
-                  </MobileProfileInfo>
+                      direction="row"
+                      font="16px" />
+                    <ChatCounterWrapper>
+                      <MessageCounter />
+                    </ChatCounterWrapper>
+                  </>
                 )}
+                <HorizontalDivider />
+                <MobileProfileInfo>
+                  <MobileWalletInfo>
+                    <p>Wallet Balance</p>
+                    <h2>
+                      {formatTokenBalance(balance, {
+                        includeCommaSeparation: true,
+                      })}{" "}
+                      {baseToken?.symbol}
+                    </h2>
+                    <AddressWrapper>
+                      <p>{getReducedAddress(key?.bech32Address)}</p>&nbsp;
+                      <GreenRound />
+                    </AddressWrapper>
+                  </MobileWalletInfo>
+                </MobileProfileInfo>
+                <HorizontalDivider />
                 <MobileLinkWrapper>
                   <StyledLink>
                     <Link
@@ -209,16 +226,17 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
                     &nbsp; Help (soon)
                   </StyledLink>
                 </MobileLinkWrapper>
+                <HorizontalDivider />
                 <ConnectedWalletButton
                   connected={!!key?.name}
                   walletName={key?.name}
                   onConnect={() => connectWallet(null)}
-                  onDisconnect={() => resetWalletConnection}
-                />
+                  onDisconnect={() => resetWalletConnection} />
               </MobileMenuWrapper>
             </MobileMenu>
+          </>
           )}
-        </MobileWrapper>
+        </MobileWrapper></>
       ) : (
         <StyledWrapper>
           <StyledListForLinks>
@@ -272,70 +290,69 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
 
           <ButtonField>
             {Boolean(key?.name) ? (
-              <Menu>
-                <MenuButton
-                  borderRadius="50%"
-                  border="3px solid rgba(255, 255, 255, 0.2)"
-                >
-                  <RoundedIcon
-                    size="36px"
-                    src={
-                      profile.avatar
+             <>
+             <Menu>
+                  <MenuButton
+                    borderRadius="50%"
+                    border="3px solid rgba(255, 255, 255, 0.2)"
+                  >
+                    <RoundedIcon
+                      size="36px"
+                      src={profile.avatar
                         ? process.env.NEXT_PUBLIC_PINATA_URL + profile.avatar
-                        : default_image
-                    }
-                  />
-                </MenuButton>
-                <StyledMenuList>
-                  <Link href={`/profile/${key?.bech32Address}`} passHref>
-                    <ProfileMenuItem>
+                        : default_image} />
+                  </MenuButton>
+                  <StyledMenuList>
+                    <Link href={`/profile/${key?.bech32Address}`} passHref>
+                      <ProfileMenuItem>
+                        <Flex>
+                          <RoundedIconComponent
+                            size="58px"
+                            address={key?.bech32Address} />
+                        </Flex>
+                        <RoundedLeft />
+                      </ProfileMenuItem>
+                    </Link>
+                    <StyledMenuItem>
+                      <VFlex>
+                        <p>Wallet Balance</p>
+                        <h1>
+                          {formatTokenBalance(balance, {
+                            includeCommaSeparation: true,
+                          })}{" "}
+                          {baseToken?.symbol}
+                        </h1>
+                      </VFlex>
+                      <AddressWrapper>
+                        <p>{key?.name}</p>&nbsp;
+                        <GreenRound />
+                      </AddressWrapper>
+                    </StyledMenuItem>
+                    <StyledMenuItem>
                       <Flex>
-                        <RoundedIconComponent
-                          size="58px"
-                          address={key?.bech32Address}
-                        />
+                        {/* <Setting /> */}
+                        &nbsp; Settings
                       </Flex>
                       <RoundedLeft />
-                    </ProfileMenuItem>
-                  </Link>
-                  <StyledMenuItem>
-                    <VFlex>
-                      <p>Wallet Balance</p>
-                      <h1>
-                        {formatTokenBalance(balance, {
-                          includeCommaSeparation: true,
-                        })}{" "}
-                        {baseToken?.symbol}
-                      </h1>
-                    </VFlex>
-                    <AddressWrapper>
-                      <p>{key?.name}</p>&nbsp;
-                      <GreenRound />
-                    </AddressWrapper>
-                  </StyledMenuItem>
-                  <StyledMenuItem>
-                    <Flex>
-                      {/* <Setting /> */}
-                      &nbsp; Settings
-                    </Flex>
-                    <RoundedLeft />
-                  </StyledMenuItem>
-                  <StyledMenuItem>
-                    <Flex>
-                      {/* <Help /> */}
-                      &nbsp; Help
-                    </Flex>
-                    <RoundedLeft />
-                  </StyledMenuItem>
-                  <StyledMenuItem onClick={resetWalletConnection}>
-                    <Flex>
-                      {/* <Disconnect /> */}
-                      &nbsp; Disconnect
-                    </Flex>
-                    <RoundedLeft />
-                  </StyledMenuItem>
-                </StyledMenuList>
-              </Menu>
+                    </StyledMenuItem>
+                    <StyledMenuItem>
+                      <Flex>
+                        {/* <Help /> */}
+                        &nbsp; Help
+                      </Flex>
+                      <RoundedLeft />
+                    </StyledMenuItem>
+                    <StyledMenuItem onClick={resetWalletConnection}>
+                      <Flex>
+                        {/* <Disconnect /> */}
+                        &nbsp; Disconnect
+                      </Flex>
+                      <RoundedLeft />
+                    </StyledMenuItem>
+                  </StyledMenuList>
+                </Menu>
+                <MessageCounter />
+                </>
             ) : (
               <ConnectedWalletButton
                 connected={!!key?.name}
@@ -437,8 +454,8 @@ const MobileMenuWrapper = styled("div", {
   padding: "30px",
   display: "flex",
   flexDirection: "column",
-  alignItems: "center",
-  rowGap: "36px",
+  alignItems: "flex-start",
+  rowGap: "30px",
 });
 const MobileWrapper = styled("div", {
   display: "flex",
@@ -451,6 +468,7 @@ const MobileWrapper = styled("div", {
 });
 
 const MobileWalletInfo = styled("div", {
+  padding:"0px",
   "& p": {
     fontSize: "12px",
   },
@@ -465,5 +483,24 @@ const MobileLinkWrapper = styled("div", {
   textAlign: "left",
   display: "flex",
   flexDirection: "column",
-  rowGap: "36px",
+  rowGap: "30px",
+});
+
+
+const ChatCounterWrapper = styled("div", {
+  position: "absolute",
+  top: "40px",
+  right: "30px",
+});
+
+
+const MobileOverlay = styled("div", {
+  position:"fixed",
+  rigth:"0px",
+  left:"0px",
+  bottom:"0px",
+  width:"100%",
+  height:"100%",
+  backdropFilter: "blur(1px)",
+  background: "rgba(0, 0, 0, 0.34)",
 });

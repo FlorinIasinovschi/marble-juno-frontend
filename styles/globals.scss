@@ -18,7 +18,6 @@ body {
   
 }
 
-
 a {
   color: inherit;
   text-decoration: none;
@@ -996,3 +995,94 @@ div{
     align-items: flex-start,
   }
 }
+
+#chakra-modal-ChatModal{
+  padding: 0px !important;
+  border-radius: 10px;
+  overflow: hidden;
+  max-width:700px;
+}
+
+
+#chakra-modal--body-ChatModal{
+  padding: 0px;
+}
+
+#chakra-modal-ChatModal .messaging__channel-list__header__name{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 200px;
+}
+
+
+.str-chat__message-input{
+  padding-bottom: 13px !important;
+}
+
+.messaging__channel-list__header{
+  padding-top: 10px !important;
+  margin-bottom: 15px !important;
+  border-bottom: 1px solid gray;
+  background-color: #000000 !important;
+}
+
+.chakra-modal__close-btn{
+  color:white;
+  z-index: 99999;
+  font-size: 15px !important;
+  top: 12px !important;
+}
+
+
+.messaging__channel-header{
+  justify-content:flex-start !important;
+  webkit-justify-content: flex-start !important;
+}
+
+
+.messaging__channel-header .channel-header__name{
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.messaging__channel-list__header__button{
+  width: 30px !important;
+  height: 30px !important;
+  margin-right: 0px !important;
+}
+
+.messaging__channel-list__header__button svg{
+  width: 18px !important;
+}
+
+@media screen and (min-width: 769px) {
+  .str-chat__list{
+    max-height: 350px !important;
+  }
+}
+
+@media screen and (max-width: 500px) {
+  .messaging__channel-header .channel-header__name{
+      max-width: 200px;
+  }
+
+  .messaging__channel-list__header__button{
+    margin-right: 40px;
+  }
+
+  .messaging__channel-header{
+    justify-content:left !important
+  }
+
+  .messaging__channel-list__header__button{
+    margin-right:40px !important;
+  }
+}
+
+
+
+
+
