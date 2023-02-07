@@ -44,8 +44,8 @@ const ChatModal = ({ currentUserToConnect, chatUser, otherUser, hideOpenButton,s
   const [channelListOptions,setChannelListOption]= useState<any>(_channelListOptions);
   const chatClient = useConnectUser<StreamChatGenerics>(process.env.NEXT_PUBLIC_STREAM_KEY, currentUserToConnect, chatUser.token);
   const toggleMobile = useMobileView();
-  const theme = useTheme(process.env.REACT_APP_TARGET_ORIGIN);
-  useChecklist(chatClient, process.env.REACT_APP_TARGET_ORIGIN);
+  const theme = useTheme(process.env.NEXT_PUBLIC_STREAM_TARGET_ORIGIN);
+  useChecklist(chatClient, process.env.NEXT_PUBLIC_STREAM_TARGET_ORIGIN);
   useUpdateAppHeightOnResize();
 
   if (!chatClient) {

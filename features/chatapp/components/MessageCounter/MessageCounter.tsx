@@ -1,11 +1,11 @@
-import { EmailIcon, PhoneIcon } from '@chakra-ui/icons';
-import { Badge, Box, Flex, Tooltip, useDisclosure } from '@chakra-ui/react';
+import { EmailIcon } from '@chakra-ui/icons';
+import { Badge, Box, useDisclosure } from '@chakra-ui/react';
 import { addUserToMurbleChannel, getChatUser } from 'hooks/useChat';
 import { getProfileInfo } from 'hooks/useProfile';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { walletState, WalletStatusType } from 'state/atoms/walletAtoms';
+import { useRecoilValue } from 'recoil';
+import { walletState } from 'state/atoms/walletAtoms';
 import { StreamChat } from 'stream-chat';
 import { default_image } from 'util/constants';
 import ChatModal from '../ChatModal/ChatModal';
@@ -19,7 +19,6 @@ export const MessageCounter =  ()=> {
   const [chatCurrentUserProfile, setchatCurrentUserProfile] = useState<any>({});
   const [chatUser, setChatUser] = useState<any>({});
   const apiKey = process.env.NEXT_PUBLIC_STREAM_KEY;
-  const targetOrigin = process.env.NEXT_APP_TARGET_ORIGIN;
   const { isOpen,onToggle, onClose } = useDisclosure();
   
   useEffect(() => {
