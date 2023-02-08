@@ -1,4 +1,4 @@
-import { HStack, Stack,IconButton } from "@chakra-ui/react";
+import { HStack, Stack, IconButton } from "@chakra-ui/react";
 import BannerImageUpload from "components/BannerImageUpload";
 import { Button } from "components/Button";
 import { AppLayout } from "components/Layout/AppLayout";
@@ -26,7 +26,11 @@ import { GradientBackground } from "styles/styles";
 import { getReducedAddress } from "util/conversion";
 import { isMobile } from "util/device";
 import ChatModal from "features/chatapp/components/ChatModal/ChatModal";
-import { addUserToMurbleChannel, getOrCreateChatChannel, getOrCreateChatUserToken } from "hooks/useChat";
+import {
+  addUserToMurbleChannel,
+  getOrCreateChatChannel,
+  getOrCreateChatUserToken,
+} from "hooks/useChat";
 import { default_image } from "util/constants";
 
 interface FollowInfoInterface {
@@ -50,7 +54,6 @@ export default function Home() {
   const [tab, setTab] = useState("owned");
   const id = asPath && asPath.split("/")[2].split("?")[0];
 
-
   useEffect(() => {
     (async () => {
       if (id == "[id]") return;
@@ -60,22 +63,32 @@ export default function Home() {
       setFollowInfo(_followInfo);
       setProfile(_profile);
 
-      //CHAT
-      console.log('curent user address');
-      console.log(address);
-
-      if(address){
+      if (address) {
         const activeProfile = await getProfileInfo(address);
-        if(_profile?.id && _profile?.id!='[id]' && activeProfile?.id && activeProfile?.id!='[id]'  && _profile?.id !=activeProfile?.id)
-        {
+        if (
+          _profile?.id &&
+          _profile?.id != "[id]" &&
+          activeProfile?.id &&
+          activeProfile?.id != "[id]" &&
+          _profile?.id != activeProfile?.id
+        ) {
           const _chatUser = await getOrCreateChatUserToken(address);
           const _chatUser2 = await getOrCreateChatUserToken(_profile.id);
-          const channel = await getOrCreateChatChannel([activeProfile.id,_profile.id]);
+          const channel = await getOrCreateChatChannel([
+            activeProfile.id,
+            _profile.id,
+          ]);
 
-          const _chatCurrentUserProfile: { id: string; name?: string; image?: string } = {
+          const _chatCurrentUserProfile: {
+            id: string;
+            name?: string;
+            image?: string;
+          } = {
             id: _chatUser.getStream_id,
             name: activeProfile.name ?? activeProfile.id,
-            image:activeProfile.avatar? process.env.NEXT_PUBLIC_PINATA_URL + activeProfile.avatar: 'https://juno-nft.marbledao.finance'+ default_image,
+            image: activeProfile.avatar
+              ? process.env.NEXT_PUBLIC_PINATA_URL + activeProfile.avatar
+              : "https://juno-nft.marbledao.finance" + default_image,
           };
           setchatCurrentUserProfile(_chatCurrentUserProfile);
           setChatUser(_chatUser);
@@ -146,7 +159,6 @@ export default function Home() {
         return <CreatedCollections id={id} />;
     }
   };
-
 
   return (
     <AppLayout fullWidth={true} hasBanner={true}>
@@ -234,19 +246,22 @@ export default function Home() {
               )}
             </Stack>
 
-            {address && address !== id && chatCurrentUserProfile?.id && chatUser?.id && (
-              <IconButton2Wrapper>
-                <ChatModal
-                  currentUserToConnect={chatCurrentUserProfile}
-                  chatUser={chatUser}
-                  otherUser={chatOtherUser}
-                  hideOpenButton={false}
-                  showRemoveFilterButton={true}
-                  IsOpenOutSide={null}
-                  OnCloseOutSide={null}
-                />
-              </IconButton2Wrapper>
-            )}
+            {address &&
+              address !== id &&
+              chatCurrentUserProfile?.id &&
+              chatUser?.id && (
+                <IconButton2Wrapper>
+                  <ChatModal
+                    currentUserToConnect={chatCurrentUserProfile}
+                    chatUser={chatUser}
+                    otherUser={chatOtherUser}
+                    hideOpenButton={false}
+                    showRemoveFilterButton={true}
+                    IsOpenOutSide={null}
+                    OnCloseOutSide={null}
+                  />
+                </IconButton2Wrapper>
+              )}
 
             {address === id && (
               <IconButtonWrapper>
@@ -449,7 +464,6 @@ const IconButtonWrapper = styled.div`
   right: 50px;
   top: 50px;
 `;
-
 
 const IconButton2Wrapper = styled.div`
   position: absolute;

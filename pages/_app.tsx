@@ -3,15 +3,15 @@ import "react-toastify/dist/ReactToastify.css";
 import "styles/globals.scss";
 import "focus-visible";
 
-import 'node_modules/stream-chat-react/dist/css/v2/index.css';
-import '../features/chatapp/styles/index.css';
-import  '../features/chatapp/components/AvatarGroup/AvatarGroup.css';
-import  '../features/chatapp/components/CreateChannel/CreateChannel.css';
-import  '../features/chatapp/components/MessagingChannelHeader/MessagingChannelHeader.css';
-import  '../features/chatapp/components/MessagingChannelPreview/MessagingChannelPreview.css';
-import  '../features/chatapp/components/MessagingThreadHeader/MessagingThreadHeader.css';
-import  '../features/chatapp/components/TypingIndicator/TypingIndicator.css';
-import  '../features/chatapp/components/WindowControls/WindowControls.css';
+import "node_modules/stream-chat-react/dist/css/v2/index.css";
+import "../features/chatapp/styles/index.css";
+import "../features/chatapp/components/AvatarGroup/AvatarGroup.css";
+import "../features/chatapp/components/CreateChannel/CreateChannel.css";
+import "../features/chatapp/components/MessagingChannelHeader/MessagingChannelHeader.css";
+import "../features/chatapp/components/MessagingChannelPreview/MessagingChannelPreview.css";
+import "../features/chatapp/components/MessagingThreadHeader/MessagingThreadHeader.css";
+import "../features/chatapp/components/TypingIndicator/TypingIndicator.css";
+import "../features/chatapp/components/WindowControls/WindowControls.css";
 
 import type { AppProps } from "next/app";
 import { RecoilRoot } from "recoil";
