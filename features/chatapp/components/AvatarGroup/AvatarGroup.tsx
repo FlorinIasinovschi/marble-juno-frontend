@@ -2,10 +2,9 @@ import React from 'react';
 import type { ChannelMemberResponse } from 'stream-chat';
 import { Avatar } from 'stream-chat-react';
 import { getCleanImage } from '../../assets';
-import StreamLogo from '../../assets/stream.png';
 
 export const AvatarGroup = ({ members }: { members: ChannelMemberResponse[] }) => {
-  let content = <Avatar image={StreamLogo} shape='square' size={40} />;
+  let content = <Avatar image="" shape='square' size={40} />;
 
   if (members.length === 1) {
     content = <Avatar image={getCleanImage(members[0])} size={40} />;
