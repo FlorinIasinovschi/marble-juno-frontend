@@ -8,10 +8,21 @@ import type { ChannelFilters, ChannelOptions, ChannelSort } from 'stream-chat';
  */
 export const getChannelListOptions = (
   user: string | undefined,
+  user2: string | undefined
 ) => {
   //console.log('getChannelListOptions');
-  //console.log(user);
-  const filters: ChannelFilters =  user && user !='' ? { type: 'messaging', members: { $in: [user!] } } : { type: 'messaging' }  ;
+  console.log(user);
+  console.log(user2);
+
+  let filterObj;
+  if(user2 && user2!=''){
+    filterObj= user !='' && user2 !='' ? {  type: "messaging", $and: [ { members: { $in: [user!] } }, { members: { $in: [user2!] } } ] }: { type: 'messaging' } ;
+  }
+  else{
+    filterObj=user !='' ? { type: 'messaging', members: { $in: [user!] } } : { type: 'messaging' }  ;
+  }
+
+  const filters: ChannelFilters =  filterObj;
   //const filters: ChannelFilters = disableChannelNameFilter
   //  ? { type: 'messaging', members: { $in: [user!] } }
   //  : { type: 'messaging', name: 'Social Demo', demo: 'social' };

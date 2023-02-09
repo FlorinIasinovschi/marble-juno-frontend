@@ -1082,7 +1082,16 @@ div{
   }
 }
 
+.str-chat__avatar .str-chat__avatar-image{
+  background-color: #000000 !important;
+}
+
+.str-chat__avatar .str-chat__avatar-image{
+  object-fit: contain !important;
+}
 
 
 
-
+#tooltipOpeChatList *{
+  font-family: Mulish !important;
+}
