@@ -1060,8 +1060,14 @@ div{
 
 @media screen and (min-width: 769px) {
   .str-chat__list{
-    max-height: 350px !important;
+    max-height: 422px !important;
   }
+  .str-chat.str-chat__theme-dark{
+    max-height: 558px;
+    padding-bottom: 0px;
+    overflow: auto;
+  }
+
 }
 
 @media screen and (max-width: 500px) {
@@ -1092,6 +1098,6 @@ div{
 
 
 
-#tooltipOpeChatList *{
+#tooltipOpeChatList {
   font-family: Mulish !important;
 }
