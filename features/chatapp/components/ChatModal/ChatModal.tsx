@@ -11,6 +11,7 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalHeader,
+  Tooltip,
 } from "@chakra-ui/react";
 
 import {
@@ -79,13 +80,15 @@ const ChatModal = ({ currentUserToConnect, chatUser, otherUser, hideOpenButton,s
     <ChakraProvider>
       <>
        {!hideOpenButton && (
-          <IconButton id="OpenChatModalButton"
-          aria-label="Open Chat"
-          icon={<ChatIcon />}
-          onClick={openModal}
-          variant="outline"
-          colorScheme="whiteAlpha"    
-          />
+          <><Tooltip id="tooltipOpeChat" label='Start conversation' fontSize='md'>
+            <IconButton id="OpenChatModalButton"
+            aria-label="Start conversation"
+            icon={<ChatIcon />}
+            onClick={openModal}
+            variant="outline"
+            colorScheme="whiteAlpha" />
+            </Tooltip>
+          </>
        )}
       </>
       <Modal
