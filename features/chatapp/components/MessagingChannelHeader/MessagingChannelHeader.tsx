@@ -21,7 +21,7 @@ const MessagingChannelHeader = (props: Props) => {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
-
+  console.log(channel);
   const members = Object.values(channel.state.members || {}).filter(
     (member) => member.user?.id !== client?.user?.id,
   );
@@ -76,7 +76,11 @@ const MessagingChannelHeader = (props: Props) => {
       <div id='mobile-nav-icon' className={`${theme}`} onClick={() => toggleMobile()}>
         <HamburgerIcon />
       </div>
+      
+      
       <AvatarGroup members={members} />
+
+
       {!isEditing ? (
         <div className='channel-header__name'>{channelName || title}</div>
       ) : (

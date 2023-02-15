@@ -249,8 +249,10 @@ export default function Home() {
             {address &&
               address !== id &&
               chatCurrentUserProfile?.id &&
-              chatUser?.id && (
+              chatUser?.id &&
+              chatOtherUser?.id && (
                 <IconButton2Wrapper>
+
                   <ChatModal
                     currentUserToConnect={chatCurrentUserProfile}
                     chatUser={chatUser}

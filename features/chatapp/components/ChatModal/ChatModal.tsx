@@ -11,6 +11,7 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalHeader,
+  Tooltip,
 } from "@chakra-ui/react";
 
 import {
@@ -37,10 +38,10 @@ const ChatModal = ({ currentUserToConnect, chatUser, otherUser, hideOpenButton,s
   const [isCreating, setIsCreating] = useState(false);
 
   let user:string=chatUser.id;
-  if(otherUser?.id)
-    user=otherUser.getStream_id
+  //if(otherUser?.id)
+  //  user=otherUser.getStream_id
 
-  const _channelListOptions=getChannelListOptions(user);
+  const _channelListOptions=getChannelListOptions(chatUser.id,otherUser?.id);
   const [channelListOptions,setChannelListOption]= useState<any>(_channelListOptions);
   const chatClient = useConnectUser<StreamChatGenerics>(process.env.NEXT_PUBLIC_STREAM_KEY, currentUserToConnect, chatUser.token);
   const toggleMobile = useMobileView();
@@ -54,17 +55,17 @@ const ChatModal = ({ currentUserToConnect, chatUser, otherUser, hideOpenButton,s
 
   const openModal = async () => {
     let user:string=chatUser.id;
-    if(otherUser?.id)
-      user=otherUser.getStream_id
+    //if(otherUser?.id)
+    //  user=otherUser.getStream_id
   
-    const _channelListOptions=getChannelListOptions(user);
-    setChannelListOption(_channelListOptions);
+      const _channelListOptions=getChannelListOptions(chatUser.id,otherUser.id);
+      setChannelListOption(_channelListOptions);
     onOpen();
   }
 
   const removeFilter = async () => {
     let user:string=chatUser.id;  
-    const _channelListOptions=getChannelListOptions(user);
+    const _channelListOptions=getChannelListOptions(user,null);
     setChannelListOption(_channelListOptions);
   }
  
@@ -79,13 +80,15 @@ const ChatModal = ({ currentUserToConnect, chatUser, otherUser, hideOpenButton,s
     <ChakraProvider>
       <>
        {!hideOpenButton && (
-          <IconButton id="OpenChatModalButton"
-          aria-label="Open Chat"
-          icon={<ChatIcon />}
-          onClick={openModal}
-          variant="outline"
-          colorScheme="whiteAlpha"    
-          />
+          <><Tooltip id="tooltipOpeChat" label='Start conversation' fontSize='md'>
+            <IconButton id="OpenChatModalButton"
+            aria-label="Start conversation"
+            icon={<ChatIcon />}
+            onClick={openModal}
+            variant="outline"
+            colorScheme="whiteAlpha" />
+            </Tooltip>
+          </>
        )}
       </>
       <Modal

@@ -35,7 +35,7 @@ const MessagingChannelListHeader = React.memo((props: Props) => {
           className={`messaging__channel-list__header__button`}
           onClick={showAllChat}
         >
-          <Tooltip label='Show All Chats' fontSize='md'>
+          <Tooltip id="tooltipOpeChatList" label='Show All Chats' fontSize='md'>
             <DownloadIcon boxSize={6} color="white" />
           </Tooltip>
         </button>
