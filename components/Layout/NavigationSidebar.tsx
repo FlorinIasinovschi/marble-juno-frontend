@@ -85,7 +85,6 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
   }
   useOutsideClick(ref);
   const getBadgeInfo = () => {
-    console.log("profile: ", profile);
     if (!key?.name)
       return (
         <>
@@ -96,8 +95,8 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
     if (profile.isAirdropper) {
       return profile.near ? (
         <>
-          <span>AIRDROP</span>: {profile?.near} eligible for {profile?.amount}{" "}
-          &nbsp;
+          <span>AIRDROP</span>: {profile?.near} is eligible for{" "}
+          {profile?.amount} &nbsp;
           <span>Edit your &quot; .near &quot; wallet</span>
           <AirdropModal />
         </>
@@ -385,7 +384,7 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
             )}
             {key?.name && (
               <Link href="/create" passHref>
-                <CreateButton>Create</CreateButton>
+                <CreateButton>Mint</CreateButton>
               </Link>
             )}
           </ButtonField>
