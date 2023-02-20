@@ -29,6 +29,8 @@ import {
   MobileProfileInfo,
   AddressWrapper,
   BadgeWrapper,
+  StyledDivForLogoMobile,
+  MobileChatAndUserContainer,
 } from "./styled";
 
 export function NavigationSidebar({ openNav, setOpenNav }) {
@@ -157,20 +159,23 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
                 <MobileOverlay id="MobileOverlay"></MobileOverlay>
                 <MobileMenu ref={ref}>
                   <MobileMenuWrapper>
-                    {/*
+                    
                 <Link href="/" passHref>
-                <StyledDivForLogo as="a">
+                <StyledDivForLogoMobile as="a">
                   <img
                     className="logo-img"
                     src="/images/logotext.svg"
                     alt="logo"
                   />
-                </StyledDivForLogo>
+                </StyledDivForLogoMobile>
                 </Link>
-                  */}
+                <HorizontalDivider />
+
+                
                     {Boolean(key?.name) && (
                       <>
-                        <RoundedIconComponent
+                      <MobileChatAndUserContainer>
+                      <RoundedIconComponent
                           size="48px"
                           address={key?.bech32Address}
                           direction="row"
@@ -179,9 +184,12 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
                         <ChatCounterWrapper>
                           <MessageCounter />
                         </ChatCounterWrapper>
+                      </MobileChatAndUserContainer>
+                      <HorizontalDivider />
                       </>
                     )}
-                    <HorizontalDivider />
+                    {key?.name && (
+                      <>
                     <MobileProfileInfo>
                       <MobileWalletInfo>
                         <p>Wallet Balance</p>
@@ -198,6 +206,8 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
                       </MobileWalletInfo>
                     </MobileProfileInfo>
                     <HorizontalDivider />
+                    </>
+                    )}
                     <MobileLinkWrapper>
                       <StyledLink>
                         <Link
@@ -476,7 +486,7 @@ const MobileMenuWrapper = styled("div", {
   display: "flex",
   flexDirection: "column",
   alignItems: "flex-start",
-  rowGap: "30px",
+  rowGap: "25px",
 });
 const MobileWrapper = styled("div", {
   display: "flex",
@@ -509,8 +519,8 @@ const MobileLinkWrapper = styled("div", {
 
 const ChatCounterWrapper = styled("div", {
   position: "absolute",
-  top: "40px",
-  right: "30px",
+  top: "10px",
+  right: "0px",  
 });
 
 const MobileOverlay = styled("div", {
