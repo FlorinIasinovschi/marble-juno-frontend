@@ -41,7 +41,7 @@ const ChatModal = ({ currentUserToConnect, chatUser, otherUser, hideOpenButton,s
   //if(otherUser?.id)
   //  user=otherUser.getStream_id
 
-  const _channelListOptions=getChannelListOptions(chatUser.id,otherUser?.id);
+  const _channelListOptions=getChannelListOptions(chatUser.getStream_id,otherUser?.getStream_id);
   const [channelListOptions,setChannelListOption]= useState<any>(_channelListOptions);
   const chatClient = useConnectUser<StreamChatGenerics>(process.env.NEXT_PUBLIC_STREAM_KEY, currentUserToConnect, chatUser.token);
   const toggleMobile = useMobileView();
@@ -54,17 +54,17 @@ const ChatModal = ({ currentUserToConnect, chatUser, otherUser, hideOpenButton,s
   }
 
   const openModal = async () => {
-    let user:string=chatUser.id;
+    let user:string=chatUser.getStream_id;
     //if(otherUser?.id)
     //  user=otherUser.getStream_id
   
-      const _channelListOptions=getChannelListOptions(chatUser.id,otherUser.id);
+      const _channelListOptions=getChannelListOptions(chatUser.getStream_id,otherUser.getStream_id);
       setChannelListOption(_channelListOptions);
     onOpen();
   }
 
   const removeFilter = async () => {
-    let user:string=chatUser.id;  
+    let user:string=chatUser.getStream_id;  
     const _channelListOptions=getChannelListOptions(user,null);
     setChannelListOption(_channelListOptions);
   }

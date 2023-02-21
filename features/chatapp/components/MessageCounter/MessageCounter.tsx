@@ -2,6 +2,7 @@ import { EmailIcon } from '@chakra-ui/icons';
 import { Badge, Box, useDisclosure } from '@chakra-ui/react';
 import { addUserToMurbleChannel, getChatUser } from 'hooks/useChat';
 import { getProfileInfo } from 'hooks/useProfile';
+import { redirect } from 'next/dist/next-server/server/api-utils';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useRecoilValue } from 'recoil';
@@ -74,7 +75,7 @@ export const MessageCounter =  ()=> {
     {Boolean(address) && (
       <Box onClick={openChatModal} style={{position:'relative'}} ml='5' mr='2'>
       <EmailIcon boxSize={6} color="white"/>
-        <Badge style={{position: 'absolute',borderRadius: '10px', fontSize: '10px;',right:'-12px',top:'-2px',lineHeight:'15px'}} variant='solid' colorScheme='red'>
+        <Badge style={{position: 'absolute',borderRadius: '10px', fontSize: '10px;',right:'-12px',top:'-2px',lineHeight:'15px' }} variant='solid' colorScheme='red'>
             {totalUnreadCount}
         </Badge>
     </Box>
