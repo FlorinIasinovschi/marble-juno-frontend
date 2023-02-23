@@ -37,7 +37,6 @@ export const Explore = () => {
             process.env.NEXT_PUBLIC_PINATA_URL + collectionList[i].uri
           );
           res_collection = await ipfs_collection.json();
-          console.log("res_collection: ", collectionList[i], res_collection);
           let collection_info: any = {};
           collection_info.id = collectionList[i].id;
           collection_info.name = res_collection.name;
