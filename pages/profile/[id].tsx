@@ -75,8 +75,8 @@ export default function Home() {
           const _chatUser = await getOrCreateChatUserToken(address);
           const _chatUser2 = await getOrCreateChatUserToken(_profile.id);
           const channel = await getOrCreateChatChannel([
-            activeProfile.id,
-            _profile.id,
+            _chatUser.getStream_id,
+            _chatUser2.getStream_id,
           ]);
 
           const _chatCurrentUserProfile: {

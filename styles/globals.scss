@@ -1060,10 +1060,13 @@ div{
 
 @media screen and (min-width: 769px) {
   .str-chat__list{
+    min-height: 422px;
     max-height: 422px !important;
   }
   .str-chat.str-chat__theme-dark{
     max-height: 558px;
+    min-height: 422px;
+    height: 85%;
     padding-bottom: 0px;
   }
 
