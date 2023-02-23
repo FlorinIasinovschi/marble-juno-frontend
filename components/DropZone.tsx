@@ -97,7 +97,6 @@ const DropZone = ({ data, dispatch, initHash }) => {
         pinata_secret_api_key: PUBLIC_PINATA_SECRET_API_KEY,
       },
     });
-
     if (response.status == 200) {
       setIpfsHash(response.data.IpfsHash);
       dispatch({ type: "SET_LOGO", logo: response.data.IpfsHash });

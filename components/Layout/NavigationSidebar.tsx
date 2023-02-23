@@ -1,5 +1,6 @@
-import { Menu, MenuButton, MenuList } from "@chakra-ui/react";
+import { Menu, MenuButton, MenuList, ModalOverlay } from "@chakra-ui/react";
 import { RoundedIcon, RoundedIconComponent } from "components/RoundedIcon";
+import MessageCounter from "features/chatapp/components/MessageCounter/MessageCounter";
 import { useTokenBalance } from "hooks/useTokenBalance";
 import { useBaseTokenInfo } from "hooks/useTokenInfo";
 import Link from "next/link";
@@ -16,6 +17,7 @@ import { walletState, WalletStatusType } from "../../state/atoms/walletAtoms";
 import { default_image } from "../../util/constants";
 import { ConnectedWalletButton } from "../ConnectedWalletButton";
 import { IconWrapper } from "../IconWrapper";
+import AirdropModal from "./AirdropModal";
 import { styled } from "../theme";
 import {
   StyledWrapper,
@@ -26,6 +28,9 @@ import {
   StyledMenuItem,
   MobileProfileInfo,
   AddressWrapper,
+  BadgeWrapper,
+  StyledDivForLogoMobile,
+  MobileChatAndUserContainer,
 } from "./styled";
 
 export function NavigationSidebar({ openNav, setOpenNav }) {
@@ -62,7 +67,11 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
        * Alert if clicked on outside of element
        */
       function handleClickOutside(event) {
-        if (ref.current && !ref.current.contains(event.target)) {
+        if (
+          ref.current &&
+          !ref.current.contains(event.target) &&
+          event.target.id == "MobileOverlay"
+        ) {
           setOpenNav(false);
         }
       }
@@ -75,150 +84,183 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
     }, [ref]);
   }
   useOutsideClick(ref);
+  const getBadgeInfo = () => {
+    if (!key?.name)
+      return (
+        <>
+          <span>AIRDROP</span>: Please connect your wallet to evaluate your
+          status.{" "}
+        </>
+      );
+    if (profile.isAirdropper) {
+      return profile.near ? (
+        <>
+          <span>AIRDROP</span>: {profile?.near} is eligible for{" "}
+          {profile?.amount} &nbsp;
+          <span>Edit your &quot; .near &quot; wallet</span>
+          <AirdropModal />
+        </>
+      ) : (
+        <>
+          <span>AIRDROP</span>: You are eligible for {profile?.amount} &nbsp;
+          <span>Provide your &quot; .near &quot; wallet</span>
+          <AirdropModal />
+        </>
+      );
+    }
+    return (
+      <>
+        <span>AIRDROP</span>: You are not eligible!{" "}
+      </>
+    );
+  };
   return (
     <>
+      <BadgeWrapper>{getBadgeInfo()}</BadgeWrapper>
       {isMobile() ? (
-        <MobileWrapper>
-          <IconWrapper
-            className="mobile-nav"
-            type="button"
-            size="40px"
-            icon={<Nav />}
-            onClick={() => {
-              setOpenNav(!openNav);
-            }}
-          />
-          <Link href="/" passHref>
-            <StyledDivForLogo as="a">
-              <img className="logo-img" src="/images/logotext.svg" alt="logo" />
-            </StyledDivForLogo>
-          </Link>
-          {Boolean(key?.name) ? (
-            <Link href="/create" passHref>
-              <CreateButton>Mint</CreateButton>
-            </Link>
-          ) : (
-            <ConnectedWalletButton
-              connected={!!key?.name}
-              walletName={key?.name}
-              onConnect={() => connectWallet(null)}
-              onDisconnect={() => resetWalletConnection}
+        <>
+          <MobileWrapper>
+            <IconWrapper
+              className="mobile-nav"
+              type="button"
+              size="40px"
+              icon={<Nav />}
+              onClick={() => {
+                setOpenNav(!openNav);
+              }}
             />
-          )}
-          {openNav && (
-            <MobileMenu ref={ref}>
-              <MobileMenuWrapper>
-                <Link href="/" passHref>
-                  <StyledDivForLogo as="a">
-                    <img
-                      className="logo-img"
-                      src="/images/logotext.svg"
-                      alt="logo"
-                    />
-                  </StyledDivForLogo>
-                </Link>
-                {Boolean(key?.name) && (
-                  <MobileProfileInfo>
-                    <RoundedIconComponent
-                      size="48px"
-                      address={key?.bech32Address}
-                      direction="column"
-                      font="16px"
-                    />
-                    <MobileWalletInfo>
-                      <p>Wallet Balance</p>
-                      <h2>
-                        {formatTokenBalance(balance, {
-                          includeCommaSeparation: true,
-                        })}{" "}
-                        {baseToken?.symbol}
-                      </h2>
-                      <AddressWrapper>
-                        <p>{getReducedAddress(key?.bech32Address)}</p>&nbsp;
-                        <GreenRound />
-                      </AddressWrapper>
-                    </MobileWalletInfo>
-                  </MobileProfileInfo>
-                )}
-                <MobileLinkWrapper>
-                  <StyledLink>
-                    <Link
-                      href="https://app.marbledao.finance/dashboard"
-                      passHref
-                    >
-                      <a className="dropdown-item">
-                        <span>Feed</span>
-                      </a>
-                    </Link>
-                  </StyledLink>
-                  <StyledLink>
-                    <Link href="/explore" passHref>
-                      <a className="dropdown-item">
-                        <span className={isActive("/explore")}>Browse</span>
-                      </a>
-                    </Link>
-                  </StyledLink>
-                  <StyledLink>
-                    <a
-                      className="dropdown-item"
-                      href="https://juno.marbledao.finance/"
-                      target="__blank"
-                    >
-                      <span className={isActive("/defi")}>DeFi</span>
-                    </a>
-                  </StyledLink>
-                  <StyledLink>
-                    <Link href="/stake" passHref>
-                      <a className="dropdown-item">
-                        <span className={isActive("/stake")}>Stake</span>
-                      </a>
-                    </Link>
-                  </StyledLink>
-                  <StyledLink>
-                    <Link href="/metaverse" passHref>
-                      <a className="dropdown-item">
-                        <span className={isActive("/metaverse")}>
-                          Metaverse
-                        </span>
-                      </a>
-                    </Link>
-                  </StyledLink>
-                  <StyledLink>
-                    <Link href="/loyalty" passHref>
-                      <a className="dropdown-item">
-                        <span>Loyalty</span>
-                      </a>
-                    </Link>
-                  </StyledLink>
-                  {Boolean(key?.name) && (
-                    <StyledLink>
-                      <Link href="/quest" passHref>
-                        <a className="dropdown-item">
-                          <span>Quests</span>
-                        </a>
-                      </Link>
-                    </StyledLink>
-                  )}
-                  <HorizontalDivider />
-                  <StyledLink>
-                    <Setting />
-                    &nbsp; Settings (soon)
-                  </StyledLink>
-                  <StyledLink>
-                    <Help />
-                    &nbsp; Help (soon)
-                  </StyledLink>
-                </MobileLinkWrapper>
-                <ConnectedWalletButton
-                  connected={!!key?.name}
-                  walletName={key?.name}
-                  onConnect={() => connectWallet(null)}
-                  onDisconnect={() => resetWalletConnection}
+            <Link href="/" passHref>
+              <StyledDivForLogo as="a">
+                <img
+                  className="logo-img"
+                  src="/images/logotext.svg"
+                  alt="logo"
                 />
-              </MobileMenuWrapper>
-            </MobileMenu>
-          )}
-        </MobileWrapper>
+              </StyledDivForLogo>
+            </Link>
+            {Boolean(key?.name) ? (
+              <>
+                <Link href="/create" passHref>
+                  <CreateButton>Create</CreateButton>
+                </Link>
+              </>
+            ) : (
+              <ConnectedWalletButton
+                connected={!!key?.name}
+                walletName={key?.name}
+                onConnect={() => connectWallet(null)}
+                onDisconnect={() => resetWalletConnection}
+              />
+            )}
+            {openNav && (
+              <>
+                <MobileOverlay id="MobileOverlay"></MobileOverlay>
+                <MobileMenu ref={ref}>
+                  <MobileMenuWrapper>
+                    <Link href="/" passHref>
+                      <StyledDivForLogoMobile as="a">
+                        <img
+                          className="logo-img"
+                          src="/images/logotext.svg"
+                          alt="logo"
+                        />
+                      </StyledDivForLogoMobile>
+                    </Link>
+                    <HorizontalDivider />
+
+                    {Boolean(key?.name) && (
+                      <>
+                        <MobileChatAndUserContainer>
+                          <RoundedIconComponent
+                            size="48px"
+                            address={key?.bech32Address}
+                            direction="row"
+                            font="16px"
+                          />
+                          <ChatCounterWrapper>
+                            <MessageCounter />
+                          </ChatCounterWrapper>
+                        </MobileChatAndUserContainer>
+                        <HorizontalDivider />
+                      </>
+                    )}
+                    {key?.name && (
+                      <>
+                        <MobileProfileInfo>
+                          <MobileWalletInfo>
+                            <p>Wallet Balance</p>
+                            <h2>
+                              {formatTokenBalance(balance, {
+                                includeCommaSeparation: true,
+                              })}{" "}
+                              {baseToken?.symbol}
+                            </h2>
+                            <AddressWrapper>
+                              <p>{getReducedAddress(key?.bech32Address)}</p>
+                              &nbsp;
+                              <GreenRound />
+                            </AddressWrapper>
+                          </MobileWalletInfo>
+                        </MobileProfileInfo>
+                        <HorizontalDivider />
+                      </>
+                    )}
+                    <MobileLinkWrapper>
+                      <StyledLink>
+                        <Link
+                          href="https://app.marbledao.finance/dashboard"
+                          passHref
+                        >
+                          Feed
+                        </Link>
+                      </StyledLink>
+                      <StyledLink>
+                        <Link href="/explore" passHref>
+                          Browse
+                        </Link>
+                      </StyledLink>
+                      <StyledLink>
+                        <a
+                          className="dropdown-item"
+                          href="https://juno.marbledao.finance/"
+                          target="__blank"
+                        >
+                          DeFi
+                        </a>
+                      </StyledLink>
+                      <StyledLink>
+                        <Link href="/stake" passHref>
+                          Stake
+                        </Link>
+                      </StyledLink>
+                      <StyledLink>
+                        <Link href="/metaverse" passHref>
+                          Metaverse
+                        </Link>
+                      </StyledLink>
+                      <HorizontalDivider />
+                      <StyledLink>
+                        <Setting />
+                        &nbsp; Settings (soon)
+                      </StyledLink>
+                      <StyledLink>
+                        <Help />
+                        &nbsp; Help (soon)
+                      </StyledLink>
+                    </MobileLinkWrapper>
+                    <HorizontalDivider />
+                    <ConnectedWalletButton
+                      connected={!!key?.name}
+                      walletName={key?.name}
+                      onConnect={() => connectWallet(null)}
+                      onDisconnect={() => resetWalletConnection}
+                    />
+                  </MobileMenuWrapper>
+                </MobileMenu>
+              </>
+            )}
+          </MobileWrapper>
+        </>
       ) : (
         <StyledWrapper>
           <StyledListForLinks>
@@ -236,17 +278,13 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
             {Boolean(key?.name) && (
               <StyledLink>
                 <Link href="/feed" passHref>
-                  <a className="dropdown-item">
-                    <span>Feed</span>
-                  </a>
+                  Feed
                 </Link>
               </StyledLink>
             )}
             <StyledLink>
               <Link href="/explore" passHref>
-                <a className="dropdown-item">
-                  <span className={isActive("/explore")}>Browse</span>
-                </a>
+                Browse
               </Link>
             </StyledLink>
 
@@ -256,110 +294,93 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
                 href="https://juno.marbledao.finance/"
                 target="__blank"
               >
-                <span className={isActive("/defi")}>DeFi</span>
+                DeFi
               </a>
             </StyledLink>
 
             {Boolean(key?.name) && (
               <StyledLink>
                 <Link href="/stake" passHref>
-                  <a className="dropdown-item">
-                    <span className={isActive("/stake")}>Stake</span>
-                  </a>
+                  Stake
                 </Link>
               </StyledLink>
             )}
             <StyledLink>
               <Link href="/metaverse" passHref>
-                <a className="dropdown-item">
-                  <span className={isActive("/metaverse")}>Metaverse</span>
-                </a>
+                Metaverse
               </Link>
             </StyledLink>
           </StyledListForLinks>
 
           <ButtonField>
-            <StyledLink>
-              <Link href="/loyalty" passHref>
-                <a className="dropdown-item">
-                  <span>Loyalty</span>
-                </a>
-              </Link>
-            </StyledLink>
-            {Boolean(key?.name) && (
-              <StyledLink>
-                <Link href="/quest" passHref>
-                  <a className="dropdown-item">
-                    <span>Quests</span>
-                  </a>
-                </Link>
-              </StyledLink>
-            )}
             {Boolean(key?.name) ? (
-              <Menu>
-                <MenuButton
-                  borderRadius="50%"
-                  border="3px solid rgba(255, 255, 255, 0.2)"
-                >
-                  <RoundedIcon
-                    size="36px"
-                    src={
-                      profile.avatar
-                        ? process.env.NEXT_PUBLIC_PINATA_URL + profile.avatar
-                        : default_image
-                    }
-                  />
-                </MenuButton>
-                <StyledMenuList>
-                  <Link href={`/profile/${key?.bech32Address}`} passHref>
-                    <ProfileMenuItem>
+              <>
+                <Menu>
+                  <MenuButton
+                    borderRadius="50%"
+                    border="3px solid rgba(255, 255, 255, 0.2)"
+                  >
+                    <RoundedIcon
+                      size="36px"
+                      src={
+                        profile.avatar
+                          ? process.env.NEXT_PUBLIC_PINATA_URL + profile.avatar
+                          : default_image
+                      }
+                    />
+                  </MenuButton>
+                  <StyledMenuList>
+                    <Link href={`/profile/${key?.bech32Address}`} passHref>
+                      <ProfileMenuItem>
+                        <Flex>
+                          <RoundedIconComponent
+                            size="58px"
+                            address={key?.bech32Address}
+                          />
+                        </Flex>
+                        <RoundedLeft />
+                      </ProfileMenuItem>
+                    </Link>
+                    <StyledMenuItem>
+                      <VFlex>
+                        <p>Wallet Balance</p>
+                        <h1>
+                          {formatTokenBalance(balance, {
+                            includeCommaSeparation: true,
+                          })}{" "}
+                          {baseToken?.symbol}
+                        </h1>
+                      </VFlex>
+                      <AddressWrapper>
+                        <p>{key?.name}</p>&nbsp;
+                        <GreenRound />
+                      </AddressWrapper>
+                    </StyledMenuItem>
+                    <StyledMenuItem>
                       <Flex>
-                        <RoundedIconComponent
-                          size="58px"
-                          address={key?.bech32Address}
-                        />
+                        {/* <Setting /> */}
+                        &nbsp; Settings
                       </Flex>
                       <RoundedLeft />
-                    </ProfileMenuItem>
-                  </Link>
-                  <StyledMenuItem>
-                    <VFlex>
-                      <p>Wallet Balance</p>
-                      <h1>
-                        {formatTokenBalance(balance, {
-                          includeCommaSeparation: true,
-                        })}{" "}
-                        {baseToken?.symbol}
-                      </h1>
-                    </VFlex>
-                    <AddressWrapper>
-                      <p>{key?.name}</p>&nbsp;
-                      <GreenRound />
-                    </AddressWrapper>
-                  </StyledMenuItem>
-                  <StyledMenuItem>
-                    <Flex>
-                      {/* <Setting /> */}
-                      &nbsp; Settings
-                    </Flex>
-                    <RoundedLeft />
-                  </StyledMenuItem>
-                  <StyledMenuItem>
-                    <Flex>
-                      {/* <Help /> */}
-                      &nbsp; Help
-                    </Flex>
-                    <RoundedLeft />
-                  </StyledMenuItem>
-                  <StyledMenuItem onClick={resetWalletConnection}>
-                    <Flex>
-                      {/* <Disconnect /> */}
-                      &nbsp; Disconnect
-                    </Flex>
-                    <RoundedLeft />
-                  </StyledMenuItem>
-                </StyledMenuList>
-              </Menu>
+                    </StyledMenuItem>
+                    <StyledMenuItem>
+                      <Flex>
+                        {/* <Help /> */}
+                        &nbsp; Help
+                      </Flex>
+                      <RoundedLeft />
+                    </StyledMenuItem>
+                    <StyledMenuItem onClick={resetWalletConnection}>
+                      <Flex>
+                        {/* <Disconnect /> */}
+                        &nbsp; Disconnect
+                      </Flex>
+                      <RoundedLeft />
+                    </StyledMenuItem>
+                  </StyledMenuList>
+                </Menu>
+                <MessageCounter />
+              </>
             ) : (
               <ConnectedWalletButton
                 connected={!!key?.name}
@@ -461,8 +482,8 @@ const MobileMenuWrapper = styled("div", {
   padding: "30px",
   display: "flex",
   flexDirection: "column",
-  alignItems: "center",
-  rowGap: "36px",
+  alignItems: "flex-start",
+  rowGap: "25px",
 });
 const MobileWrapper = styled("div", {
   display: "flex",
@@ -475,6 +496,7 @@ const MobileWrapper = styled("div", {
 });
 
 const MobileWalletInfo = styled("div", {
+  padding: "0px",
   "& p": {
     fontSize: "12px",
   },
@@ -489,5 +511,22 @@ const MobileLinkWrapper = styled("div", {
   textAlign: "left",
   display: "flex",
   flexDirection: "column",
-  rowGap: "36px",
+  rowGap: "30px",
+});
+
+const ChatCounterWrapper = styled("div", {
+  position: "absolute",
+  top: "10px",
+  right: "0px",
+});
+
+const MobileOverlay = styled("div", {
+  position: "fixed",
+  rigth: "0px",
+  left: "0px",
+  bottom: "0px",
+  width: "100%",
+  height: "100%",
+  backdropFilter: "blur(1px)",
+  background: "rgba(0, 0, 0, 0.34)",
 });

@@ -234,3 +234,21 @@ export const PROFILE_STATUS = "PROFILE_STATUS";
 export const BUY_STATUS = "BUY_STATUS";
 export const OFFER_STATUS = "OFFER_STATUS";
 export const RELOAD_STATUS = "RELOAD_STATUS";
+export interface StateType {
+  // coinData: {
+  //   near_value: number;
+  // };
+  profileData: {
+    profile_status: {
+      avatar: string;
+      banner: string;
+      bio: string;
+      discord: string;
+      id: string;
+      mail: string;
+      name: string;
+      isAirdropper: boolean;
+      near: string;
+    };
+  };
+}

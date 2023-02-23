@@ -206,15 +206,10 @@ const StyledContainer = styled.div<{ hasBanner: boolean }>`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  margin-top: ${({ hasBanner }) => (hasBanner ? "0" : "130px")};
   padding: ${({ hasBanner }) => (hasBanner ? "0" : "40px")};
   ${({ hasBanner }) => !hasBanner && "max-width: 1700px"};
   width: 100%;
-  @media (max-width: 1600px) {
-    margin-top: 60px;
-  }
   @media (max-width: 1024px) {
-    margin-top: 80px;
     padding: 10px;
   }
   @media (max-width: 650px) {

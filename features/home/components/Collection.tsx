@@ -25,66 +25,85 @@ import {
   getFileTypeFromURL,
 } from "services/nft";
 import { SecondGradientBackground } from "styles/styles";
+import { default_image, PINATA_URL, MARKETPLACE_ADDRESS } from "util/constants";
 
-const PUBLIC_MARKETPLACE = process.env.NEXT_PUBLIC_MARKETPLACE || "";
-
+interface CollectionType {
+  image?: string;
+  category: string;
+  name: string;
+  creator: string;
+  id: string;
+}
 const CollectionInfo = ({ info }) => {
   const [nfts, setNfts] = useState([]);
-  const [collectionInfo, setCollectionInfo] = useState();
   const { client } = useSdk();
-  const fetchTokensInfo = useCallback(async () => {
-    // try {
-    //   const cwCollectionContract = Marketplace(info.collection_address).use(
-    //     client
-    //   );
-    //   const marketContract = Factory().use(client);
-    //   let collection = await marketContract.collection(info.id);
-    //   let ipfs_collection = await fetch(
-    //     process.env.NEXT_PUBLIC_PINATA_URL + collection.uri
-    //   );
-    //   let res_collection = await ipfs_collection.json();
-    //   res_collection.image =
-    //     process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
-    //   setCollectionInfo(res_collection);
-    //   let sales: any = await cwCollectionContract.getSales();
-    //   const cw721Contract = CW721(info.cw721_address).use(client);
-    //   let tokenIdsInfo = await cw721Contract.allTokens();
-    //   let tokenIds = tokenIdsInfo.tokens.slice(0, 3);
-    //   let collectionNFTs = [];
-    //   for (let i = 0; i < tokenIds.length; i++) {
-    //     let nftInfo = await cw721Contract.allNftInfo(tokenIds[i]);
-    //     let ipfs_nft = await fetch(
-    //       process.env.NEXT_PUBLIC_PINATA_URL + nftInfo.info.token_uri
-    //     );
-    //     let res_nft = await ipfs_nft.json();
-    //     let nft_type = await getFileTypeFromURL(
-    //       res_nft.uri.includes("https://")
-    //         ? res_nft["uri"]
-    //         : process.env.NEXT_PUBLIC_PINATA_URL + res_nft["uri"]
-    //     );
-    //     res_nft["collectionId"] = info.id;
-    //     res_nft["type"] = nft_type.fileType;
-    //     res_nft["tokenId"] = tokenIds[i];
-    //     res_nft["title"] = info.name;
-    //     res_nft["owner"] = nftInfo.access.owner;
-    //     res_nft["image"] = res_nft.uri.includes("https://")
-    //       ? res_nft.uri
-    //       : process.env.NEXT_PUBLIC_PINATA_URL + res_nft.uri;
-    //     res_nft["sale"] =
-    //       sales.find((_sale) => _sale.token_id == res_nft.token_id) || {};
-    //     collectionNFTs.push(res_nft);
-    //   }
-    //   return collectionNFTs;
-    // } catch (err) {
-    //   return [];
-    // }
-  }, [client]);
+  const collection: CollectionType = {
+    image: info.uri ? PINATA_URL + info.uri : default_image,
+    category: info.category,
+    name: info.name,
+    creator: info.creator,
+    id: info.collectionId,
+  };
   useEffect(() => {
     (async () => {
-      const tokensInfo = await fetchTokensInfo();
-      // setNfts(tokensInfo);
+      let paymentTokensAddress = [];
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_COLLECTION_TOKEN_LIST_URL
+      );
+      const paymentTokenList = await response.json();
+      const paymentTokens: PaymentToken[] = paymentTokenList.tokens;
+      for (let i = 0; i < paymentTokens.length; i++) {
+        paymentTokensAddress.push(paymentTokens[i].address);
+      }
+      const marketplaceContract = Marketplace(MARKETPLACE_ADDRESS).use(client);
+      const _nfts = info.nftEntitiesByCollectionId.nodes;
+      const nftData = await Promise.all(
+        _nfts.map(async (_nft) => {
+          let res_nft: any = {};
+          const token_id = _nft.id.split(":")[1];
+          const nft_address = _nft.id.split(":")[0];
+          res_nft.image = PINATA_URL + _nft.imageUrl;
+          res_nft.tokenId = token_id;
+          res_nft.type = "image";
+          res_nft.owner = _nft.owner;
+          res_nft.name = _nft.name;
+          try {
+            const nft_type = await getFileTypeFromURL(
+              PINATA_URL + _nft.imageUrl
+            );
+            res_nft.type = nft_type.fileType;
+          } catch {}
+          try {
+            const sale: any = await marketplaceContract.getSale(
+              token_id,
+              nft_address
+            );
+            let paymentToken: any;
+            if (sale.denom.hasOwnProperty("cw20")) {
+              paymentToken =
+                paymentTokens[paymentTokensAddress.indexOf(sale.denom.cw20)];
+            } else {
+              paymentToken =
+                paymentTokens[paymentTokensAddress.indexOf(sale.denom.native)];
+            }
+            res_nft["paymentToken"] = paymentToken;
+            res_nft["price"] = getRealTokenAmount({
+              amount: sale.initial_price,
+              denom: paymentToken?.denom,
+            });
+            res_nft["owner"] = sale.provider;
+            res_nft["sale"] = sale;
+          } catch (err) {
+            res_nft["price"] = 0;
+            res_nft["sale"] = {};
+          }
+          return res_nft;
+        })
+      );
+      console.log("nftData: ", nftData);
+      setNfts(nftData);
     })();
-  }, [client]);
+  }, [info]);
   return (
     <Container>
       <ChakraProvider>
@@ -95,18 +114,18 @@ const CollectionInfo = ({ info }) => {
         >
           <HStack>
             <ImgDiv>
-              <StyledImage src={info.image} alt="collection" />
+              <StyledImage src={collection.image} alt="collection" />
             </ImgDiv>
             <Stack>
-              <Title>{info.name}</Title>
-              <SubTitle>{info.cat_ids}</SubTitle>
+              <Title>{collection.name}</Title>
+              <SubTitle>{collection.category}</SubTitle>
             </Stack>
           </HStack>
           {!isMobile() && (
             <CreatorInfo>
               <RoundedIconComponent
                 size={isClientMobie ? "36px" : "48px"}
-                address={info.creator}
+                address={collection.creator}
                 font={isClientMobie ? "15px" : "20px"}
               />
             </CreatorInfo>
@@ -121,18 +140,19 @@ const CollectionInfo = ({ info }) => {
         >
           {nfts.map((nftInfo, index) => (
             <Link
-              href={`/nft/${nftInfo.collectionId}/${nftInfo.tokenId}`}
+              href={`/nft/${collection.id}/${nftInfo.tokenId}`}
               passHref
               key={index}
             >
-              <LinkBox
-                as="picture"
-                transition="transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1) 0s"
-                _hover={{
-                  transform: isMobile() ? "" : "scale(1.05)",
-                }}
-              >
-                <NftCard nft={nftInfo} collection={collectionInfo} />
+              <LinkBox as="picture">
+                <NftCard
+                  nft={nftInfo}
+                  collection={{
+                    name: collection.name,
+                    image: collection.image,
+                    collectionId: collection.id,
+                  }}
+                />
               </LinkBox>
             </Link>
           ))}
@@ -142,7 +162,7 @@ const CollectionInfo = ({ info }) => {
             <CreatorInfo>
               <RoundedIconComponent
                 size={isClientMobie ? "36px" : "48px"}
-                address={info.creator}
+                address={collection.creator}
                 font={isClientMobie ? "15px" : "20px"}
               />
             </CreatorInfo>

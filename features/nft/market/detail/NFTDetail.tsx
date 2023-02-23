@@ -224,22 +224,32 @@ export const NFTDetail = ({ collectionId, id }) => {
   }, [loadNft, collectionId, id, reloadCount, reload_status]);
 
   const cancelSale = async (e) => {
-    e.preventDefault();
-    const marketplaceContract =
-      Marketplace(MARKETPLACE_ADDRESS).useTx(signingClient);
-    await marketplaceContract.cancelSale(address, id, collectionInfo.address);
-    toast.success(`You have cancelled this NFT successfully.`, {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-    });
-    let rCount = reloadCount + 1;
-    setReloadCount(rCount);
-    return false;
+    try {
+      e.preventDefault();
+      const marketplaceContract =
+        Marketplace(MARKETPLACE_ADDRESS).useTx(signingClient);
+      console.log("herjewlkjfklejkflj", collectionInfo.address);
+      const result = await marketplaceContract.cancelSale(
+        address,
+        id,
+        collectionInfo.address
+      );
+      console.log("result: ", result);
+      toast.success(`You have cancelled this NFT successfully.`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      let rCount = reloadCount + 1;
+      setReloadCount(rCount);
+      return false;
+    } catch (err) {
+      console.log("cancel sale error: ", err);
+    }
   };
   const acceptSale = async (e) => {
     try {

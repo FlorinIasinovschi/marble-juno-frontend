@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
-import { useSelector } from 'react-redux'
-import { Progress, ChakraProvider } from '@chakra-ui/react'
-import { MagicStar, CheckIcon } from 'icons'
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import { Progress, ChakraProvider } from "@chakra-ui/react";
+import { CheckIcon } from "icons";
 import {
   Container,
   Header,
@@ -21,7 +21,7 @@ import {
   TableWrapper,
   TableHeader,
   TableRow,
-} from './styled'
+} from "./styled";
 
 const Icons = {
   Basic: (
@@ -86,106 +86,106 @@ const Icons = {
       <path d="M111.922 0H83.1865V29.1884H111.922V0Z" fill="white" />
     </svg>
   ),
-}
+};
 
 const loyaltyConstant = [
   {
     id: 0,
-    title: 'Basic',
-    description: 'Welcome to Marble. Your journey starts here',
-    total: '25$',
-    staked: '0',
-    liquidity: '25$',
-    nft: '0',
+    title: "Basic",
+    description: "Welcome to Marble. Your journey starts here",
+    total: "25$",
+    staked: "0",
+    liquidity: "25$",
+    nft: "0",
     governance: false,
-    cash: '0%',
+    cash: "0%",
   },
   {
     id: 1,
-    title: 'Silver',
-    description: 'You are a DAO member! Stake, vote and enjoy benefits',
-    total: '50$',
-    staked: '1',
-    liquidity: '50$',
-    nft: '1',
+    title: "Silver",
+    description: "You are a DAO member! Stake, vote and enjoy benefits",
+    total: "50$",
+    staked: "1",
+    liquidity: "50$",
+    nft: "1",
     governance: true,
-    cash: '0.5%',
+    cash: "0.5%",
   },
   {
     id: 2,
-    title: 'Gold',
-    description: 'Exclusive deals on products and experiences made by Marble',
-    total: '150$',
-    staked: '10',
-    liquidity: '150$',
-    nft: '3',
+    title: "Gold",
+    description: "Exclusive deals on products and experiences made by Marble",
+    total: "150$",
+    staked: "10",
+    liquidity: "150$",
+    nft: "3",
     governance: true,
-    cash: '1%',
+    cash: "1%",
   },
   {
     id: 3,
-    title: 'Platinum',
+    title: "Platinum",
     description:
-      'Full privileges on Marble. Early access and reserved discounts',
-    total: '500$',
-    staked: '50',
-    liquidity: '500$',
-    nft: '5',
+      "Full privileges on Marble. Early access and reserved discounts",
+    total: "500$",
+    staked: "50",
+    liquidity: "500$",
+    nft: "5",
     governance: true,
-    cash: '3%',
+    cash: "3%",
   },
-]
+];
 
 const leaderboardConstant = [
   {
     id: 1,
-    src: '/profile.png',
-    name: 'Christian Albert',
-    level: '3',
+    src: "/profile.png",
+    name: "Christian Albert",
+    level: "3",
     rankChange: 1,
-    quests: '10',
-    points: '10',
+    quests: "10",
+    points: "10",
   },
   {
     id: 2,
-    src: '/profile.png',
-    name: 'Joshua Thenderson',
-    level: '2',
+    src: "/profile.png",
+    name: "Joshua Thenderson",
+    level: "2",
     rankChange: 1,
-    quests: '10',
-    points: '10',
+    quests: "10",
+    points: "10",
   },
   {
     id: 3,
-    src: '/profile.png',
-    name: 'Nicholas Halden',
-    level: '2',
+    src: "/profile.png",
+    name: "Nicholas Halden",
+    level: "2",
     rankChange: 1,
-    quests: '10',
-    points: '10',
+    quests: "10",
+    points: "10",
   },
   {
     id: 4,
-    src: '/profile.png',
-    name: 'Eric Dunham',
-    level: '1',
+    src: "/profile.png",
+    name: "Eric Dunham",
+    level: "1",
     rankChange: 1,
-    quests: '10',
-    points: '10',
+    quests: "10",
+    points: "10",
   },
   {
     id: 5,
-    src: '/profile.png',
-    name: 'Harry Potter',
-    level: '1',
+    src: "/profile.png",
+    name: "Harry Potter",
+    level: "1",
     rankChange: 1,
-    quests: '10',
-    points: '10',
+    quests: "10",
+    points: "10",
   },
-]
+];
 
 const Loyalty = () => {
-  const [filter, setFilter] = useState('Basic')
+  const [filter, setFilter] = useState("Basic");
   return (
     <ChakraProvider>
       <Container>
@@ -238,7 +238,7 @@ const Loyalty = () => {
                     <CheckIcon fill="black" />
                   </CheckIconWrapper>
                 ) : (
-                  '-'
+                  "-"
                 )}
               </CardContent>
               <CardContent>{element.cash}</CardContent>
@@ -271,7 +271,7 @@ const Loyalty = () => {
             {leaderboardConstant.map((element) => (
               <TableRow id={element.id} key={element.id}>
                 <td>{element.id}</td>
-                <td style={{ justifyContent: 'start' }}>
+                <td style={{ justifyContent: "start" }}>
                   <img src={element.src} alt="img" />
                   {element.name}
                 </td>
@@ -298,7 +298,7 @@ const Loyalty = () => {
         </LeaderboardWrapper>
       </Container>
     </ChakraProvider>
-  )
-}
+  );
+};
 
-export default Loyalty
+export default Loyalty;

@@ -25,6 +25,14 @@ import styled from "styled-components";
 import { GradientBackground } from "styles/styles";
 import { getReducedAddress } from "util/conversion";
 import { isMobile } from "util/device";
+import ChatModal from "features/chatapp/components/ChatModal/ChatModal";
+import {
+  addUserToMurbleChannel,
+  getOrCreateChatChannel,
+  getOrCreateChatUserToken,
+} from "hooks/useChat";
+import { default_image } from "util/constants";
+
 interface FollowInfoInterface {
   followers: number;
   followings: number;
@@ -34,6 +42,10 @@ export default function Home() {
   const { asPath, push } = useRouter();
   const { address, client: signingClient } = useRecoilValue(walletState);
   const [profile, setProfile] = useState<any>({});
+  const [chatCurrentUserProfile, setchatCurrentUserProfile] = useState<any>({});
+  const [chatUser, setChatUser] = useState<any>({});
+  const [chatOtherUser, setChatOtherUser] = useState<any>({});
+
   const [followInfo, setFollowInfo] = useState<FollowInfoInterface>({
     followers: 0,
     followings: 0,
@@ -41,13 +53,48 @@ export default function Home() {
   });
   const [tab, setTab] = useState("owned");
   const id = asPath && asPath.split("/")[2].split("?")[0];
+
   useEffect(() => {
     (async () => {
+      if (id == "[id]") return;
       const _profile = await getProfileInfo(id);
       if (!_profile) push("/404");
       const _followInfo = await getFollowInfo(id, address);
       setFollowInfo(_followInfo);
       setProfile(_profile);
+
+      if (address) {
+        const activeProfile = await getProfileInfo(address);
+        if (
+          _profile?.id &&
+          _profile?.id != "[id]" &&
+          activeProfile?.id &&
+          activeProfile?.id != "[id]" &&
+          _profile?.id != activeProfile?.id
+        ) {
+          const _chatUser = await getOrCreateChatUserToken(address);
+          const _chatUser2 = await getOrCreateChatUserToken(_profile.id);
+          const channel = await getOrCreateChatChannel([
+            _chatUser.getStream_id,
+            _chatUser2.getStream_id,
+          ]);
+
+          const _chatCurrentUserProfile: {
+            id: string;
+            name?: string;
+            image?: string;
+          } = {
+            id: _chatUser.getStream_id,
+            name: activeProfile.name ?? activeProfile.id,
+            image: activeProfile.avatar
+              ? process.env.NEXT_PUBLIC_PINATA_URL + activeProfile.avatar
+              : "https://juno-nft.marbledao.finance" + default_image,
+          };
+          setchatCurrentUserProfile(_chatCurrentUserProfile);
+          setChatUser(_chatUser);
+          setChatOtherUser(_chatUser2);
+        }
+      }
     })();
   }, [id]);
   const handleSetHash = async (e) => {
@@ -196,6 +243,26 @@ export default function Home() {
                 </Card>
               )}
             </Stack>
+
+            {address &&
+              address !== id &&
+              chatCurrentUserProfile?.id &&
+              chatUser?.id &&
+              chatOtherUser?.id && (
+                <IconButton2Wrapper>
+
+                  <ChatModal
+                    currentUserToConnect={chatCurrentUserProfile}
+                    chatUser={chatUser}
+                    otherUser={chatOtherUser}
+                    hideOpenButton={false}
+                    showRemoveFilterButton={true}
+                    IsOpenOutSide={null}
+                    OnCloseOutSide={null}
+                  />
+                </IconButton2Wrapper>
+              )}
+
             {address === id && (
               <IconButtonWrapper>
                 <EditProfileModal

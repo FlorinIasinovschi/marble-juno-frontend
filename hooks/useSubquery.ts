@@ -60,7 +60,6 @@ const useSubquery = () => {
             },
           },
         } = await axios.post(SUBQUERY_URL, { query });
-        console.log("result: ", nodes);
         return nodes.map((_node) => _node.nftInfo);
       }
     },
@@ -387,6 +386,59 @@ const useSubquery = () => {
     },
     []
   );
+  const getSpecialNftInfo = useCallback(async (id) => {
+    const query = `query {
+      nftEntities(filter:{id: {equalTo:"${id}"}}) {
+        nodes{
+          owner
+          imageUrl
+          collection {
+            name
+            uri
+          }
+        }
+      }
+    }`;
+    const {
+      data: {
+        data: {
+          nftEntities: { nodes },
+        },
+      },
+    } = await axios.post(SUBQUERY_URL, { query });
+    return nodes[0];
+  }, []);
+  const fetchCollectionsById = useCallback(async (ids) => {
+    const query = `query {
+      collectionEntities(filter: {collectionId: {in: ["1"]}}) {
+        nodes {
+          name
+          category
+          creator
+          uri
+          collectionId
+          nftEntitiesByCollectionId(first: 3, orderBy:CREATED_TIME_DESC) {
+            nodes {
+              id
+              name
+              owner
+              vrUri
+              arUri
+              imageUrl
+            }
+          }
+        }
+      }
+    }`;
+    const {
+      data: {
+        data: {
+          collectionEntities: { nodes },
+        },
+      },
+    } = await axios.post(SUBQUERY_URL, { query });
+    return nodes;
+  }, []);
   return {
     getAllNfts,
     getAllCollections,
@@ -395,6 +447,8 @@ const useSubquery = () => {
     getCreatedNfts,
     getCreatedNftCounts,
     fetchOwnedCollections,
+    getSpecialNftInfo,
+    fetchCollectionsById,
   };
 };
 

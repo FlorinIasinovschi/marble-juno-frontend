@@ -9,8 +9,8 @@ export const StyledWrapper = styled.div`
   border-bottom: 1px solid #363b4e;
   background: rgba(8, 12, 28, 0.6);
   backdrop-filter: blur(20px);
-  position: fixed;
-  top: 0;
+  position: sticky;
+  top: 40px;
   width: 100%;
   z-index: 100;
   justify-content: space-between;
@@ -31,6 +31,8 @@ export const StyledLink = styled.div`
   margin: 0 40px;
   display: flex;
   align-items: center;
+  color: white;
+  text-decoration: none;
   @media (max-width: 1550px) {
     margin: 0 20px;
   }
@@ -48,9 +50,18 @@ export const StyledDivForLogo = styled.div`
       width: 150px;
     }
   }
-  @media (max-width: 850px) {
+  @media (max-width: 767px) {
     display: none;
   }
+`;
+
+export const StyledDivForLogoMobile = styled.div`
+  align-items: center;
+  margin-right: 40px;
+  img {
+    width: 200px;
+  }
+  padding-top: 30px;
 `;
 
 export const CreateButton = styled.div`
@@ -131,4 +142,37 @@ export const AddressWrapper = styled(SecondGradientBackground)`
   }
   padding: 10px;
   align-items: center;
+`;
+export const BadgeWrapper = styled.div`
+  position: sticky;
+  top: 0;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(45deg, #eb5d47 0%, #a933b2 50%, #a4f9ff 100%);
+  box-shadow: 0px 0px 40px rgba(0, 0, 0, 0.6);
+  width: 100%;
+  z-index: 100;
+  font-family: Mulish;
+  span {
+    font-weight: bold;
+    font-family: Mulish;
+  }
+  div {
+    background: white;
+    border-radius: 8px;
+    height: 26px;
+    color: black;
+    font-family: Mulish;
+    padding-inline: 5px;
+    margin-inline: 20px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+`;
+
+export const MobileChatAndUserContainer = styled.div`
+  position: relative;
+  width: 100%;
 `;

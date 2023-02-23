@@ -1,56 +1,36 @@
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import styled from "styled-components";
-import { Stack, Text, HStack } from "@chakra-ui/react";
-import { RoundedIconComponent } from "components/RoundedIcon";
+import { HStack, Stack } from "@chakra-ui/react";
 import Image from "components/Img";
-import {
-  CW721,
-  Factory,
-  useSdk,
-  Marketplace,
-  getRealTokenAmount,
-  Marble,
-} from "services/nft";
+import { RoundedIconComponent } from "components/RoundedIcon";
+import useSubquery from "hooks/useSubquery";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useSdk } from "services/nft";
+import styled from "styled-components";
 import { GradientBackground, SecondGradientBackground } from "styles/styles";
 import {
   PINATA_PRIMARY_IMAGE_SIZE,
   PINATA_SECONDARY_IMAGE_SIZE,
+  PINATA_URL,
 } from "util/constants";
-
-const PUBLIC_MARKETPLACE = process.env.NEXT_PUBLIC_MARKETPLACE || "";
-const PUBLIC_NFTSALE_CONTRACT = process.env.NEXT_PUBLIC_NFTSALE_CONTRACT || "";
 
 const SelectedNFT = () => {
   const { client } = useSdk();
   const [showData, setShowData] = useState<any>({});
+  const { getSpecialNftInfo } = useSubquery();
   useEffect(() => {
     (async () => {
-      if (!client) return;
-      const factoryContract = Factory().use(client);
-      let collection = await factoryContract.collection("3");
-      console.log("collecti9on: ", collection);
-      const marbleContract = Marble(PUBLIC_NFTSALE_CONTRACT).use(client);
-      // const contractConfig = await marbleContract.getConfig();
-      let ipfs_collection = await fetch(
-        process.env.NEXT_PUBLIC_PINATA_URL + collection.uri
+      const selectedNft = await getSpecialNftInfo(
+        "juno14kd9vs4s6m2n3kd00khsk6w93sve0sq23yglkpsds0fmep4xfsqqermgya:1"
       );
-      let res_collection = await ipfs_collection.json();
-      console.log("rescollection: ", res_collection);
-      const cw721Contract = CW721(collection.address).use(client);
-      let nftInfo = await cw721Contract.allNftInfo("4");
-      console.log("nftInfo: ", nftInfo);
+      if (!selectedNft) return;
       const show_data = {
-        creator: nftInfo.access.owner,
+        creator: selectedNft.owner,
         collection_logo:
-          process.env.NEXT_PUBLIC_PINATA_URL +
-          res_collection.logo +
+          PINATA_URL +
+          selectedNft.collection.name +
           PINATA_SECONDARY_IMAGE_SIZE,
-        collection_name: collection.name,
-        nft_uri:
-          process.env.NEXT_PUBLIC_PINATA_URL +
-          nftInfo.info.extension.image_url +
-          PINATA_PRIMARY_IMAGE_SIZE,
+        collection_name: selectedNft.collection.name,
+        nft_uri: PINATA_URL + selectedNft.imageUrl + PINATA_PRIMARY_IMAGE_SIZE,
         // price: (Number(contractConfig.price) / 1000000).toFixed(2),
       };
       setShowData(show_data);

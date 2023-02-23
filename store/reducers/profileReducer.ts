@@ -1,7 +1,7 @@
 import { PROFILE_STATUS } from "../types";
 
 const initialState = {
-  profile_status: [],
+  profile_status: {},
 };
 
 const profileReducer = (state = initialState, action) => {

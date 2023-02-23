@@ -49,44 +49,27 @@ export const PINATA_PRIMARY_IMAGE_SIZE =
   process.env.NEXT_PUBLIC_PINATA_PRIMARY_IMAGE_SIZE;
 export const PINATA_SECONDARY_IMAGE_SIZE =
   process.env.NEXT_PUBLIC_PINATA_SECONDARY_IMAGE_SIZE;
+export const PINATA_URL = process.env.NEXT_PUBLIC_PINATA_URL;
 export const NUM_PER_PAGE = 12;
 export const FACTORY_ADDRESS =
-  "juno1yy38kftj053myjuznf8x89zhgsu4lse6l2tug0d7wl9efhunldtqn47ej3";
+  "juno19m5duxnjrz9s3857xmefrmr7cagqmdl93fcjy2zt2zjc2fmzj99sueqdl0";
 export const MARKETPLACE_ADDRESS =
-  "juno1k799zl0wt7wkuuxnwgeuvatj4ljsqnk0zm4s8hjmkdvx23eayhlsn3pwc0";
-export const SUBQUERY_URL = "https://api.subquery.network/sq/kdbvier/test";
+  "juno1pc8uu8vzccuwgth3jm6n47hwxelg4dkvc8322q3pz790g9vgnftsxg72fq";
+export const SUBQUERY_URL =
+  "https://api.subquery.network/sq/rafleberry/marble-nft";
+
 export const categories = [
   {
     value: "Digital",
     label: "Digital",
   },
   {
-    value: "Physical",
-    label: "Physical",
+    value: "Community",
+    label: "Community",
   },
   {
-    value: "Music",
-    label: "Music",
-  },
-  {
-    value: "Painting",
-    label: "Painting",
-  },
-  {
-    value: "Videos",
-    label: "Videos",
-  },
-  {
-    value: "Photography",
-    label: "Photography",
-  },
-  {
-    value: "Sports",
-    label: "Sports",
-  },
-  {
-    value: "Utility",
-    label: "Utility",
+    value: "Phygital",
+    label: "Phygital",
   },
 ];
 export const SORT_INFO = {

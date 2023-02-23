@@ -1,31 +1,29 @@
 import { LinkBox, Spinner } from "@chakra-ui/react";
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import DropDownButton from "components/DrowdownButton";
 import { NftCard } from "components/NFT";
+import useSubquery from "hooks/useSubquery";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { useSelector } from "react-redux";
 import {
-  Marketplace,
-  CW721,
   getFileTypeFromURL,
   getRealTokenAmount,
-  Factory,
+  Marketplace,
   PaymentToken,
   useSdk,
 } from "services/nft";
-import { MARKETPLACE_ADDRESS, SORT_INFO } from "util/constants";
-import useSubquery from "hooks/useSubquery";
+import { MARKETPLACE_ADDRESS, PINATA_URL, SORT_INFO } from "util/constants";
 import {
   Container,
+  CountWrapper,
   ExploreWrapper,
-  FilterSortWrapper,
   Filter,
   FilterCard,
-  CountWrapper,
+  FilterSortWrapper,
 } from "./styled";
 
-const Explore = ({ filter }) => {
+const Explore = () => {
   const { client } = useSdk();
   const { getAllNfts } = useSubquery();
   const { countInfo } = useSelector((state: any) => state.uiData);
@@ -35,6 +33,7 @@ const Explore = ({ filter }) => {
   const [page, setPage] = useState(0);
   const [sort, setSort] = useState(0);
   const [reloadCount, setReloadCount] = useState(0);
+  const [filter, setFilter] = useState("all");
   const getNfts = async (limit = 12) => {
     let paymentTokensAddress = [];
     if (!paymentTokens) return;
@@ -55,21 +54,17 @@ const Explore = ({ filter }) => {
         let res_nft: any = {};
         const token_id = _nft.id.split(":")[1];
         const nft_address = _nft.id.split(":")[0];
-        try {
-          const ipfs_collection = await fetch(
-            process.env.NEXT_PUBLIC_PINATA_URL + _nft.collection.uri
-          );
+        if (_nft.collection.uri) {
+          const ipfs_collection = await fetch(PINATA_URL + _nft.collection.uri);
           res_collection = await ipfs_collection.json();
-        } catch (err) {}
-        res_nft.image = process.env.NEXT_PUBLIC_PINATA_URL + _nft.imageUrl;
+        }
+        res_nft.image = PINATA_URL + _nft.imageUrl;
         res_nft.tokenId = token_id;
         res_nft.type = "image";
         res_nft.owner = _nft.owner;
         res_nft.name = _nft.name;
         try {
-          const nft_type = await getFileTypeFromURL(
-            process.env.NEXT_PUBLIC_PINATA_URL + _nft.imageUrl
-          );
+          const nft_type = await getFileTypeFromURL(PINATA_URL + _nft.imageUrl);
           res_nft.type = nft_type.fileType;
         } catch {}
         try {
@@ -106,6 +101,7 @@ const Explore = ({ filter }) => {
         };
       })
     );
+    console.log("nftData: ", nftData);
     setLoadedNfts(loadedNfts.concat(nftData));
     setPage(page + 1);
   };
@@ -128,11 +124,13 @@ const Explore = ({ filter }) => {
     })();
   }, [paymentTokens, sort, reloadCount]);
   useEffect(() => {
+    setHasMore(true);
     setPage(0);
     setLoadedNfts([]);
     setReloadCount(reloadCount + 1);
   }, [filter]);
   const handleSortChange = async (e) => {
+    setHasMore(true);
     setSort(e);
     setPage(0);
     setLoadedNfts([]);
@@ -145,30 +143,34 @@ const Explore = ({ filter }) => {
     <ExploreWrapper>
       <FilterSortWrapper>
         <Filter>
-          <Link href="/explore/nfts" passHref>
-            <FilterCard isActive={filter == "all"}>
-              <CountWrapper>{countInfo.nft}</CountWrapper>
-              All
-            </FilterCard>
-          </Link>
-          <Link href="/explore/nfts/fixed" passHref>
-            <FilterCard isActive={filter == "fixed"}>
-              <CountWrapper>{countInfo.fixed}</CountWrapper>
-              Buy Now
-            </FilterCard>
-          </Link>
-          <Link href="/explore/nfts/auction" passHref>
-            <FilterCard isActive={filter == "auction"}>
-              <CountWrapper>{countInfo.auction}</CountWrapper>
-              Live Auction
-            </FilterCard>
-          </Link>
-          <Link href="/explore/nfts/offer" passHref>
-            <FilterCard isActive={filter == "offer"}>
-              <CountWrapper>{countInfo.offer}</CountWrapper>
-              Active Offers
-            </FilterCard>
-          </Link>
+          <FilterCard
+            isActive={filter == "all"}
+            onClick={() => setFilter("all")}
+          >
+            <CountWrapper>{countInfo.nft}</CountWrapper>
+            All
+          </FilterCard>
+          <FilterCard
+            isActive={filter == "fixed"}
+            onClick={() => setFilter("fixed")}
+          >
+            <CountWrapper>{countInfo.fixed}</CountWrapper>
+            Buy Now
+          </FilterCard>
+          <FilterCard
+            isActive={filter == "auction"}
+            onClick={() => setFilter("auction")}
+          >
+            <CountWrapper>{countInfo.auction}</CountWrapper>
+            Live Auction
+          </FilterCard>
+          <FilterCard
+            isActive={filter == "offer"}
+            onClick={() => setFilter("offer")}
+          >
+            <CountWrapper>{countInfo.offer}</CountWrapper>
+            Active Offers
+          </FilterCard>
         </Filter>
         <DropDownButton
           menuList={SORT_INFO[filter]}
@@ -176,46 +178,44 @@ const Explore = ({ filter }) => {
           current={SORT_INFO[filter][sort]}
         />
       </FilterSortWrapper>
-      {loadedNfts.length > 0 && (
-        <InfiniteScroll
-          dataLength={loadedNfts.length}
-          next={getMoreNfts}
-          hasMore={hasMore}
-          loader={
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                height: "100%",
-                padding: "20px",
-              }}
+      <InfiniteScroll
+        dataLength={loadedNfts.length}
+        next={getMoreNfts}
+        hasMore={hasMore}
+        loader={
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%",
+              padding: "20px",
+            }}
+          >
+            <Spinner size="xl" />
+          </div>
+        }
+        endMessage={<h4></h4>}
+      >
+        <Container>
+          {loadedNfts.map((nft, index) => (
+            <Link
+              href={`/nft/${nft.collectionInfo.collectionId}/${nft.nftInfo.tokenId}`}
+              passHref
+              key={index}
             >
-              <Spinner size="xl" />
-            </div>
-          }
-          endMessage={<h4></h4>}
-        >
-          <Container>
-            {loadedNfts.map((nft, index) => (
-              <Link
-                href={`/nft/${nft.collectionInfo.collectionId}/${nft.nftInfo.tokenId}`}
-                passHref
-                key={index}
-              >
-                <LinkBox as="picture">
-                  <NftCard
-                    nft={nft.nftInfo}
-                    collection={nft.collectionInfo}
-                    id=""
-                  />
-                </LinkBox>
-              </Link>
-            ))}
-          </Container>
-        </InfiniteScroll>
-      )}
+              <LinkBox as="picture">
+                <NftCard
+                  nft={nft.nftInfo}
+                  collection={nft.collectionInfo}
+                  id=""
+                />
+              </LinkBox>
+            </Link>
+          ))}
+        </Container>
+      </InfiniteScroll>
     </ExploreWrapper>
   );
 };
