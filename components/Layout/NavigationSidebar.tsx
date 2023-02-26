@@ -67,8 +67,8 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
        * Alert if clicked on outside of element
        */
       function handleClickOutside(event) {
-        console.log(event);
-        console.log(ref.current);
+        //console.log(event);
+        //console.log(ref.current);
         if (
           ref.current &&
           !ref.current.contains(event.target) &&
