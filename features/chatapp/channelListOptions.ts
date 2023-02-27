@@ -11,8 +11,8 @@ export const getChannelListOptions = (
   user2: string | undefined
 ) => {
   //console.log('getChannelListOptions');
-  console.log(user);
-  console.log(user2);
+  //console.log(user);
+  //console.log(user2);
 
   let filterObj;
   if(user2 && user2!=''){
