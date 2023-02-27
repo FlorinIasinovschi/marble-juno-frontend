@@ -43,7 +43,7 @@ const OnSaleModal = ({ nft, collection, handleSale, paymentTokens }) => {
   const IconOption = (props) => (
     <Option {...props}>
       <HStack>
-        <img src={props.data.logoUri} alt="token" style={{ width: "30px" }} />
+        <img src={props.data.logoUri} style={{ width: "30px" }} alt="img" />
         <Text>{props.data.symbol}</Text>
       </HStack>
     </Option>

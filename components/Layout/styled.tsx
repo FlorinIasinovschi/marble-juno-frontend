@@ -19,28 +19,56 @@ export const StyledWrapper = styled.div`
     height: 80px;
   }
 `;
+export const BadgeWrapper = styled.div`
+  position: sticky;
+  top: 0;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(45deg, #eb5d47 0%, #a933b2 50%, #a4f9ff 100%);
+  box-shadow: 0px 0px 40px rgba(0, 0, 0, 0.6);
+  width: 100%;
+  z-index: 100;
+  font-family: Mulish;
+  span {
+    font-weight: bold;
+    font-family: Mulish;
+  }
+  div {
+    background: white;
+    border-radius: 8px;
+    height: 26px;
+    color: black;
+    font-family: Mulish;
+    padding-inline: 5px;
+    margin-inline: 20px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  padding-inline: 10px;
+`;
 export const StyledListForLinks = styled.div`
   display: flex;
   row-gap: 10px;
   flex-direction: row;
   align-items: center;
   height: 100%;
+  column-gap: 40px;
 `;
 export const StyledLink = styled.div`
   font-size: 16px;
-  margin: 0 40px;
   display: flex;
   align-items: center;
-  color: white;
-  text-decoration: none;
-  @media (max-width: 1550px) {
-    margin: 0 20px;
+
+  a {
+    display: flex;
+    align-items: center;
   }
 `;
 
 export const StyledDivForLogo = styled.div`
   align-items: center;
-  margin-right: 40px;
   img {
     width: 200px;
   }
@@ -73,7 +101,6 @@ export const CreateButton = styled.div`
   color: black;
   width: 130px;
   text-align: center;
-  margin-left: 25px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -143,33 +170,38 @@ export const AddressWrapper = styled(SecondGradientBackground)`
   padding: 10px;
   align-items: center;
 `;
-export const BadgeWrapper = styled.div`
-  position: sticky;
-  top: 0;
-  height: 40px;
+
+const loyaltyButtonColor = {
+  basic: "#434960",
+  silver: "#A2A3A8",
+  gold: "#B1973B",
+  platinum: "#608B97",
+};
+
+export const LoyaltyButton = styled.div<{ id: string }>`
+  background: ${({ id }) => loyaltyButtonColor[id]};
+  border-radius: 16px;
+  cursor: pointer;
+  text-align: center;
+  margin-left: 25px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(45deg, #eb5d47 0%, #a933b2 50%, #a4f9ff 100%);
-  box-shadow: 0px 0px 40px rgba(0, 0, 0, 0.6);
-  width: 100%;
-  z-index: 100;
-  font-family: Mulish;
-  span {
-    font-weight: bold;
-    font-family: Mulish;
+  font-size: 16px;
+  height: 57px;
+  padding-inline: 10px;
+  @media (max-width: 1550px) {
+    border-radius: 10px;
+    font-size: 12px;
+    height: 37px;
   }
-  div {
-    background: white;
-    border-radius: 8px;
-    height: 26px;
-    color: black;
-    font-family: Mulish;
-    padding-inline: 5px;
-    margin-inline: 20px;
-    font-weight: bold;
-    cursor: pointer;
+  @media (max-width: 650px) {
+    height: 36px;
+    font-size: 12px;
+    border-radius: 14px;
+    margin-left: 0px;
   }
+  border: 1px solid rgba(255, 255, 255, 0.2);
 `;
 
 export const MobileChatAndUserContainer = styled.div`

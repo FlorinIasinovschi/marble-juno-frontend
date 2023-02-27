@@ -38,7 +38,6 @@ const NFT = () => {
     setMaxToken(totalNFTs);
     setSoldCnt(594 + contractConfig.sold_index + 1);
     // setRoyalties(contractConfig.royalty)
-    console.log("cw721:", contractConfig.cw721_address);
     const contract = CW721(contractConfig.cw721_address).use(client);
     const numTokens = await contract.numTokens();
 

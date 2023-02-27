@@ -77,9 +77,9 @@ export const AppLayout = ({
         </StyledFooter>
         <ChakraProvider>
           <Modal
-            blockScrollOnMount={false}
+            blockScrollOnMount={true}
             isOpen={isOpen}
-            onClose={onClose}
+            onClose={() => {}}
             isCentered
           >
             <ModalOverlay
@@ -87,50 +87,80 @@ export const AppLayout = ({
               bg="rgba(0, 0, 0, 0.34)"
             />
             <ModalContainer>
-              <StyledCloseIcon onClick={onClose} offset={20} size="40px" />
-              {/* <ModalCloseButton /> */}
+              <a href="https://google.com">
+                <StyledCloseIcon offset={20} size="40px" />
+              </a>
               <Card>
-                <Stack spacing="70px">
-                  <Stack>
-                    <HStack>
-                      <Checkbox
-                        checked={original}
-                        onChange={(e) => {
-                          setOriginal(!original);
-                        }}
-                      />
-                      <h3>Be Original</h3>
-                    </HStack>
+                <CardContent>
+                  <h1>Accepting Terms of Service and Privacy Policy </h1>
+                  <HStack alignItems="start">
+                    <span>1.</span>
                     <Text>
-                      Lorem Ipsum is simply dummy text of the printing and
-                      typesetting industry.{" "}
+                      Illegal Content: This includes anything that infringes on
+                      someone&apos;s intellectual property rights, such as using
+                      images, videos, or music without permission, or selling
+                      counterfeit products.
                     </Text>
-                  </Stack>
-                  <Stack>
-                    <HStack>
-                      <Checkbox
-                        checked={creative}
-                        onChange={(e) => setCreative(!creative)}
-                      />
-                      <h3>Be Creative And Have Fun</h3>
-                    </HStack>
+                  </HStack>
+                  <HStack alignItems="start">
+                    <span>2.</span>
                     <Text>
-                      Lorem Ipsum is simply dummy text of the printing and
-                      typesetting industry.{" "}
+                      Harmful Content: This includes content that promotes hate
+                      speech, discrimination, or violence against a specific
+                      group of people or individual. It also includes content
+                      that promotes self-harm, dangerous behaviors, or illegal
+                      activities.
                     </Text>
-                  </Stack>
-                </Stack>
+                  </HStack>
+                  <HStack alignItems="start">
+                    <span>3.</span>
+                    <Text>
+                      Offensive Content: This includes content that is
+                      considered vulgar, obscene, or offensive to a specific
+                      group of people, such as sexually explicit content,
+                      nudity, or explicit language.
+                    </Text>
+                  </HStack>
+                  <HStack alignItems="start">
+                    <span>4.</span>
+                    <Text>
+                      Inappropriate Content: This includes content that is not
+                      suitable for minors or children, such as gambling or
+                      adult-related content.
+                    </Text>
+                  </HStack>
+                  <HStack alignItems="start">
+                    <span>5.</span>
+                    <Text>
+                      Misleading Content: This includes content that is
+                      misleading, false, or inaccurate, such as selling NFTs
+                      that do not exist or misrepresenting the value or
+                      ownership of the NFT.
+                    </Text>
+                  </HStack>
+                </CardContent>
+
                 <Divider />
-                <Stack spacing="50px" maxWidth="600px" margin="0 auto">
-                  <Stack>
-                    <p
-                      style={{
-                        visibility: error ? "visible" : "hidden",
-                        color: "red",
+                <CheckboxContent>
+                  <HStack alignItems="center">
+                    <Checkbox
+                      checked={original}
+                      onChange={(e) => {
+                        setOriginal(!original);
                       }}
-                    >
-                      Please select all conditions
-                    </p>
+                      size="20px"
+                    />
+                    <h3>I have read and agree to the Privacy Policy.</h3>
+                  </HStack>
+                  <HStack alignItems="center">
+                    <Checkbox
+                      checked={creative}
+                      onChange={(e) => setCreative(!creative)}
+                      size="20px"
+                    />
+                    <h3>I have read and agree to the Terms and Conditions.</h3>
+                  </HStack>
+                  <Stack width="100%" margin="0 auto">
                     <Button
                       className="btn-buy btn-default"
                       css={{
@@ -145,8 +175,17 @@ export const AppLayout = ({
                     >
                       I Agree
                     </Button>
+                    <p
+                      style={{
+                        visibility: error ? "visible" : "hidden",
+                        color: "red",
+                        fontFamily: "Mulish",
+                      }}
+                    >
+                      Please select all conditions
+                    </p>
                   </Stack>
-                </Stack>
+                </CheckboxContent>
               </Card>
             </ModalContainer>
           </Modal>
@@ -155,34 +194,21 @@ export const AppLayout = ({
     </Container>
   );
 };
-
 const Divider = styled.div`
   height: 0px;
   border: 1px solid #363b4e;
-  margin: 60px 0;
+  margin: 20px 0;
 `;
 const Card = styled.div<{ fullWidth: boolean }>`
   /* &:before {
     opacity: 0.3;
     border-radius: 30px;
   } */
-  padding: 40px;
+  padding: 40px 40px 10px 40px;
   max-width: 1000px;
   width: 100%;
   @media (max-width: 1024px) {
     padding: 20px;
-  }
-`;
-const ModalContainer = styled(ModalContent)`
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  background: rgba(255, 255, 255, 0.06) !important;
-  border-radius: 30px !important;
-  padding: 30px;
-  color: white !important;
-  max-width: 900px !important;
-  @media (max-width: 1000px) {
-    max-width: 90vw !important;
-    padding: 5px;
   }
 `;
 
@@ -209,6 +235,8 @@ const StyledContainer = styled.div<{ hasBanner: boolean }>`
   padding: ${({ hasBanner }) => (hasBanner ? "0" : "40px")};
   ${({ hasBanner }) => !hasBanner && "max-width: 1700px"};
   width: 100%;
+  @media (max-width: 1600px) {
+  }
   @media (max-width: 1024px) {
     padding: 10px;
   }
@@ -233,4 +261,39 @@ const StyledFooterWrapper = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+`;
+const ModalContainer = styled(ModalContent)`
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-radius: 30px !important;
+  padding: 30px;
+  color: white !important;
+  max-width: 900px !important;
+  @media (max-width: 1000px) {
+    max-width: 90vw !important;
+    padding: 5px;
+  }
+`;
+const CardContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  row-gap: 20px;
+  h1 {
+    text-align: center;
+    font-size: 30px;
+    font-weight: 500;
+  }
+  span {
+    width: 20px;
+  }
+  p {
+    font-family: Mulish;
+    width: fit-content;
+    font-size: 16px;
+  }
+`;
+const CheckboxContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  row-gap: 20px;
 `;

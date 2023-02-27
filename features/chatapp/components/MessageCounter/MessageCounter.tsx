@@ -1,18 +1,16 @@
-import { EmailIcon } from '@chakra-ui/icons';
-import { Badge, Box, useDisclosure } from '@chakra-ui/react';
-import { addUserToMurbleChannel, getChatUser } from 'hooks/useChat';
-import { getProfileInfo } from 'hooks/useProfile';
-import { redirect } from 'next/dist/next-server/server/api-utils';
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { useRecoilValue } from 'recoil';
-import { walletState } from 'state/atoms/walletAtoms';
-import { StreamChat } from 'stream-chat';
-import { default_image } from 'util/constants';
-import ChatModal from '../ChatModal/ChatModal';
+import { EmailIcon } from "@chakra-ui/icons";
+import { Badge, Box, useDisclosure } from "@chakra-ui/react";
+import { addUserToMurbleChannel, getChatUser } from "hooks/useChat";
+import { getProfileInfo } from "hooks/useProfile";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { useRecoilValue } from "recoil";
+import { walletState } from "state/atoms/walletAtoms";
+import { StreamChat } from "stream-chat";
+import { default_image } from "util/constants";
+import ChatModal from "../ChatModal/ChatModal";
 
-export const MessageCounter =  ()=> {
-
+export const MessageCounter = () => {
   const profile = useSelector((state: any) => state.profileData.profile_status);
   const { address, client: signingClient } = useRecoilValue(walletState);
   const [totalUnreadCount, setChatUserUnreadCount] = useState(0);
@@ -20,17 +18,14 @@ export const MessageCounter =  ()=> {
   const [chatCurrentUserProfile, setchatCurrentUserProfile] = useState<any>({});
   const [chatUser, setChatUser] = useState<any>({});
   const apiKey = process.env.NEXT_PUBLIC_STREAM_KEY;
-  const { isOpen,onToggle, onClose } = useDisclosure();
-  
+  const { isOpen, onToggle, onClose } = useDisclosure();
+
   useEffect(() => {
-    (async () => {     
+    (async () => {
+      if (!address) return;
 
-      if(!address)
-        return;
-
-      let _chatUser=await getChatUser(address);
-      if(!_chatUser?.id)
-        return;
+      let _chatUser = await getChatUser(address);
+      if (!_chatUser?.id) return;
 
       // client-side you initialize the Chat client with your API key
       const chatClient = StreamChat.getInstance(apiKey, {
@@ -38,61 +33,79 @@ export const MessageCounter =  ()=> {
       });
 
       const activeProfile = await getProfileInfo(address);
-      if(activeProfile?.id){
-
+      if (activeProfile?.id) {
         await addUserToMurbleChannel(address);
 
-        const _chatCurrentUserProfile: { id: string; name?: string; image?: string } = {
+        const _chatCurrentUserProfile: {
+          id: string;
+          name?: string;
+          image?: string;
+        } = {
           id: _chatUser.getStream_id,
           name: activeProfile.name ?? activeProfile.id,
-          image:activeProfile.avatar? process.env.NEXT_PUBLIC_PINATA_URL + activeProfile.avatar: 'https://juno-nft.marbledao.finance'+ default_image,
+          image: activeProfile.avatar
+            ? process.env.NEXT_PUBLIC_PINATA_URL + activeProfile.avatar
+            : "https://juno-nft.marbledao.finance" + default_image,
         };
-        const _user=await chatClient.connectUser(_chatCurrentUserProfile,_chatUser.token);    
-  
+        const _user = await chatClient.connectUser(
+          _chatCurrentUserProfile,
+          _chatUser.token
+        );
+
         setchatCurrentUserProfile(_chatCurrentUserProfile);
         setChatUser(_chatUser);
-  
-        if(_user && _user?.me) 
+
+        if (_user && _user?.me)
           setChatUserUnreadCount(_user?.me.total_unread_count);
-  
+
         chatClient.on((event) => {
-              if (event.total_unread_count !== undefined) {
-                setChatUserUnreadCount(event.total_unread_count);
-                console.log(event.total_unread_count);
-              }
+          if (event.total_unread_count !== undefined) {
+            setChatUserUnreadCount(event.total_unread_count);
+            console.log(event.total_unread_count);
+          }
         });
       }
     })();
   }, []);
 
-  const openChatModal  = async () => {
+  const openChatModal = async () => {
     setshowChatModal(true);
     onToggle();
   };
 
-  return(
+  return (
     <>
-    {Boolean(address) && (
-      <Box onClick={openChatModal} style={{position:'relative'}} ml='5' mr='2'>
-      <EmailIcon boxSize={6} color="white"/>
-        <Badge style={{position: 'absolute',borderRadius: '10px', fontSize: '10px;',right:'-12px',top:'-2px',lineHeight:'15px' }} variant='solid' colorScheme='red'>
+      {Boolean(address) && (
+        <Box onClick={openChatModal} style={{ position: "relative" }}>
+          <EmailIcon boxSize={6} color="white" cursor="pointer" />
+          <Badge
+            style={{
+              position: "absolute",
+              borderRadius: "10px",
+              fontSize: "10px;",
+              right: "-12px",
+              top: "-2px",
+              lineHeight: "15px",
+            }}
+            variant="solid"
+            colorScheme="red"
+          >
             {totalUnreadCount}
-        </Badge>
-    </Box>
-    )}
+          </Badge>
+        </Box>
+      )}
 
-
-    {showChatModal && (
+      {showChatModal && (
         <ChatModal
-        currentUserToConnect={chatCurrentUserProfile}
-        chatUser={chatUser}
-        otherUser={null}
-        hideOpenButton={true}
-        showRemoveFilterButton={false}
-        IsOpenOutSide={isOpen}
-        OnCloseOutSide={onClose}
-      />
-    )}
+          currentUserToConnect={chatCurrentUserProfile}
+          chatUser={chatUser}
+          otherUser={null}
+          hideOpenButton={true}
+          showRemoveFilterButton={false}
+          IsOpenOutSide={isOpen}
+          OnCloseOutSide={onClose}
+        />
+      )}
     </>
   );
 };

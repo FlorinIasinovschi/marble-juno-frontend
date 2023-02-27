@@ -232,7 +232,6 @@ export const CollectionPage = ({ id }: CollectionProps) => {
                 address={collectionInfo.creator}
               />
             </ProfileInfoItem>
-
             <ProfileInfoItem>
               <ProfileInfoTitle>Collection Of</ProfileInfoTitle>
               <ProfileInfoContent>{num} NFTs</ProfileInfoContent>

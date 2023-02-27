@@ -20,7 +20,7 @@ const SelectedNFT = () => {
   useEffect(() => {
     (async () => {
       const selectedNft = await getSpecialNftInfo(
-        "juno14kd9vs4s6m2n3kd00khsk6w93sve0sq23yglkpsds0fmep4xfsqqermgya:1"
+        "juno1xvj69dfxp2fyfv2uhl2fd6ng8kr3hheevkmmhtlugdvc6f0gercs8mjf79:1"
       );
       if (!selectedNft) return;
       const show_data = {

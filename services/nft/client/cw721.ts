@@ -98,7 +98,7 @@ export interface CW721Instance {
     owner: string,
     startAfter?: string,
     limit?: number
-  ) => Promise<TokensResponse>;
+  ) => Promise<TokensResponse[]>;
   allTokens: (startAfter?: string, limit?: number) => Promise<TokensResponse[]>;
   minter: () => Promise<any>;
   contractInfo: () => Promise<ContractInfoResponse>;
@@ -168,11 +168,11 @@ export const CW721 = (contractAddress: string): CW721Contract => {
       owner: string,
       startAfter?: string,
       limit?: number
-    ): Promise<TokensResponse> => {
+    ): Promise<TokensResponse[]> => {
       const result = await client.queryContractSmart(contractAddress, {
         tokens: { owner: owner, start_after: startAfter, limit: limit },
       });
-      return result;
+      return result.tokens;
     };
 
     const allTokens = async (

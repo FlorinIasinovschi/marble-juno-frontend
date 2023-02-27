@@ -439,6 +439,27 @@ const useSubquery = () => {
     } = await axios.post(SUBQUERY_URL, { query });
     return nodes;
   }, []);
+  const fetchCollectionByAddress = useCallback(async (address) => {
+    const query = `query {
+      collectionEntities(filter: {id: {equalTo: "${address}"}}) {
+        nodes {
+          name
+          category
+          creator
+          uri
+          collectionId
+        }
+      }
+    }`;
+    const {
+      data: {
+        data: {
+          collectionEntities: { nodes },
+        },
+      },
+    } = await axios.post(SUBQUERY_URL, { query });
+    return nodes;
+  }, []);
   return {
     getAllNfts,
     getAllCollections,
@@ -449,6 +470,7 @@ const useSubquery = () => {
     fetchOwnedCollections,
     getSpecialNftInfo,
     fetchCollectionsById,
+    fetchCollectionByAddress,
   };
 };
 

@@ -7,6 +7,7 @@ import { GradientBackground } from "styles/styles";
 import { getProfileInfo } from "hooks/useProfile";
 import { getReducedAddress } from "util/conversion";
 import Image from "components/Img";
+import ARModal from "./ARModal";
 import styled from "styled-components";
 import {
   PINATA_PRIMARY_IMAGE_SIZE,
@@ -59,22 +60,9 @@ export function NftCard({ nft, collection }: any): JSX.Element {
         <Flex justifyContent="space-between">
           <NFTName>{nft.name}</NFTName>
           <HStack>
-            <IconWrapper
-              revertColor={nft.saleType === "Direct Sell"}
-              onClick={handleClick}
-            >
-              VR
-            </IconWrapper>
-            <IconWrapper
-              revertColor={nft.saleType === "Direct Sell"}
-              onClick={handleClick}
-            >
-              AR
-            </IconWrapper>
+            <img onClick={handleClick} src="/images/VR.png" alt="img" />
+            <ARModal />
           </HStack>
-          {/* <HStack>
-              <RoundedIconComponent size="34px" address={nft.owner} />
-            </HStack> */}
         </Flex>
 
         <Flex justifyContent="space-between" paddingTop="10px 0">

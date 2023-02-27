@@ -24,6 +24,7 @@ import {
 } from "services/nft";
 import { useRecoilValue } from "recoil";
 import { GradientBackground, SecondGradientBackground } from "styles/styles";
+import useSubquery from "hooks/useSubquery";
 
 const PUBLIC_STAKE_ADDRESS = process.env.NEXT_PUBLIC_STAKE_ADDRESS || "";
 interface StakeConfigType {
@@ -39,221 +40,221 @@ interface StakeConfigType {
 }
 
 export default function StakePage() {
-  // const { client } = useSdk();
-  // const [collection, setCollection] = useState<NftCollection>();
-  // const { address, client: signingClient } = useRecoilValue(walletState);
-  // const [stakeConfig, setStakeConfig] = useState<StakeConfigType>({
-  //   daily_reward: "0",
-  //   enabled: false,
-  //   cw20_address: "",
-  //   interval: 0,
-  //   lock_time: 0,
-  //   collection_address: "",
-  //   cw721_address: "",
-  //   total_supply: 0,
-  //   end_date: 0,
-  // });
-  // const [rCount, setRCount] = useState(0);
-  // const [userStakeInfo, setUserStakeInfo] = useState<UserStakeInfoType>({
-  //   address: "",
-  //   claimed_amount: "0",
-  //   unclaimed_amount: "0",
-  //   create_unstake_timestamp: 0,
-  //   token_ids: [],
-  //   last_timestamp: 0,
-  //   claimed_timestamp: 0,
-  // });
-  // const [ownedNfts, setOwnedNfts] = useState([]);
-  // useEffect(() => {
-  //   (async () => {
-  //     if (!client || !address) {
-  //       return;
-  //     }
-  //     const stakeContract = Stake(PUBLIC_STAKE_ADDRESS).use(client);
-  //     try {
-  //       const userStakeInfo = await stakeContract.getStaking(address);
-  //       console.log("userStakeInfo: ", userStakeInfo);
-  //       setUserStakeInfo(userStakeInfo);
-  //     } catch (err) {
-  //       setUserStakeInfo({
-  //         address: "",
-  //         claimed_amount: "0",
-  //         unclaimed_amount: "0",
-  //         create_unstake_timestamp: 0,
-  //         token_ids: [],
-  //         last_timestamp: 0,
-  //         claimed_timestamp: 0,
-  //       });
-  //     }
-  //     try {
-  //       const _stakeConfig = await stakeContract.getConfig();
-  //       const collectionContract = Marketplace(
-  //         _stakeConfig.collection_address
-  //       ).use(client);
-  //       const collectionConfig = await collectionContract.getConfig();
-  //       setStakeConfig({
-  //         ..._stakeConfig,
-  //         cw721_address: collectionConfig.cw721_address,
-  //       });
-  //       let res_collection: any = {};
-  //       let ipfs_collection = await fetch(
-  //         process.env.NEXT_PUBLIC_PINATA_URL + collectionConfig.uri
-  //       );
-  //       res_collection = await ipfs_collection.json();
+  const { client } = useSdk();
+  const [collection, setCollection] = useState<NftCollection>();
+  const { address, client: signingClient } = useRecoilValue(walletState);
+  const { fetchCollectionByAddress } = useSubquery();
+  const [stakeConfig, setStakeConfig] = useState<StakeConfigType>({
+    daily_reward: "0",
+    enabled: false,
+    cw20_address: "",
+    interval: 0,
+    lock_time: 0,
+    collection_address: "",
+    cw721_address: "",
+    total_supply: 0,
+    end_date: 0,
+  });
+  const [rCount, setRCount] = useState(0);
+  const [userStakeInfo, setUserStakeInfo] = useState<UserStakeInfoType>({
+    address: "",
+    claimed_amount: "0",
+    unclaimed_amount: "0",
+    create_unstake_timestamp: 0,
+    token_ids: [],
+    last_timestamp: 0,
+    claimed_timestamp: 0,
+  });
+  const [ownedNfts, setOwnedNfts] = useState([]);
+  useEffect(() => {
+    (async () => {
+      if (!client || !address) {
+        return;
+      }
+      const stakeContract = Stake(PUBLIC_STAKE_ADDRESS).use(client);
+      try {
+        const userStakeInfo = await stakeContract.getStaking(address);
+        setUserStakeInfo(userStakeInfo);
+      } catch (err) {
+        setUserStakeInfo({
+          address: "",
+          claimed_amount: "0",
+          unclaimed_amount: "0",
+          create_unstake_timestamp: 0,
+          token_ids: [],
+          last_timestamp: 0,
+          claimed_timestamp: 0,
+        });
+      }
+      try {
+        const _stakeConfig = await stakeContract.getConfig();
+        setStakeConfig({
+          ..._stakeConfig,
+          cw721_address: _stakeConfig.collection_address,
+        });
+        const [collectionInfo] = await fetchCollectionByAddress([
+          _stakeConfig.collection_address,
+        ]);
 
-  //       let collection_info: any = {};
-  //       collection_info.id = 0;
-  //       collection_info.name = res_collection.name;
-  //       collection_info.description = res_collection.description;
-  //       collection_info.image =
-  //         process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
-  //       collection_info.banner_image = res_collection.featuredImage
-  //         ? process.env.NEXT_PUBLIC_PINATA_URL + res_collection.featuredImage
-  //         : process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
-  //       collection_info.slug = res_collection.slug;
-  //       collection_info.creator = collectionConfig.owner ?? "";
-  //       collection_info.cat_ids = res_collection.category;
+        let res_collection: any = {};
+        if (collectionInfo.uri) {
+          try {
+            let ipfs_collection = await fetch(
+              process.env.NEXT_PUBLIC_PINATA_URL + collectionInfo.uri
+            );
+            res_collection = await ipfs_collection.json();
+          } catch (err) {}
+        }
 
-  //       let collection_type = await getFileTypeFromURL(
-  //         process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo
-  //       );
-  //       collection_info.type = collection_type.fileType;
+        let collection_info: any = {};
+        collection_info.name = collectionInfo.name;
+        collection_info.description = res_collection.description;
+        collection_info.image =
+          res_collection.featuredImage &&
+          process.env.NEXT_PUBLIC_PINATA_URL + res_collection.featuredImage;
 
-  //       setCollection(collection_info);
-  //     } catch (e) {
-  //       console.error(e);
-  //     }
-  //   })();
-  // }, [client, address, rCount]);
-  // useEffect(() => {
-  //   (async () => {
-  //     if (!client || !address) {
-  //       return;
-  //     }
-  //     try {
-  //       const cw721Contract = CW721(stakeConfig.cw721_address).use(client);
-  //       const tokenIdsInfo = await cw721Contract.tokens(address);
-  //       const tokenIds = tokenIdsInfo.tokens;
-  //       setOwnedNfts(tokenIds);
-  //     } catch (err) {
-  //       console.log("get ownedToekns Error: ", err);
-  //     }
-  //   })();
-  // }, [stakeConfig, client, address]);
-  // const handleStake = async () => {
-  //   try {
-  //     const selectedNum = getRandomInt(ownedNfts.length);
-  //     const cw721Contract = CW721(stakeConfig.cw721_address).useTx(
-  //       signingClient
-  //     );
-  //     let encodedMsg: string = toBase64(
-  //       new TextEncoder().encode(JSON.stringify({ stake: {} }))
-  //     );
+        collection_info.creator = collectionInfo.creator;
 
-  //     const result = await cw721Contract.sendNft(
-  //       address,
-  //       PUBLIC_STAKE_ADDRESS,
-  //       ownedNfts[selectedNum],
-  //       encodedMsg
-  //     );
-  //     toast.success(`Successfully Staked`, {
-  //       position: "top-right",
-  //       autoClose: 5000,
-  //       hideProgressBar: true,
-  //       closeOnClick: true,
-  //       pauseOnHover: true,
-  //       draggable: true,
-  //       progress: undefined,
-  //     });
-  //     setRCount(rCount + 1);
-  //   } catch (err) {}
-  // };
-  // const handleUnstake = async () => {
-  //   try {
-  //     if (
-  //       userStakeInfo.create_unstake_timestamp > 0 &&
-  //       userStakeInfo.create_unstake_timestamp + stakeConfig.lock_time >
-  //         Date.now() / 1000
-  //     ) {
-  //       return;
-  //     }
-  //     const stakeContract = Stake(PUBLIC_STAKE_ADDRESS).useTx(signingClient);
-  //     if (userStakeInfo.create_unstake_timestamp === 0) {
-  //       const unCrateUnstakeResult = await stakeContract.createUnstake(address);
-  //     } else {
-  //       const fetchUnstakeResult = await stakeContract.fetchUnstake(address);
-  //     }
-  //     toast.success(`Successfully Unstaked`, {
-  //       position: "top-right",
-  //       autoClose: 5000,
-  //       hideProgressBar: true,
-  //       closeOnClick: true,
-  //       pauseOnHover: true,
-  //       draggable: true,
-  //       progress: undefined,
-  //     });
-  //     setRCount(rCount + 1);
-  //   } catch (err) {
-  //     console.log("unstakeError: ", err);
-  //   }
-  // };
+        let collection_type = await getFileTypeFromURL(
+          process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo
+        );
+        collection_info.type = collection_type.fileType;
 
-  // const handleClaim = async () => {
-  //   const stakeContract = Stake(PUBLIC_STAKE_ADDRESS).useTx(signingClient);
-  //   try {
-  //     await stakeContract.claim(address);
-  //     setRCount(rCount + 1);
-  //     toast.success(`Successfully Claimed`, {
-  //       position: "top-right",
-  //       autoClose: 5000,
-  //       hideProgressBar: true,
-  //       closeOnClick: true,
-  //       pauseOnHover: true,
-  //       draggable: true,
-  //       progress: undefined,
-  //     });
-  //   } catch (err) {
-  //     console.log("error: ", err);
-  //     toast.error(`Insufficient funds.`, {
-  //       position: "top-right",
-  //       autoClose: 5000,
-  //       hideProgressBar: true,
-  //       closeOnClick: true,
-  //       pauseOnHover: true,
-  //       draggable: true,
-  //       progress: undefined,
-  //     });
-  //   }
-  // };
-  // const getClaimableReward = () => {
-  //   if (stakeConfig.interval === 0) return 0;
-  //   if (stakeConfig.total_supply === 0) return 0;
-  //   return convertToFixedDecimalNumber(
-  //     convertMicroDenomToDenom(userStakeInfo.unclaimed_amount, 6)
-  //   );
-  // };
-  // const getDailyRewards = () => {
-  //   if (
-  //     stakeConfig.total_supply === 0 ||
-  //     userStakeInfo.create_unstake_timestamp !== 0
-  //   )
-  //     return 0;
-  //   const dailyReward =
-  //     (Number(stakeConfig.daily_reward) * userStakeInfo.token_ids.length) /
-  //     stakeConfig.total_supply;
-  //   return convertToFixedDecimalNumber(
-  //     convertMicroDenomToDenom(dailyReward, 6)
-  //   );
-  // };
-  // const getLeftDays = () => {
-  //   if (Date.now() / 1000 > stakeConfig.end_date) {
-  //     return "Staking Finished";
-  //   }
-  //   return ((stakeConfig.end_date - Date.now() / 1000) / 86400).toFixed(0);
-  // };
+        setCollection(collection_info);
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+  }, [client, address, rCount]);
+  useEffect(() => {
+    (async () => {
+      if (!client || !address) {
+        return;
+      }
+      try {
+        const cw721Contract = CW721(stakeConfig.cw721_address).use(client);
+        const tokenIdsInfo = await cw721Contract.tokens(address, "", 100);
+        const tokenIds = tokenIdsInfo.map((_tokenInfo) => _tokenInfo.token_id);
+        setOwnedNfts(tokenIds);
+      } catch (err) {
+        console.log("get ownedToekns Error: ", err);
+      }
+    })();
+  }, [stakeConfig, client, address]);
+  const handleStake = async () => {
+    try {
+      const selectedNum = getRandomInt(ownedNfts.length);
+      const cw721Contract = CW721(stakeConfig.cw721_address).useTx(
+        signingClient
+      );
+      let encodedMsg: string = toBase64(
+        new TextEncoder().encode(JSON.stringify({ stake: {} }))
+      );
+
+      const result = await cw721Contract.sendNft(
+        address,
+        PUBLIC_STAKE_ADDRESS,
+        ownedNfts[selectedNum],
+        encodedMsg
+      );
+      toast.success(`Successfully Staked`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      setRCount(rCount + 1);
+    } catch (err) {}
+  };
+  const handleUnstake = async () => {
+    try {
+      if (
+        userStakeInfo.create_unstake_timestamp > 0 &&
+        userStakeInfo.create_unstake_timestamp + stakeConfig.lock_time >
+          Date.now() / 1000
+      ) {
+        return;
+      }
+      const stakeContract = Stake(PUBLIC_STAKE_ADDRESS).useTx(signingClient);
+      if (userStakeInfo.create_unstake_timestamp === 0) {
+        const unCrateUnstakeResult = await stakeContract.createUnstake(address);
+      } else {
+        const fetchUnstakeResult = await stakeContract.fetchUnstake(address);
+      }
+      toast.success(`Successfully Unstaked`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      setRCount(rCount + 1);
+    } catch (err) {
+      console.log("unstakeError: ", err);
+    }
+  };
+
+  const handleClaim = async () => {
+    const stakeContract = Stake(PUBLIC_STAKE_ADDRESS).useTx(signingClient);
+    try {
+      await stakeContract.claim(address);
+      setRCount(rCount + 1);
+      toast.success(`Successfully Claimed`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    } catch (err) {
+      console.log("error: ", err);
+      toast.error(`Insufficient funds.`, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+  };
+  const getClaimableReward = () => {
+    if (stakeConfig.interval === 0) return 0;
+    if (stakeConfig.total_supply === 0) return 0;
+    return convertToFixedDecimalNumber(
+      convertMicroDenomToDenom(userStakeInfo.unclaimed_amount, 6)
+    );
+  };
+  const getDailyRewards = () => {
+    if (
+      stakeConfig.total_supply === 0 ||
+      userStakeInfo.create_unstake_timestamp !== 0
+    )
+      return 0;
+    const dailyReward =
+      (Number(stakeConfig.daily_reward) * userStakeInfo.token_ids.length) /
+      stakeConfig.total_supply;
+    return convertToFixedDecimalNumber(
+      convertMicroDenomToDenom(dailyReward, 6)
+    );
+  };
+  const getLeftDays = () => {
+    if (Date.now() / 1000 > stakeConfig.end_date) {
+      return "Staking Finished";
+    }
+    return ((stakeConfig.end_date - Date.now() / 1000) / 86400).toFixed(0);
+  };
   return (
     <AppLayout fullWidth={false}>
-      {/* <Container>
+      <Container>
         <Header>NFT Staking</Header>
         {collection && (
           <StakingCardWrapper>
@@ -332,7 +333,7 @@ export default function StakePage() {
             </CollectionContent>
           </StakingCardWrapper>
         )}
-      </Container> */}
+      </Container>
     </AppLayout>
   );
 }

@@ -1,20 +1,12 @@
-import { useState, useEffect } from "react";
-import styled from "styled-components";
-import SelectedNFT from "./components/SelectedNFT";
-import Collection from "./components/Collection";
-import {
-  ChakraProvider,
-  Flex,
-  Stack,
-  HStack,
-  Text,
-  Grid,
-  Button,
-} from "@chakra-ui/react";
-import { CW721, Factory, useSdk, getFileTypeFromURL } from "services/nft";
+import { ChakraProvider, Flex, Stack } from "@chakra-ui/react";
 import useSubquery from "hooks/useSubquery";
-import { isMobile, isPC } from "util/device";
+import { useEffect, useState } from "react";
+import { useSdk } from "services/nft";
+import styled from "styled-components";
 import { SecondGradientBackground } from "styles/styles";
+import { isMobile, isPC } from "util/device";
+import Collection from "./components/Collection";
+import SelectedNFT from "./components/SelectedNFT";
 
 const Home = () => {
   const { client } = useSdk();

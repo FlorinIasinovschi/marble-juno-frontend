@@ -1,4 +1,4 @@
-import { HStack, Stack } from "@chakra-ui/react";
+import { HStack, Stack, IconButton } from "@chakra-ui/react";
 import BannerImageUpload from "components/BannerImageUpload";
 import { Button } from "components/Button";
 import { AppLayout } from "components/Layout/AppLayout";
@@ -159,6 +159,7 @@ export default function Home() {
         return <CreatedCollections id={id} />;
     }
   };
+
   return (
     <AppLayout fullWidth={true} hasBanner={true}>
       <Container>
@@ -463,4 +464,14 @@ const IconButtonWrapper = styled.div`
   position: absolute;
   right: 50px;
   top: 50px;
+`;
+
+const IconButton2Wrapper = styled.div`
+  position: absolute;
+  right: 30px;
+  top: 50px;
+  @media (max-width: 500px) {
+    right: 20px;
+    top: 25px;
+  }
 `;

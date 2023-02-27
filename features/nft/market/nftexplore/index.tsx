@@ -50,14 +50,9 @@ const Explore = () => {
     if (allNfts.length < limit) setHasMore(false);
     const nftData = await Promise.all(
       allNfts.map(async (_nft) => {
-        let res_collection: any = {};
         let res_nft: any = {};
         const token_id = _nft.id.split(":")[1];
         const nft_address = _nft.id.split(":")[0];
-        if (_nft.collection.uri) {
-          const ipfs_collection = await fetch(PINATA_URL + _nft.collection.uri);
-          res_collection = await ipfs_collection.json();
-        }
         res_nft.image = PINATA_URL + _nft.imageUrl;
         res_nft.tokenId = token_id;
         res_nft.type = "image";
@@ -94,14 +89,13 @@ const Explore = () => {
         return {
           nftInfo: res_nft,
           collectionInfo: {
-            name: res_collection.name,
-            image: process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo,
+            name: _nft.collection.name,
+            image: PINATA_URL + _nft.collection.uri,
             collectionId: _nft.collection.collectionId,
           },
         };
       })
     );
-    console.log("nftData: ", nftData);
     setLoadedNfts(loadedNfts.concat(nftData));
     setPage(page + 1);
   };

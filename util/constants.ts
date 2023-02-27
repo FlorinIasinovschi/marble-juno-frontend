@@ -44,7 +44,7 @@ export const __TRANSFERS_ENABLED__ = JSON.parse(
 );
 /* /feature flags */
 export const backend_url = "https://juno-api.marbledao.finance";
-// export const backend_url = "http://localhost:3030";
+//export const backend_url = "http://localhost:3030";
 export const PINATA_PRIMARY_IMAGE_SIZE =
   process.env.NEXT_PUBLIC_PINATA_PRIMARY_IMAGE_SIZE;
 export const PINATA_SECONDARY_IMAGE_SIZE =
@@ -52,9 +52,9 @@ export const PINATA_SECONDARY_IMAGE_SIZE =
 export const PINATA_URL = process.env.NEXT_PUBLIC_PINATA_URL;
 export const NUM_PER_PAGE = 12;
 export const FACTORY_ADDRESS =
-  "juno19m5duxnjrz9s3857xmefrmr7cagqmdl93fcjy2zt2zjc2fmzj99sueqdl0";
+  "juno13vh2z4eg6gvzaw4e6853whcdc7uzkfezkva54qm23nl9n8ad8ylslzuk66";
 export const MARKETPLACE_ADDRESS =
-  "juno1pc8uu8vzccuwgth3jm6n47hwxelg4dkvc8322q3pz790g9vgnftsxg72fq";
+  "juno15g4tyy8zq3gmj2r3whxxyy2qeegdnzw3jh29te9fq6aslwtm9l7qjja2zm";
 export const SUBQUERY_URL =
   "https://api.subquery.network/sq/rafleberry/marble-nft";
 

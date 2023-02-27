@@ -1,28 +1,21 @@
-import type { NextPage } from "next";
-import NFTToken from "features/nft";
-import { SdkProvider } from "services/nft/client/wallet";
-import { config } from "services/config";
-import { ChakraProvider } from "@chakra-ui/react";
-import theme from "theme";
-import { useCallback, useEffect, useState } from "react";
 import { Text } from "@chakra-ui/react";
-import styled from "styled-components";
+import { Button } from "components/Button";
 import { AppLayout } from "components/Layout/AppLayout";
 import { NftCollectionCard } from "components/NFT/collection/nftCollenctionCard";
-import { Button } from "components/Button";
-import { walletState } from "state/atoms/walletAtoms";
-import { getRandomInt } from "util/numbers";
-import { GradientBackground, SecondGradientBackground } from "styles/styles";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import {
-  Marketplace,
-  Marble,
-  NftCollection,
-  CW721,
-  useSdk,
-  getFileTypeFromURL,
-} from "services/nft";
 import { useRecoilValue } from "recoil";
+import {
+  CW721,
+  getFileTypeFromURL,
+  Marble,
+  Marketplace,
+  NftCollection,
+  useSdk,
+} from "services/nft";
+import { walletState } from "state/atoms/walletAtoms";
+import styled from "styled-components";
+import { SecondGradientBackground } from "styles/styles";
 
 const PUBLIC_STAKE_ADDRESS = process.env.NEXT_PUBLIC_STAKE_ADDRESS || "";
 interface StakeConfigType {

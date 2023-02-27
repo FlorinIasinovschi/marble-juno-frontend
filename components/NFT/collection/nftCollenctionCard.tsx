@@ -23,7 +23,7 @@ export function NftCollectionCard({
       <ImgDiv className="nft-img-div" isImage={collection.type == "image"}>
         {collection.type == "image" && (
           <StyledImage
-            src={collection.banner_image + PINATA_PRIMARY_IMAGE_SIZE}
+            src={collection.image + PINATA_PRIMARY_IMAGE_SIZE}
             alt="NFT Image"
           />
         )}
