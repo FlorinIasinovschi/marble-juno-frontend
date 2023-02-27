@@ -1,8 +1,13 @@
 import { EmailIcon } from "@chakra-ui/icons";
 import { Badge, Box, useDisclosure } from "@chakra-ui/react";
-import { addUserToMurbleChannel, getChatUser } from "hooks/useChat";
+import {
+  addUserToMurbleChannel,
+  getChatUser,
+  getOrCreateChatUserToken,
+} from "hooks/useChat";
 import { getProfileInfo } from "hooks/useProfile";
-import { useEffect, useState } from "react";
+import { redirect } from "next/dist/next-server/server/api-utils";
+import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useRecoilValue } from "recoil";
 import { walletState } from "state/atoms/walletAtoms";
@@ -24,7 +29,9 @@ export const MessageCounter = () => {
     (async () => {
       if (!address) return;
 
-      let _chatUser = await getChatUser(address);
+      if (!address) return;
+
+      let _chatUser = await getOrCreateChatUserToken(address);
       if (!_chatUser?.id) return;
 
       // client-side you initialize the Chat client with your API key
@@ -47,6 +54,7 @@ export const MessageCounter = () => {
             ? process.env.NEXT_PUBLIC_PINATA_URL + activeProfile.avatar
             : "https://juno-nft.marbledao.finance" + default_image,
         };
+
         const _user = await chatClient.connectUser(
           _chatCurrentUserProfile,
           _chatUser.token
