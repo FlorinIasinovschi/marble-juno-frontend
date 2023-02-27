@@ -1,22 +1,18 @@
-import React, { useState, useEffect } from "react";
+import { EditIcon } from "@chakra-ui/icons";
 import {
-  Modal,
   ChakraProvider,
+  IconButton,
+  Modal,
   ModalContent,
   ModalOverlay,
-  useDisclosure,
-  HStack,
-  Text,
   Stack,
-  InputRightElement,
-  Input,
-  IconButton,
+  Text,
+  useDisclosure,
 } from "@chakra-ui/react";
-import { EditIcon } from "@chakra-ui/icons";
 import { Button } from "components/Button";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { checkRegularExp } from "util/index";
-import { NftCard } from "components/NFT/nft-card";
 
 const PlaceBidModal = ({ onHandleSave, profileInfo }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -26,7 +22,7 @@ const PlaceBidModal = ({ onHandleSave, profileInfo }) => {
     setProfile(profileInfo);
   }, [profileInfo]);
   const onHandleChange = (e) => {
-    if (e.target.value.length > 30) return;
+    if (e.target.name == "name" && e.target.value.length > 30) return;
     if (e.target.name == "name") {
       const regRes = checkRegularExp(e.target.value);
       if (!regRes) {
