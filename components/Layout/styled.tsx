@@ -51,11 +51,9 @@ export const StyledDivForLogo = styled.div`
     }
   }
   @media (max-width: 767px) {
-    display:none
+    display: none;
   }
 `;
-
-
 
 export const StyledDivForLogoMobile = styled.div`
   align-items: center;
@@ -63,9 +61,8 @@ export const StyledDivForLogoMobile = styled.div`
   img {
     width: 200px;
   }
-  padding-top:30px
+  padding-top: 30px;
 `;
-
 
 export const CreateButton = styled.div`
   background: #ffffff;
@@ -175,8 +172,7 @@ export const BadgeWrapper = styled.div`
   }
 `;
 
-
 export const MobileChatAndUserContainer = styled.div`
-  position:relative;
-  width:100%;
+  position: relative;
+  width: 100%;
 `;
