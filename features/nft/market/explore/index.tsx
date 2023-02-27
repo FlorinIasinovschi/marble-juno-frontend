@@ -37,39 +37,31 @@ export const Explore = () => {
         } catch (err) {
           console.log("err", err);
         }
+        console.log("res_collection: ", res_collection, collectionList[i]);
         let collection_info: any = {};
         collection_info.id = collectionList[i].collectionId;
         collection_info.name = collectionList[i].name;
         collection_info.description = res_collection.description;
         collection_info.slug = res_collection.slug;
         collection_info.creator = collectionList[i].creator ?? "";
-        collection_info.cat_ids = res_collection.category;
+        collection_info.cat_ids = collectionList[i].category;
 
-        if (res_collection.logo) {
+        if (res_collection.featuredImage) {
           let collection_type = await getFileTypeFromURL(
-            process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo
+            process.env.NEXT_PUBLIC_PINATA_URL + res_collection.featuredImage
           );
           collection_info.type = collection_type.fileType;
         } else {
           collection_info.type = "image";
         }
 
-        if (res_collection.logo) {
+        if (res_collection.featuredImage) {
           collection_info.image =
-            process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
+            process.env.NEXT_PUBLIC_PINATA_URL + res_collection.featuredImage;
         } else {
           collection_info.image = "https://via.placeholder.com/70";
         }
 
-        if (res_collection.logo || res_collection.featuredImage) {
-          collection_info.banner_image = res_collection.featuredImage
-            ? process.env.NEXT_PUBLIC_PINATA_URL + res_collection.featuredImage
-            : process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
-        } else {
-          collection_info.banner_image = "https://via.placeholder.com/300";
-        }
-        if (collectionList[i].id === "5")
-          collection_info.banner_image = "/marblenauts.gif";
         collections.push(collection_info);
       }
       setPage(1);
@@ -100,20 +92,19 @@ export const Explore = () => {
       collection_info.description = res_collection.description;
       collection_info.slug = res_collection.slug;
       collection_info.creator = collectionList[i].creator ?? "";
-      collection_info.cat_ids = res_collection.category;
+      collection_info.cat_ids = collectionList[i].category;
 
-      if (res_collection.logo) {
+      if (res_collection.featuredImage) {
         let collection_type = await getFileTypeFromURL(
-          process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo
+          process.env.NEXT_PUBLIC_PINATA_URL + res_collection.featuredImage
         );
         collection_info.type = collection_type.fileType;
       } else {
         collection_info.type = "image";
       }
-
-      if (res_collection.logo) {
+      if (res_collection.featuredImage) {
         collection_info.image =
-          process.env.NEXT_PUBLIC_PINATA_URL + res_collection.logo;
+          process.env.NEXT_PUBLIC_PINATA_URL + res_collection.featuredImage;
       } else {
         collection_info.image = "https://via.placeholder.com/70";
       }

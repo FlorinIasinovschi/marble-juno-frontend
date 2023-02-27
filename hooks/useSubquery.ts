@@ -75,6 +75,7 @@ const useSubquery = () => {
             uri
             creator
             collectionId
+            category
           }
         }
       }`;
@@ -86,6 +87,7 @@ const useSubquery = () => {
             uri
             creator
             collectionId
+            category
           }
         }
       }`;

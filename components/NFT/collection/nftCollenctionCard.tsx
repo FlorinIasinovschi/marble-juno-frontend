@@ -18,6 +18,7 @@ interface NftCollectionCardProps {
 export function NftCollectionCard({
   collection,
 }: NftCollectionCardProps): JSX.Element {
+  console.log("collectionImage: ", collection);
   return (
     <CollectionDiv className="collection">
       <ImgDiv className="nft-img-div" isImage={collection.type == "image"}>

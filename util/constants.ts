@@ -60,16 +60,16 @@ export const SUBQUERY_URL =
 
 export const categories = [
   {
+    value: "Phygital",
+    label: "Phygital",
+  },
+  {
     value: "Digital",
     label: "Digital",
   },
   {
     value: "Community",
     label: "Community",
-  },
-  {
-    value: "Phygital",
-    label: "Phygital",
   },
 ];
 export const SORT_INFO = {

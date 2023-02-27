@@ -13,9 +13,9 @@ export function CategoryTab({ categories, activeCategory, setActiveCategory }) {
         All
       </CategoryItem>
       {categories.length > 0 &&
-        categories.map((category) => (
+        categories.map((category, index) => (
           <CategoryItem
-            key={category.id}
+            key={index}
             onClick={() => setActiveCategory(category.value)}
             isActive={getActiveTabIfActive(category.value)}
           >
@@ -29,9 +29,8 @@ export function CategoryTab({ categories, activeCategory, setActiveCategory }) {
 const Container = styled.div`
   margin: 30px 0;
   display: flex;
-  column-gap: 5px;
   overflow: auto;
-  justify-content: space-around;
+  column-gap: 20px;
 `;
 
 const CategoryItem = styled.div<{ isActive: boolean }>`
