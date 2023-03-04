@@ -88,7 +88,6 @@ export default function NFTCreate() {
   useEffect(() => {
     (async () => {
       const collectionList = await fetchCollections();
-      console.log("collectionLIst: ", collectionList);
       const collectionData = await Promise.all(
         collectionList.map(async (_collection) => {
           let res_collection: any = {};
@@ -111,7 +110,6 @@ export default function NFTCreate() {
           };
         })
       );
-      console.log("collectiondATA: ", collectionData);
       setOwnedCollections(collectionData);
     })();
   }, [client]);
@@ -125,6 +123,7 @@ export default function NFTCreate() {
     }
   };
   const handleMint = async () => {
+    return;
     if (!address || !signingClient) {
       toast.warning(`Please connect your wallet.`, {
         position: "top-right",

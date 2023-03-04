@@ -359,9 +359,9 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
               />
             )}
             {key?.name && (
-              <Link href="/create" passHref>
-                <CreateButton>Mint</CreateButton>
-              </Link>
+              // <Link href="/create" passHref>
+              <CreateButton>Mint</CreateButton>
+              // </Link>
             )}
           </ButtonField>
         </StyledWrapper>
