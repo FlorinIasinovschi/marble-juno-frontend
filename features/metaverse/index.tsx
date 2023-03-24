@@ -3,7 +3,7 @@ const Metaverse = () => {
     <iframe
       width="100%"
       height="800px"
-      src="https://www.spatial.io/s/Marbleverse-633c3595b4f3e70001089a4d?share=3281566939575842343"
+      src="https://www.spatial.io/s/MARBLEVERSE-640c86db1a784385b515cd50?share=2562486181685063377"
       allow="microphone https://spatial.io; camera https://spatial.io"
     ></iframe>
   )
