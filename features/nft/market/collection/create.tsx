@@ -61,10 +61,6 @@ const customStyles = {
   }),
 };
 
-const PUBLIC_PINATA_API_KEY = process.env.NEXT_PUBLIC_PINATA_API_KEY || "";
-const PUBLIC_PINATA_SECRET_API_KEY =
-  process.env.NEXT_PUBLIC_PINATA_SECRET_API_KEY || "";
-let themeValue = "1";
 export const CollectionCreate = () => {
   const router = useRouter();
   //const toast = useToast()
@@ -74,12 +70,10 @@ export const CollectionCreate = () => {
 
   const { client } = useSdk();
   const { address, client: signingClient } = useRecoilValue(walletState);
-  const [token, setToken] = useState("");
   const [tokens, setTokens] = useState<number[]>([]);
   const [collectionTokens, setCollectionTokens] = useState<CollectionToken[]>(
     []
   );
-  const [tokenReomveCount, setTokenReomveCount] = useState(0);
   const [inputFields, setInputFields] = useState([
     { address: address, rate: 0 },
   ]);
@@ -133,15 +127,6 @@ export const CollectionCreate = () => {
     }
   };
 
-  // destructuring state and dispatch, initializing fileList to empty array
-  const [data, dispatch] = useReducer(reducer, {
-    inDropZone: false,
-    fileList: [],
-    logo: "",
-    featuredImage: "",
-    banner: "",
-  });
-
   const options = ["1", "2", "3"];
   const { getRootProps, getRadioProps } = useRadioGroup({
     name: "template",
@@ -161,6 +146,7 @@ export const CollectionCreate = () => {
   }, []);
 
   const createCollection = async (e) => {
+    return;
     if (!address || !signingClient) {
       toast.warning(`Please connect your wallet.`, {
         position: "top-right",

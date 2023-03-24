@@ -59,14 +59,14 @@ export const SUBQUERY_URL =
   "https://api.subquery.network/sq/rafleberry/marble-nft";
 
 export const categories = [
-  {
-    value: "Phygital",
-    label: "Phygital",
-  },
-  {
-    value: "Digital",
-    label: "Digital",
-  },
+  // {
+  //   value: "Phygital",
+  //   label: "Phygital",
+  // },
+  // {
+  //   value: "Digital",
+  //   label: "Digital",
+  // },
   {
     value: "Community",
     label: "Community",
