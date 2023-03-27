@@ -18,6 +18,7 @@ import { default_image } from "../../util/constants";
 import { ConnectedWalletButton } from "../ConnectedWalletButton";
 import { IconWrapper } from "../IconWrapper";
 import { styled } from "../theme";
+import { NotificationsContainer } from "./NotificationsContainer";
 import {
   StyledWrapper,
   StyledListForLinks,
@@ -348,6 +349,7 @@ export function NavigationSidebar({ openNav, setOpenNav }) {
                     </StyledMenuItem>
                   </StyledMenuList>
                 </Menu>
+                <NotificationsContainer />
                 <MessageCounter />
               </>
             ) : (
